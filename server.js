@@ -19,14 +19,33 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 // ── TRUST RENDER'S PROXY ────────────────────────────────────────
-// Required for express-rate-limit to work correctly on Render
 app.set('trust proxy', 1);
 
 // ── MIDDLEWARE ──────────────────────────────────────────────────
-app.use(helmet());
-app.use(cors({ origin: '*' }));
+// Helmet with CORS-friendly settings
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+  crossOriginOpenerPolicy: false,
+}));
+
+// CORS — allow all origins
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Handle preflight requests
+app.options('*', cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Request logger
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
 
 // Rate limiting
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, validate: { xForwardedForHeader: false } });
