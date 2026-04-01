@@ -171,26 +171,7 @@ async function getSlotAvailability(date, time) {
   };
 }
 
-// ── EMAIL SERVICE (Brevo SMTP) ──────────────────────────────────
-const nodemailer = require('nodemailer');
-
-const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.brevo.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.BREVO_USER,
-    pass: process.env.BREVO_SMTP_KEY,
-  },
-  tls: {
-    rejectUnauthorized: false,
-    ciphers: 'SSLv3',
-  },
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000,
-});
-
+// ── EMAIL SERVICE (Brevo HTTP API) ─────────────────────────────
 async function sendConfirmationEmail(booking, lang = 'it') {
   const isIT = lang === 'it';
   const subject = isIT
@@ -240,13 +221,30 @@ async function sendConfirmationEmail(booking, lang = 'it') {
   `;
 
   try {
-    await transporter.sendMail({
-      from: `"Antico Frantoio" <${process.env.BREVO_FROM}>`,
-      to: booking.email,
-      subject,
-      html,
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: {
+          name: 'Antico Frantoio',
+          email: process.env.BREVO_FROM || 'salvatore.dalessandro01@gmail.com',
+        },
+        to: [{ email: booking.email, name: booking.name }],
+        subject,
+        htmlContent: html,
+      }),
     });
-    console.log('Email sent successfully to:', booking.email);
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error('Brevo API error:', JSON.stringify(data));
+    } else {
+      console.log('Email sent successfully to:', booking.email);
+    }
   } catch (err) {
     console.error('Email send error:', err.message);
   }
