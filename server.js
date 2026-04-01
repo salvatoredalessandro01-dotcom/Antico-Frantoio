@@ -16,18 +16,22 @@ const nodemailer = require('nodemailer');
 const { body, param, validationResult } = require('express-validator');
 
 const app = express();
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+
+// ── TRUST RENDER'S PROXY ────────────────────────────────────────
+// Required for express-rate-limit to work correctly on Render
+app.set('trust proxy', 1);
 
 // ── MIDDLEWARE ──────────────────────────────────────────────────
 app.use(helmet());
-app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Rate limiting
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
-const reservationLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 10, message: 'Too many reservation attempts.' });
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, validate: { xForwardedForHeader: false } });
+const reservationLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 10, message: 'Too many reservation attempts.', validate: { xForwardedForHeader: false } });
 app.use('/api/', limiter);
 
 // ── DATABASE INIT ───────────────────────────────────────────────
@@ -151,10 +155,13 @@ async function getSlotAvailability(date, time) {
 
 // ── EMAIL SERVICE ───────────────────────────────────────────────
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT) || 587,
-  secure: false,
+  host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+  port: parseInt(process.env.SMTP_PORT) || 465,
+  secure: true,
   auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
 async function sendConfirmationEmail(booking, lang = 'it') {
