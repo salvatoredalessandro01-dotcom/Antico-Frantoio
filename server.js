@@ -221,8 +221,16 @@ async function sendConfirmationEmail(booking, lang = 'it') {
   `;
 
   try {
+    console.log('Attempting to send email via Brevo API to:', booking.email);
+    console.log('BREVO_API_KEY present:', !!process.env.BREVO_API_KEY);
+    console.log('BREVO_FROM:', process.env.BREVO_FROM);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
+      signal: controller.signal,
       headers: {
         'accept': 'application/json',
         'api-key': process.env.BREVO_API_KEY,
@@ -239,6 +247,7 @@ async function sendConfirmationEmail(booking, lang = 'it') {
       }),
     });
 
+    clearTimeout(timeout);
     const data = await response.json();
     if (!response.ok) {
       console.error('Brevo API error:', JSON.stringify(data));
@@ -247,6 +256,8 @@ async function sendConfirmationEmail(booking, lang = 'it') {
     }
   } catch (err) {
     console.error('Email send error:', err.message);
+    console.error('Error type:', err.name);
+    console.error('Error cause:', err.cause?.message || 'none');
   }
 }
 
