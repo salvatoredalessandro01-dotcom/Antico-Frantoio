@@ -171,7 +171,17 @@ async function getSlotAvailability(date, time) {
   };
 }
 
-// ── EMAIL SERVICE (Resend) ──────────────────────────────────────
+// ── EMAIL SERVICE (Gmail) ───────────────────────────────────────
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
+
 async function sendConfirmationEmail(booking, lang = 'it') {
   const isIT = lang === 'it';
   const subject = isIT
@@ -221,26 +231,13 @@ async function sendConfirmationEmail(booking, lang = 'it') {
   `;
 
   try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: process.env.RESEND_FROM || 'Antico Frantoio <onboarding@resend.dev>',
-        to: booking.email,
-        subject,
-        html,
-      }),
+    await transporter.sendMail({
+      from: `"Antico Frantoio" <${process.env.GMAIL_USER}>`,
+      to: booking.email,
+      subject,
+      html,
     });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error('Resend error:', data);
-    } else {
-      console.log('Email sent successfully to:', booking.email);
-    }
+    console.log('Email sent successfully to:', booking.email);
   } catch (err) {
     console.error('Email send error:', err.message);
   }
