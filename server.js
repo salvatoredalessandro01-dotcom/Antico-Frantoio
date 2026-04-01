@@ -171,15 +171,24 @@ async function getSlotAvailability(date, time) {
   };
 }
 
-// ── EMAIL SERVICE (Gmail) ───────────────────────────────────────
+// ── EMAIL SERVICE (Brevo SMTP) ──────────────────────────────────
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp-relay.brevo.com',
+  port: 587,
+  secure: false,
   auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
+    user: process.env.BREVO_USER,
+    pass: process.env.BREVO_SMTP_KEY,
   },
+  tls: {
+    rejectUnauthorized: false,
+    ciphers: 'SSLv3',
+  },
+  connectionTimeout: 30000,
+  greetingTimeout: 30000,
+  socketTimeout: 30000,
 });
 
 async function sendConfirmationEmail(booking, lang = 'it') {
@@ -232,7 +241,7 @@ async function sendConfirmationEmail(booking, lang = 'it') {
 
   try {
     await transporter.sendMail({
-      from: `"Antico Frantoio" <${process.env.GMAIL_USER}>`,
+      from: `"Antico Frantoio" <${process.env.BREVO_FROM}>`,
       to: booking.email,
       subject,
       html,
