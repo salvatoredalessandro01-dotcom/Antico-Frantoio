@@ -850,7 +850,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
     <div class="text-center mt1">
       <button class="btn-secondary" onclick="closeAdminLogin()" data-i18n="admin.login.cancel">Annulla</button>
     </div>
-    <p class="text-gray text-sm text-center mt1" style="font-size:.72rem">Demo: admin / serafino2025</p>
+    <p class="text-gray text-sm text-center mt1" style="font-size:.72rem">Demo: admin / anticofrantoio2025</p>
   </div>
 </div>
 
@@ -1415,40 +1415,104 @@ document.getElementById('reservation-form').addEventListener('submit', async fun
   spinner.style.display = 'block';
   btn.querySelector('[data-i18n]').textContent = t('form.submitting');
 
-  // Simulate API call
-  await new Promise(r => setTimeout(r, 1400));
-
   const adults = parseInt(document.getElementById('adults').value);
   const children = parseInt(document.getElementById('children').value);
   const date = document.getElementById('res-date').value;
   const payDeposit = document.getElementById('pay-deposit').checked;
 
-  currentBookingData = {
-    id: 'B' + Date.now().toString().slice(-4),
-    date,
-    time: selectedTime,
+  const payload = {
     name: document.getElementById('full-name').value.trim(),
     email: document.getElementById('email').value.trim(),
     phone: document.getElementById('phone-prefix').value + ' ' + document.getElementById('phone').value.trim(),
+    date,
+    time: selectedTime,
     adults,
     children,
     notes: document.getElementById('notes').value.trim(),
-    status: payDeposit ? 'pending' : 'confirmed',
-    deposit: requiresDeposit(date),
-    depositPaid: false,
+    payDeposit,
+    language: lang,
+    gdprConsent: 'true',
   };
 
-  // Add to bookings array
-  bookings.push(currentBookingData);
+  // Try to call the real backend API
+  // Replace the URL below with your actual Render URL
+  const API_BASE = 'https://antico-frantoio-api-2.onrender.com';
 
-  btn.disabled = false;
-  spinner.style.display = 'none';
-  btn.querySelector('[data-i18n]').textContent = t('form.submit');
+  try {
+    const response = await fetch(`${API_BASE}/api/reservations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
-  if (payDeposit) {
-    showPaymentRedirect();
-  } else {
-    showConfirmation();
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Server returned an error
+      throw new Error(data.error || 'Server error');
+    }
+
+    // Success — store booking data for confirmation screen
+    currentBookingData = {
+      id: data.booking.id,
+      date,
+      time: selectedTime,
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      adults,
+      children,
+      notes: payload.notes,
+      status: data.booking.status,
+      deposit: requiresDeposit(date),
+      depositPaid: false,
+    };
+
+    bookings.push(currentBookingData);
+
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    btn.querySelector('[data-i18n]').textContent = t('form.submit');
+
+    if (data.requiresPayment && data.stripeUrl) {
+      // Redirect to Stripe checkout
+      window.location.href = data.stripeUrl;
+    } else if (payDeposit) {
+      showPaymentRedirect();
+    } else {
+      showConfirmation();
+    }
+
+  } catch (err) {
+    console.warn('API unavailable, running in offline mode:', err.message);
+
+    // Fallback — run in browser-only mode (no email, no DB)
+    currentBookingData = {
+      id: 'B' + Date.now().toString().slice(-4),
+      date,
+      time: selectedTime,
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      adults,
+      children,
+      notes: payload.notes,
+      status: payDeposit ? 'pending' : 'confirmed',
+      deposit: requiresDeposit(date),
+      depositPaid: false,
+    };
+
+    bookings.push(currentBookingData);
+
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    btn.querySelector('[data-i18n]').textContent = t('form.submit');
+
+    if (payDeposit) {
+      showPaymentRedirect();
+    } else {
+      showConfirmation();
+    }
   }
 });
 
@@ -1570,7 +1634,7 @@ function closeAdminLogin() {
 function tryAdminLogin() {
   const user = document.getElementById('admin-user').value;
   const pass = document.getElementById('admin-pass').value;
-  if (user === 'admin' && pass === 'serafino2025') {
+  if (user === 'admin' && pass === 'anticofrantoio2025') {
     closeAdminLogin();
     openAdmin();
   } else {
