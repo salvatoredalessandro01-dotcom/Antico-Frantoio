@@ -12,7 +12,6 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { Pool } = require('pg');
 const Stripe = require('stripe');
-const nodemailer = require('nodemailer');
 const { body, param, validationResult } = require('express-validator');
 
 const app = express();
@@ -153,17 +152,7 @@ async function getSlotAvailability(date, time) {
   };
 }
 
-// ── EMAIL SERVICE ───────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
-  port: parseInt(process.env.SMTP_PORT) || 465,
-  secure: true,
-  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-});
-
+// ── EMAIL SERVICE (Resend) ──────────────────────────────────────
 async function sendConfirmationEmail(booking, lang = 'it') {
   const isIT = lang === 'it';
   const subject = isIT
@@ -173,9 +162,9 @@ async function sendConfirmationEmail(booking, lang = 'it') {
   const html = `
     <div style="font-family:'Georgia',serif;max-width:600px;margin:0 auto;padding:40px 20px;color:#1A1612">
       <div style="text-align:center;margin-bottom:32px">
-        <h1 style="font-size:2rem;font-weight:300;color:#C9A84C;margin:0">Ristorante Serafino</h1>
+        <h1 style="font-size:2rem;font-weight:300;color:#C9A84C;margin:0">Antico Frantoio</h1>
         <p style="color:#6B6460;font-size:.85rem;letter-spacing:.1em;text-transform:uppercase">
-          ${isIT ? 'Via Santa Lucia 42, Napoli' : 'Via Santa Lucia 42, Naples, Italy'}
+          ${isIT ? 'Via Casarlano 5, 80067 Sorrento (NA), Italia' : 'Via Casarlano 5, 80067 Sorrento (NA), Italy'}
         </p>
       </div>
       <hr style="border:none;border-top:1px solid #D4CEC8;margin-bottom:32px">
@@ -200,8 +189,8 @@ async function sendConfirmationEmail(booking, lang = 'it') {
       <hr style="border:none;border-top:1px solid #D4CEC8;margin:24px 0">
       <p style="color:#6B6460;font-size:.85rem;line-height:1.6">
         ${isIT
-          ? 'Per modifiche o cancellazioni, contattaci almeno 24 ore prima al <a href="tel:+390817640001" style="color:#C9A84C">+39 081 764 0001</a> oppure rispondi a questa email.'
-          : 'For changes or cancellations, please contact us at least 24 hours before at <a href="tel:+390817640001" style="color:#C9A84C">+39 081 764 0001</a> or reply to this email.'
+          ? 'Per modifiche o cancellazioni, contattaci almeno 24 ore prima al <a href="tel:+390818072200" style="color:#C9A84C">+39 081 807 22 00</a> oppure rispondi a questa email.'
+          : 'For changes or cancellations, please contact us at least 24 hours before at <a href="tel:+390818072200" style="color:#C9A84C">+39 081 807 22 00</a> or reply to this email.'
         }
       </p>
       <div style="text-align:center;margin-top:32px">
@@ -213,12 +202,26 @@ async function sendConfirmationEmail(booking, lang = 'it') {
   `;
 
   try {
-    await transporter.sendMail({
-      from: `"Ristorante Serafino" <${process.env.SMTP_FROM}>`,
-      to: booking.email,
-      subject,
-      html,
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: process.env.RESEND_FROM || 'Antico Frantoio <onboarding@resend.dev>',
+        to: booking.email,
+        subject,
+        html,
+      }),
     });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error('Resend error:', data);
+    } else {
+      console.log('Email sent successfully to:', booking.email);
+    }
   } catch (err) {
     console.error('Email send error:', err.message);
   }
