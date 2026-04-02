@@ -174,6 +174,22 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .status-confirmed{background:#2A604020;color:var(--green)}
 .status-pending{background:#C9A84C22;color:var(--gold-dk)}
 .status-cancelled{background:#A3303022;color:var(--red)}
+.status-arrived{background:#185FA520;color:#185FA5}
+/* Concierge / Arrivi tab specific styles */
+.arrivals-table{width:100%;border-collapse:collapse;font-size:.92rem}
+.arrivals-table th{text-align:left;padding:.75rem 1rem;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);border-bottom:2px solid var(--gray-lt);white-space:nowrap}
+.arrivals-table td{padding:.85rem 1rem;border-bottom:1px solid var(--gray-lt);vertical-align:middle}
+.arrivals-table tr:hover td{background:var(--cream2)}
+.arrivals-table tr.row-arrived td{background:rgba(42,96,64,.04)}
+.arrivals-table tr.row-cancelled td{opacity:.45}
+.arrivals-notes{font-size:.85rem;color:var(--dark);font-style:italic;background:rgba(201,168,76,.08);border-left:3px solid var(--gold);padding:.35rem .65rem;border-radius:0 var(--radius) var(--radius) 0;margin-top:.3rem;line-height:1.5}
+.btn-arrived{padding:.5rem 1.1rem;background:var(--green);color:white;border-radius:var(--radius);font-size:.8rem;font-weight:500;letter-spacing:.05em;transition:all var(--transition);border:none}
+.btn-arrived:hover{background:#1e4d30;transform:translateY(-1px)}
+.btn-undo-arrived{padding:.5rem 1rem;background:transparent;color:var(--gray);border:1px solid var(--gray-lt);border-radius:var(--radius);font-size:.78rem;transition:all var(--transition)}
+.btn-undo-arrived:hover{border-color:var(--gold-dk);color:var(--gold-dk)}
+.shift-badge{display:inline-block;padding:.2rem .6rem;border-radius:2rem;font-size:.68rem;font-weight:500}
+.shift-lunch{background:#FFF3CD;color:#856404}
+.shift-evening{background:#CCE5FF;color:#004085}
 .source-badge{display:inline-block;padding:.15rem .5rem;border-radius:2rem;font-size:.65rem}
 .source-online{background:#E6F1FB;color:#185FA5}
 .source-manual{background:#EAF3DE;color:#3B6D11}
@@ -222,6 +238,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .role-superadmin{background:#E6F1FB;color:#185FA5}
 .role-admin{background:#EAF3DE;color:#3B6D11}
 .role-staff{background:#FAEEDA;color:#854F0B}
+.role-concierge{background:#F3E8FF;color:#6B21A8}
 footer{background:var(--dark);color:rgba(255,255,255,.5);padding:3rem 0;text-align:center;font-size:.8rem;line-height:2}
 footer .logo{margin-bottom:1rem;font-size:1.25rem}
 .footer-links{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
@@ -572,6 +589,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
         <select id="amend-status">
           <option value="confirmed">Confermato</option>
           <option value="pending">In attesa</option>
+          <option value="arrived">Arrivato</option>
           <option value="cancelled">Cancellato</option>
         </select>
       </div>
@@ -1063,6 +1081,7 @@ const ROLE_NAV = {
     {section:'Gestione'},
     {id:'dashboard',icon:'📊',label:'Dashboard'},
     {id:'bookings',icon:'📋',label:'Prenotazioni'},
+    {id:'arrivals',icon:'🚪',label:'Arrivi'},
     {id:'new-booking',icon:'➕',label:'Nuova Prenotazione'},
     {section:'Calendario'},
     {id:'schedule',icon:'📅',label:'Chiusure & Orari'},
@@ -1074,10 +1093,15 @@ const ROLE_NAV = {
     {section:'Gestione'},
     {id:'dashboard',icon:'📊',label:'Dashboard'},
     {id:'bookings',icon:'📋',label:'Prenotazioni'},
+    {id:'arrivals',icon:'🚪',label:'Arrivi'},
     {id:'new-booking',icon:'➕',label:'Nuova Prenotazione'},
   ],
   staff: [
     {id:'bookings',icon:'📋',label:'Prenotazioni'},
+    {id:'arrivals',icon:'🚪',label:'Arrivi'},
+  ],
+  concierge: [
+    {id:'arrivals',icon:'🚪',label:'Arrivi'},
   ],
 };
 
@@ -1116,19 +1140,23 @@ function openAdmin(){
   document.getElementById('admin-role-label').textContent=currentUser.role.toUpperCase();
   document.getElementById('admin-user-label').textContent=`👤 ${currentUser.username}`;
   document.getElementById('admin-nav-list').innerHTML=buildNav(currentUser.role);
-  // Show export for admin and above
+  // Show export for admin and above only
   document.getElementById('btn-export').style.display=['superadmin','admin'].includes(currentUser.role)?'':'none';
-  // Open default tab
-  const defaultTab=currentUser.role==='staff'?'bookings':'dashboard';
+  // Default tab per role
+  const defaultTab={superadmin:'dashboard',admin:'dashboard',staff:'bookings',concierge:'arrivals'}[currentUser.role]||'arrivals';
   const firstLink=document.querySelector('#admin-nav-list a');
   if(firstLink)switchAdminTab(defaultTab,firstLink);
 }
 
-function closeAdmin(){document.getElementById('admin-panel').classList.remove('open');}
+function closeAdmin(){
+  document.getElementById('admin-panel').classList.remove('open');
+  if(window._arrRefreshTimer){clearInterval(window._arrRefreshTimer);window._arrRefreshTimer=null;}
+}
 
 function logoutAdmin(){
   adminToken=null;currentUser={username:'',role:''};
   try{localStorage.removeItem('adminSession');}catch(e){}
+  if(window._arrRefreshTimer){clearInterval(window._arrRefreshTimer);window._arrRefreshTimer=null;}
   closeAdmin();
   showToast('Disconnesso');
 }
@@ -1149,7 +1177,7 @@ function switchAdminTab(tab,link){
   content.innerHTML='';
   document.querySelectorAll('#admin-nav-list a').forEach(a=>a.classList.remove('active'));
   if(link)link.classList.add('active');
-  const titles={dashboard:'Dashboard',bookings:'Prenotazioni','new-booking':'Nuova Prenotazione',schedule:'Chiusure & Orari',settings:'Impostazioni',users:'Utenti'};
+  const titles={dashboard:'Dashboard',bookings:'Prenotazioni','new-booking':'Nuova Prenotazione',schedule:'Chiusure & Orari',settings:'Impostazioni',users:'Utenti',arrivals:'Arrivi'};
   document.getElementById('admin-tab-title').textContent=titles[tab]||tab;
   // Render tab
   if(tab==='dashboard')renderDashboard(content);
@@ -1158,6 +1186,7 @@ function switchAdminTab(tab,link){
   else if(tab==='schedule')renderScheduleTab(content);
   else if(tab==='settings')renderSettingsTab(content);
   else if(tab==='users')renderUsersTab(content);
+  else if(tab==='arrivals')renderArrivalsTab(content);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1172,7 +1201,13 @@ async function adminFetch(path,options={}){
 // ═══════════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════════
-function statusLabel(s){return s==='confirmed'?'Confermato':s==='pending'?'In attesa':'Cancellato';}
+function statusLabel(s){
+  return s==='confirmed'?'Confermato':s==='pending'?'In attesa':s==='arrived'?'Arrivato':'Cancellato';
+}
+function statusBadge(s){
+  const cls={confirmed:'status-confirmed',pending:'status-pending',cancelled:'status-cancelled',arrived:'status-arrived'};
+  return `<span class="status-badge ${cls[s]||''}">${statusLabel(s)}</span>`;
+}
 function paymentPill(m){
   if(!m)return '<span style="color:var(--gray);font-size:.75rem">—</span>';
   const labels={cash:'💵 Contanti',card:'💳 Carta',bank_transfer:'🏦 Bonifico'};
@@ -1211,7 +1246,6 @@ async function renderDashboard(container) {
         <td>${b.adults+b.children} (${b.adults}A+${b.children}B)</td>
         <td><input type="number" class="table-input" value="${b.table_number||''}" placeholder="—" min="1" onchange="saveTableInline('${b.id}',this.value)"></td>
         <td><span class="status-badge status-${b.status}">${statusLabel(b.status)}</span></td>
-        <td>${b.deposit_paid?'<span style="color:var(--green)">✓</span>':(b.deposit_required?'<span style="color:var(--gold-dk)">⏳</span>':'—')}</td>
         <td>${paymentPill(b.payment_method)}</td>
         <td><span class="source-badge source-${b.source||'online'}">${b.source==='manual'?'📞':'🌐'}</span></td>
         ${currentUser.role==='superadmin'&&b.status==='cancelled'?`<td><button class="btn-secondary btn-sm btn-danger" onclick="permanentlyDeleteBooking('${b.id}')" title="Elimina definitivamente">🗑️</button></td>`:'<td></td>'}
@@ -1233,6 +1267,7 @@ function renderBookingsTab(container) {
         <option value="">Tutti gli stati</option>
         <option value="confirmed">Confermati</option>
         <option value="pending">In attesa</option>
+        <option value="arrived">Arrivati</option>
         <option value="cancelled">Cancellati</option>
       </select>
       <select id="filter-source" onchange="applyBookingFilters()">
@@ -1339,6 +1374,7 @@ async function permanentlyDeleteBooking(id){
       if(activeLink){
         const tab=activeLink.getAttribute('onclick').match(/'([^']+)'/)?.[1];
         if(tab==='bookings')loadBookings();
+        else if(tab==='arrivals')loadArrivals();
         else if(tab==='dashboard'){const c=document.getElementById('admin-content-area');if(c)renderDashboard(c);}
       }
     } else {
@@ -1356,6 +1392,165 @@ async function adminExportCSV(){
     a.href=url;a.download=`antico_frantoio_prenotazioni_${todayStr()}.csv`;
     a.click();URL.revokeObjectURL(url);
   } catch(e){showToast('Errore esportazione','error');}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ARRIVALS TAB
+// ═══════════════════════════════════════════════════════════════
+function renderArrivalsTab(container) {
+  const canEdit = ['superadmin','admin','concierge'].includes(currentUser.role);
+  container.innerHTML = `
+    <div style="display:flex;gap:.75rem;margin-bottom:1.25rem;align-items:center;flex-wrap:wrap">
+      <input type="date" id="arr-date" value="${todayStr()}" onchange="loadArrivals()" style="padding:.5rem .75rem;font-size:.85rem;border:1px solid var(--gray-lt);border-radius:var(--radius);background:var(--cream);color:var(--dark)">
+      <select id="arr-shift" onchange="loadArrivals()" style="padding:.5rem .75rem;font-size:.85rem;border:1px solid var(--gray-lt);border-radius:var(--radius);background:var(--cream);color:var(--dark);appearance:none;padding-right:2rem;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22%3E%3Cpath d=%22M1 1l5 5 5-5%22 stroke=%22%23999%22 fill=%22none%22 stroke-width=%221.5%22 stroke-linecap=%22round%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right .75rem center">
+        <option value="">Tutti i turni</option>
+        <option value="lunch">🌞 Pranzo</option>
+        <option value="evening">🌙 Cena</option>
+      </select>
+      <select id="arr-status" onchange="loadArrivals()" style="padding:.5rem .75rem;font-size:.85rem;border:1px solid var(--gray-lt);border-radius:var(--radius);background:var(--cream);color:var(--dark);appearance:none;padding-right:2rem;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22%3E%3Cpath d=%22M1 1l5 5 5-5%22 stroke=%22%23999%22 fill=%22none%22 stroke-width=%221.5%22 stroke-linecap=%22round%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right .75rem center">
+        <option value="">Tutti gli stati</option>
+        <option value="confirmed">In attesa</option>
+        <option value="arrived">Arrivati</option>
+        <option value="cancelled">Cancellati</option>
+      </select>
+      <button class="btn-secondary btn-sm" onclick="loadArrivals()" style="white-space:nowrap">↻ Aggiorna</button>
+      <span id="arr-summary" style="font-size:.8rem;color:var(--gray);margin-left:.25rem"></span>
+    </div>
+    <div class="bookings-table-wrap">
+      <table class="arrivals-table" id="arr-table">
+        <thead>
+          <tr>
+            <th style="width:70px">Ora</th>
+            <th>Nome</th>
+            <th>Telefono</th>
+            <th style="width:90px">Ospiti</th>
+            <th style="width:70px">Tavolo</th>
+            <th>Richieste Speciali</th>
+            <th style="width:110px">Stato</th>
+            ${canEdit ? '<th style="width:130px">Azioni</th>' : ''}
+          </tr>
+        </thead>
+        <tbody id="arr-tbody">
+          <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--gray)">Caricamento...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+  loadArrivals();
+
+  // Auto-refresh every 60 seconds while tab is open
+  if(window._arrRefreshTimer) clearInterval(window._arrRefreshTimer);
+  window._arrRefreshTimer = setInterval(()=>{
+    const activeLink = document.querySelector('#admin-nav-list a.active');
+    if(activeLink){
+      const tab = activeLink.getAttribute('onclick').match(/'([^']+)'/)?.[1];
+      if(tab === 'arrivals') loadArrivals(true); // silent refresh
+      else clearInterval(window._arrRefreshTimer);
+    } else {
+      clearInterval(window._arrRefreshTimer);
+    }
+  }, 60000);
+}
+
+async function loadArrivals(silent = false) {
+  const date  = document.getElementById('arr-date')?.value || todayStr();
+  const shift = document.getElementById('arr-shift')?.value || '';
+  const status= document.getElementById('arr-status')?.value || '';
+  const tbody = document.getElementById('arr-tbody');
+  const canEdit = ['superadmin','admin','concierge'].includes(currentUser.role);
+
+  if(!tbody) return;
+  if(!silent) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--gray)">⏳ Caricamento...</td></tr>`;
+
+  let url = `/api/admin/bookings?date=${date}&limit=200`;
+  if(shift)  url += `&shift=${shift}`;
+  if(status) url += `&status=${status}`;
+
+  try {
+    const res = await adminFetch(url);
+    const data = await res.json();
+    const bookings = (data.bookings || []).filter(b => b.status !== 'cancelled' || status === 'cancelled');
+
+    // Summary counts
+    const total   = bookings.filter(b => b.status !== 'cancelled').length;
+    const arrived = bookings.filter(b => b.status === 'arrived').length;
+    const waiting = bookings.filter(b => b.status === 'confirmed' || b.status === 'pending').length;
+    const covers  = bookings.filter(b => b.status !== 'cancelled').reduce((s,b) => s+b.adults+b.children, 0);
+    const summaryEl = document.getElementById('arr-summary');
+    if(summaryEl) summaryEl.innerHTML =
+      `<span style="color:var(--green);font-weight:500">✓ ${arrived} arrivati</span> &nbsp;·&nbsp; ` +
+      `<span style="color:var(--gold-dk)">⏳ ${waiting} in attesa</span> &nbsp;·&nbsp; ` +
+      `${covers} coperti totali`;
+
+    if(!bookings.length) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2.5rem;color:var(--gray)">Nessuna prenotazione per questa selezione</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = bookings.map(b => {
+      const isArrived   = b.status === 'arrived';
+      const isCancelled = b.status === 'cancelled';
+      const rowClass    = isArrived ? 'row-arrived' : isCancelled ? 'row-cancelled' : '';
+      const shiftTag    = (() => {
+        const [h] = (b.time||'').split(':').map(Number);
+        return h < 17
+          ? '<span class="shift-badge shift-lunch">🌞 Pranzo</span>'
+          : '<span class="shift-badge shift-evening">🌙 Cena</span>';
+      })();
+
+      const notesCell = b.notes
+        ? `<div class="arrivals-notes">📝 ${b.notes}</div>`
+        : '<span style="color:var(--gray-lt);font-size:.8rem">—</span>';
+
+      let actionCell = '';
+      if(canEdit && !isCancelled) {
+        if(!isArrived) {
+          actionCell = `<button class="btn-arrived" onclick="markArrived('${b.id}', true)">✓ Arrivato</button>`;
+        } else {
+          actionCell = `<button class="btn-undo-arrived" onclick="markArrived('${b.id}', false)">↩ Annulla</button>`;
+        }
+      }
+
+      return `<tr class="${rowClass}">
+        <td>
+          <strong style="font-size:1rem">${fmtTime(b.time)}</strong><br>
+          <span style="margin-top:.2rem;display:block">${shiftTag}</span>
+        </td>
+        <td><strong style="font-size:.95rem">${b.name}</strong></td>
+        <td style="font-size:.85rem">${b.phone||'—'}</td>
+        <td style="font-size:.9rem;text-align:center">
+          <strong>${b.adults+b.children}</strong><br>
+          <span style="font-size:.72rem;color:var(--gray)">${b.adults}A · ${b.children}B</span>
+        </td>
+        <td style="text-align:center;font-size:.9rem">
+          ${b.table_number ? `<strong>T${b.table_number}</strong>` : '<span style="color:var(--gray-lt)">—</span>'}
+        </td>
+        <td>${notesCell}</td>
+        <td>${statusBadge(b.status)}</td>
+        ${canEdit ? `<td>${actionCell}</td>` : ''}
+      </tr>`;
+    }).join('');
+
+  } catch(e) {
+    if(tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:1rem;color:var(--red)">Errore nel caricamento</td></tr>`;
+  }
+}
+
+async function markArrived(bookingId, arrived) {
+  const newStatus = arrived ? 'arrived' : 'confirmed';
+  try {
+    const res = await adminFetch(`/api/admin/bookings/${bookingId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: newStatus }),
+    });
+    if(res.ok) {
+      showToast(arrived ? '✓ Ospite segnato come arrivato' : 'Stato ripristinato');
+      loadArrivals(true); // silent refresh — keep scroll position
+    } else {
+      const d = await res.json();
+      showToast(d.error || 'Errore', 'error');
+    }
+  } catch(e) { showToast('Errore di connessione', 'error'); }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1806,7 +2001,7 @@ async function renderUsersTab(container){
         <div class="form-group"><label>Password <span class="req">*</span></label><input type="password" id="nu-pass" placeholder="min. 8 caratteri" autocomplete="new-password"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Ruolo</label><select id="nu-role"><option value="staff">Staff (sola lettura)</option><option value="admin">Admin (gestione prenotazioni)</option><option value="superadmin">Superadmin (accesso completo)</option></select></div>
+        <div class="form-group"><label>Ruolo</label><select id="nu-role"><option value="staff">Staff (sola lettura)</option><option value="concierge">Concierge (solo arrivi)</option><option value="admin">Admin (gestione prenotazioni)</option><option value="superadmin">Superadmin (accesso completo)</option></select></div>
       </div>
       <button class="btn-secondary" onclick="createUser()">+ Crea Utente</button>
     </div>
