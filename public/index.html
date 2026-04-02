@@ -15,7 +15,7 @@
   --gold:#C9A84C;--gold-lt:#E8D5A3;--gold-dk:#8A6820;
   --cream:#FAF7F2;--cream2:#F3EDE3;--dark:#1A1612;--dark2:#2C2520;
   --gray:#6B6460;--gray-lt:#D4CEC8;--white:#FFFFFF;
-  --red:#A33030;--green:#2A6040;
+  --red:#A33030;--green:#2A6040;--blue:#185FA5;
   --radius:2px;--radius-lg:4px;
   --shadow:0 4px 24px rgba(0,0,0,.12);
   --transition:.25s cubic-bezier(.4,0,.2,1);
@@ -26,7 +26,6 @@
 }
 html{scroll-behavior:smooth}
 body{background:var(--cream);color:var(--dark);min-height:100vh;overflow-x:hidden}
-img{display:block;max-width:100%}
 button{cursor:pointer;border:none;font-family:'Jost',sans-serif}
 input,select,textarea{font-family:'Jost',sans-serif}
 a{color:inherit;text-decoration:none}
@@ -34,11 +33,9 @@ a{color:inherit;text-decoration:none}
 h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:300;line-height:1.2}
 h1{font-size:clamp(3rem,7vw,6rem);letter-spacing:-.02em}
 h2{font-size:clamp(2rem,4vw,3.5rem)}
-h3{font-size:1.5rem}
 .container{max-width:1200px;margin:0 auto;padding:0 clamp(1rem,4vw,3rem)}
-.flex{display:flex;align-items:center}
-/* ── HEADER ── */
-#site-header{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.25rem 0;transition:background var(--transition),backdrop-filter var(--transition)}
+/* HEADER */
+#site-header{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.25rem 0;transition:background var(--transition)}
 #site-header.scrolled{background:rgba(26,22,18,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .header-inner{display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:0 clamp(1rem,4vw,3rem)}
 .logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;letter-spacing:.1em;color:var(--gold);text-transform:uppercase}
@@ -51,7 +48,7 @@ h3{font-size:1.5rem}
 .lang-btn.active{background:var(--gold);color:var(--dark)}
 .header-right{display:flex;align-items:center;gap:1.5rem}
 .mobile-menu-btn{display:none;background:none;color:white;font-size:1.5rem}
-/* ── HERO ── */
+/* HERO */
 #hero{position:relative;height:100vh;min-height:600px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .hero-bg{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.3) 0%,rgba(0,0,0,.55) 100%),url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800&q=80') center/cover no-repeat}
 .hero-content{position:relative;text-align:center;color:white;padding:0 1rem;animation:fadeUp .9s ease both}
@@ -62,11 +59,11 @@ h3{font-size:1.5rem}
 .hero-cta:hover{background:var(--gold-lt);transform:translateY(-2px)}
 .scroll-indicator{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;color:rgba(255,255,255,.5);font-size:.7rem;letter-spacing:.15em;animation:bounce 2s infinite}
 .scroll-line{width:1px;height:3rem;background:linear-gradient(to bottom,var(--gold),transparent)}
-/* ── SECTIONS ── */
+/* SECTIONS */
 section{padding:clamp(4rem,8vw,8rem) 0}
 .section-eyebrow{font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;display:block}
 .divider{width:3rem;height:1px;background:var(--gold);margin:1.5rem auto}
-/* ── RESERVATION ── */
+/* RESERVATION */
 #reservation{background:var(--cream2)}
 .reservation-wrap{display:grid;grid-template-columns:1fr 1.8fr;gap:4rem;align-items:start}
 @media(max-width:900px){.reservation-wrap{grid-template-columns:1fr}}
@@ -75,7 +72,7 @@ section{padding:clamp(4rem,8vw,8rem) 0}
 .info-block{margin-bottom:1.5rem}
 .info-block-label{font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;display:block}
 .info-block-value{font-size:.9rem;color:var(--gray);line-height:1.7}
-/* ── FORM ── */
+/* FORM */
 .res-card{background:var(--white);border:1px solid var(--gray-lt);border-radius:var(--radius-lg);padding:2.5rem;box-shadow:var(--shadow)}
 .form-section-title{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:300;color:var(--dark);margin:1.5rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--gray-lt)}
 .form-section-title:first-child{margin-top:0}
@@ -87,15 +84,15 @@ label{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--
 label .req{color:var(--gold)}
 input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],input[type=number],select,textarea{width:100%;padding:.75rem 1rem;border:1px solid var(--gray-lt);border-radius:var(--radius);background:var(--cream);color:var(--dark);font-size:.9rem;transition:border-color var(--transition),box-shadow var(--transition);appearance:none;-webkit-appearance:none}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.15)}
-input.error,select.error,textarea.error{border-color:var(--red)}
+input.error,select.error{border-color:var(--red)}
 .field-error{font-size:.75rem;color:var(--red);margin-top:.2rem}
 textarea{resize:vertical;min-height:100px}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
 .phone-row{display:grid;grid-template-columns:6rem 1fr;gap:.5rem}
 .guest-split{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
-/* ── SLOTS ── */
+/* SLOTS */
 .slots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(5rem,1fr));gap:.5rem;margin-top:.5rem}
-.slot-btn{padding:.5rem .25rem;border:1px solid var(--gray-lt);border-radius:var(--radius);background:var(--cream);color:var(--dark);font-size:.8rem;font-weight:400;letter-spacing:.05em;transition:all var(--transition);text-align:center}
+.slot-btn{padding:.5rem .25rem;border:1px solid var(--gray-lt);border-radius:var(--radius);background:var(--cream);color:var(--dark);font-size:.8rem;transition:all var(--transition);text-align:center}
 .slot-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
 .slot-btn.selected{background:var(--gold);color:var(--dark);border-color:var(--gold)}
 .slot-btn:disabled{opacity:.35;cursor:not-allowed}
@@ -105,29 +102,26 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .avail-badge.medium{background:#C9A84C22;color:var(--gold-dk)}
 .avail-badge.low{background:#A3303022;color:var(--red)}
 .avail-dot{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
-/* ── DEPOSIT ── */
+/* DEPOSIT */
 .deposit-box{border:1px solid var(--gray-lt);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:.5rem;display:none}
 .deposit-box.visible{display:block}
 .deposit-highlight{background:rgba(201,168,76,.1);border-radius:var(--radius);padding:.75rem 1rem;font-size:.85rem;color:var(--gray);margin-bottom:.75rem}
 .deposit-highlight strong{color:var(--gold-dk)}
 .check-row{display:flex;align-items:flex-start;gap:.75rem;cursor:pointer}
 .check-row input[type=checkbox]{width:1.1rem;height:1.1rem;accent-color:var(--gold);flex-shrink:0;margin-top:.15rem;cursor:pointer}
-.check-label{font-size:.85rem;color:var(--gray);line-height:1.5}
-.check-label strong{color:var(--dark)}
 .gdpr-row{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:var(--radius);padding:.75rem 1rem;font-size:.78rem;color:var(--gray);line-height:1.5}
 .gdpr-row a{color:var(--gold);text-decoration:underline}
-/* ── BUTTONS ── */
+/* BUTTONS */
 .btn-primary{width:100%;padding:1rem;background:var(--gold);color:var(--dark);font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;font-weight:500;border-radius:var(--radius);transition:all var(--transition);display:flex;align-items:center;justify-content:center;gap:.75rem}
 .btn-primary:hover{background:var(--gold-lt);transform:translateY(-1px)}
-.btn-primary:active{transform:translateY(0)}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btn-secondary{padding:.65rem 1.5rem;background:transparent;color:var(--dark);border:1px solid var(--gray-lt);font-size:.8rem;letter-spacing:.1em;border-radius:var(--radius);transition:all var(--transition)}
 .btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
-.btn-sm{padding:.35rem .75rem;font-size:.75rem}
-.btn-danger{border-color:var(--red);color:var(--red)}
-.btn-danger:hover{background:var(--red);color:white}
+.btn-sm{padding:.35rem .75rem;font-size:.73rem}
+.btn-danger{border-color:var(--red)!important;color:var(--red)!important}
+.btn-danger:hover{background:var(--red)!important;color:white!important}
 .loading-spinner{width:1rem;height:1rem;border:2px solid rgba(0,0,0,.2);border-top-color:var(--dark);border-radius:50%;animation:spin .6s linear infinite;display:none}
-/* ── CONFIRMATION ── */
+/* CONFIRMATION */
 #confirmation{display:none;background:var(--cream2);min-height:60vh;align-items:center;justify-content:center;padding:5rem 1rem}
 #confirmation.visible{display:flex}
 .confirm-card{max-width:640px;width:100%;background:var(--white);border:1px solid var(--gray-lt);border-radius:var(--radius-lg);padding:3rem;box-shadow:var(--shadow);text-align:center}
@@ -140,23 +134,26 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .summary-label{color:var(--gray);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase}
 .summary-value{color:var(--dark);font-weight:500}
 .confirm-note{font-size:.8rem;color:var(--gray);line-height:1.6;margin-bottom:1.5rem}
-/* ── PAYMENT ── */
+/* PAYMENT */
 #payment-redirect{display:none}
 #payment-redirect.visible{display:flex}
 .payment-card{max-width:500px;width:100%;margin:0 auto;background:var(--white);border:1px solid var(--gray-lt);border-radius:var(--radius-lg);padding:2.5rem;text-align:center;box-shadow:var(--shadow)}
-.stripe-btn{display:inline-flex;align-items:center;gap:.75rem;padding:1rem 2rem;border-radius:var(--radius);background:#635BFF;color:white;font-size:.85rem;letter-spacing:.05em;font-weight:500;transition:all var(--transition);width:100%;justify-content:center;margin-bottom:.75rem}
+.stripe-btn{display:inline-flex;align-items:center;gap:.75rem;padding:1rem 2rem;border-radius:var(--radius);background:#635BFF;color:white;font-size:.85rem;font-weight:500;transition:all var(--transition);width:100%;justify-content:center;margin-bottom:.75rem}
 .stripe-btn:hover{background:#7A73FF;transform:translateY(-1px)}
-/* ── ADMIN PANEL ── */
+/* ADMIN PANEL */
 #admin-panel{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);animation:fadeIn .2s ease}
 #admin-panel.open{display:flex;align-items:stretch}
-.admin-sidebar{width:220px;background:var(--dark2);color:white;padding:2rem 0;flex-shrink:0;overflow-y:auto}
-.admin-logo{padding:0 1.5rem 1.5rem;font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold);border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:1rem}
-.admin-nav{list-style:none}
-.admin-nav li a{display:block;padding:.6rem 1.5rem;font-size:.78rem;letter-spacing:.08em;color:rgba(255,255,255,.6);transition:all var(--transition);border-left:2px solid transparent}
+.admin-sidebar{width:220px;background:var(--dark2);color:white;padding:2rem 0;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column}
+.admin-logo{padding:0 1.5rem 1rem;font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold);border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:.75rem}
+.admin-logo small{display:block;font-family:'Jost',sans-serif;font-size:.65rem;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.25rem}
+.admin-nav{list-style:none;flex:1}
+.admin-nav li a{display:block;padding:.6rem 1.5rem;font-size:.78rem;letter-spacing:.06em;color:rgba(255,255,255,.6);transition:all var(--transition);border-left:2px solid transparent}
 .admin-nav li a:hover,.admin-nav li a.active{color:white;background:rgba(201,168,76,.15);border-left-color:var(--gold)}
+.admin-nav .nav-section{padding:.75rem 1.5rem .25rem;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.25)}
 .admin-main{flex:1;background:var(--cream);overflow-y:auto}
-.admin-topbar{background:var(--white);border-bottom:1px solid var(--gray-lt);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.admin-topbar{background:var(--white);border-bottom:1px solid var(--gray-lt);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
 .admin-topbar h3{font-size:1rem;font-weight:500}
+.admin-user-badge{font-size:.72rem;padding:.25rem .6rem;border-radius:2rem;background:rgba(201,168,76,.15);color:var(--gold-dk)}
 .admin-content{padding:2rem}
 .admin-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
 @media(max-width:900px){.admin-stats{grid-template-columns:repeat(2,1fr)}}
@@ -165,85 +162,98 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .stat-value{font-size:2rem;font-family:'Cormorant Garamond',serif;font-weight:300}
 .stat-sub{font-size:.75rem;color:var(--gray);margin-top:.15rem}
 .bookings-table-wrap{overflow-x:auto}
-.bookings-table{width:100%;border-collapse:collapse;font-size:.82rem}
-.bookings-table th{text-align:left;padding:.65rem .75rem;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);border-bottom:2px solid var(--gray-lt);white-space:nowrap}
-.bookings-table td{padding:.65rem .75rem;border-bottom:1px solid var(--gray-lt);vertical-align:middle}
+.bookings-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.bookings-table th{text-align:left;padding:.6rem .7rem;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);border-bottom:2px solid var(--gray-lt);white-space:nowrap}
+.bookings-table td{padding:.6rem .7rem;border-bottom:1px solid var(--gray-lt);vertical-align:middle}
 .bookings-table tr:hover td{background:var(--cream2)}
-.status-badge{display:inline-block;padding:.2rem .6rem;border-radius:2rem;font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;font-weight:500}
+.status-badge{display:inline-block;padding:.2rem .6rem;border-radius:2rem;font-size:.65rem;letter-spacing:.05em;text-transform:uppercase;font-weight:500}
 .status-confirmed{background:#2A604020;color:var(--green)}
 .status-pending{background:#C9A84C22;color:var(--gold-dk)}
 .status-cancelled{background:#A3303022;color:var(--red)}
-.source-badge{display:inline-block;padding:.15rem .5rem;border-radius:2rem;font-size:.65rem;letter-spacing:.04em}
+.source-badge{display:inline-block;padding:.15rem .5rem;border-radius:2rem;font-size:.65rem}
 .source-online{background:#E6F1FB;color:#185FA5}
 .source-manual{background:#EAF3DE;color:#3B6D11}
+.payment-pill{display:inline-block;padding:.15rem .5rem;border-radius:2rem;font-size:.65rem;font-weight:500}
+.pay-cash{background:#EAF3DE;color:#3B6D11}
+.pay-card{background:#E6F1FB;color:#185FA5}
+.pay-bank{background:#FAEEDA;color:#854F0B}
 .admin-close{background:none;color:white;font-size:1.25rem;padding:.25rem .5rem;border-radius:var(--radius);transition:background var(--transition)}
 .admin-close:hover{background:rgba(255,255,255,.1)}
 .btn-export{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border:1px solid var(--gray-lt);border-radius:var(--radius);font-size:.75rem;background:var(--white);color:var(--dark);transition:all var(--transition)}
 .btn-export:hover{border-color:var(--gold);color:var(--gold)}
 .admin-filter-bar{display:flex;gap:.75rem;margin-bottom:1.5rem;align-items:center;flex-wrap:wrap}
 .admin-filter-bar input,.admin-filter-bar select{padding:.5rem .75rem;font-size:.8rem;width:auto}
-.admin-section{margin-bottom:2.5rem}
-.admin-section-title{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gray);margin-bottom:1rem;display:flex;align-items:center;gap:1rem}
+.admin-section{margin-bottom:2rem}
+.admin-section-title{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gray);margin-bottom:1rem;display:flex;align-items:center;gap:1rem}
 .admin-section-title::after{content:'';flex:1;height:1px;background:var(--gray-lt)}
-.settings-row{display:flex;justify-content:space-between;align-items:center;padding:.75rem 0;border-bottom:1px solid var(--gray-lt)}
-.settings-label{font-size:.85rem}
+.settings-row{display:flex;justify-content:space-between;align-items:center;padding:.75rem 0;border-bottom:1px solid var(--gray-lt);gap:1rem}
+.settings-label{font-size:.85rem;flex:1}
 .settings-sub{font-size:.75rem;color:var(--gray)}
-.toggle{position:relative;width:2.5rem;height:1.35rem}
+.toggle{position:relative;width:2.5rem;height:1.35rem;flex-shrink:0}
 .toggle input{opacity:0;width:0;height:0}
 .toggle-slider{position:absolute;inset:0;background:var(--gray-lt);border-radius:2rem;cursor:pointer;transition:background var(--transition)}
 .toggle-slider::before{content:'';position:absolute;width:1rem;height:1rem;left:.175rem;top:.175rem;background:white;border-radius:50%;transition:transform var(--transition)}
 .toggle input:checked+.toggle-slider{background:var(--gold)}
 .toggle input:checked+.toggle-slider::before{transform:translateX(1.15rem)}
 .admin-card{background:var(--white);border:1px solid var(--gray-lt);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
-.admin-card h4{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:1.1rem;margin-bottom:1rem;color:var(--dark)}
-.inline-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;align-items:end}
+.admin-card h4{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:1.1rem;margin-bottom:.5rem}
+.admin-card p.desc{font-size:.8rem;color:var(--gray);margin-bottom:1rem}
+.inline-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;align-items:end;margin-bottom:1rem}
 .inline-form .form-group{margin-bottom:0}
-.toast{position:fixed;bottom:2rem;right:2rem;z-index:999;background:var(--dark2);color:white;padding:.75rem 1.25rem;border-radius:var(--radius-lg);font-size:.82rem;box-shadow:var(--shadow);transform:translateY(4rem);opacity:0;transition:all .3s ease;pointer-events:none}
+/* Inline table number input */
+.table-input{width:55px;padding:.3rem .5rem;font-size:.8rem;text-align:center;border:1px solid var(--gray-lt);border-radius:var(--radius);background:var(--cream);color:var(--dark)}
+.table-input:focus{outline:none;border-color:var(--gold)}
+/* Opening hours day row */
+.oh-day-row{border-bottom:1px solid var(--gray-lt);padding:.75rem 0}
+.oh-day-row:last-child{border-bottom:none}
+.oh-day-header{display:flex;align-items:center;gap:1rem;margin-bottom:.5rem}
+.oh-day-name{font-size:.85rem;font-weight:500;min-width:80px}
+.oh-sessions{display:flex;flex-direction:column;gap:.5rem;padding-left:90px}
+.oh-session{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.oh-session input[type=time]{width:110px;padding:.4rem .6rem;font-size:.82rem}
+.oh-session label{font-size:.75rem;color:var(--gray);text-transform:none;letter-spacing:0}
+/* Toast */
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:999;background:var(--dark2);color:white;padding:.75rem 1.25rem;border-radius:var(--radius-lg);font-size:.82rem;box-shadow:var(--shadow);transform:translateY(4rem);opacity:0;transition:all .3s ease;pointer-events:none;max-width:300px}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.success{border-left:3px solid var(--gold)}
 .toast.error{border-left:3px solid var(--red)}
-.payment-pill{display:inline-block;padding:.15rem .5rem;border-radius:2rem;font-size:.68rem;font-weight:500}
-.pay-cash{background:#EAF3DE;color:#3B6D11}
-.pay-card{background:#E6F1FB;color:#185FA5}
-.pay-bank{background:#FAEEDA;color:#854F0B}
-.pay-none{color:var(--gray)}
-/* ── FOOTER ── */
+/* Role badge */
+.role-badge{display:inline-block;padding:.15rem .5rem;border-radius:2rem;font-size:.65rem;font-weight:500;text-transform:uppercase}
+.role-admin{background:#E6F1FB;color:#185FA5}
+.role-staff{background:#EAF3DE;color:#3B6D11}
+/* Footer */
 footer{background:var(--dark);color:rgba(255,255,255,.5);padding:3rem 0;text-align:center;font-size:.8rem;line-height:2}
 footer .logo{margin-bottom:1rem;font-size:1.25rem}
 .footer-links{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
 .footer-links a{color:rgba(255,255,255,.4);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;transition:color var(--transition)}
 .footer-links a:hover{color:var(--gold)}
-/* ── COOKIE ── */
+/* Cookie */
 #cookie-banner{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:300;width:min(94vw,600px);background:var(--dark2);color:white;border-radius:var(--radius-lg);padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 8px 32px rgba(0,0,0,.3);animation:slideUp .4s ease both;flex-wrap:wrap}
 #cookie-banner p{font-size:.8rem;color:rgba(255,255,255,.7);line-height:1.5;flex:1;min-width:200px}
-#cookie-banner a{color:var(--gold)}
 .cookie-actions{display:flex;gap:.5rem;flex-shrink:0}
-.btn-cookie-accept{padding:.5rem 1.25rem;background:var(--gold);color:var(--dark);border-radius:var(--radius);font-size:.75rem;letter-spacing:.08em;font-weight:500;transition:all var(--transition)}
-.btn-cookie-accept:hover{background:var(--gold-lt)}
+.btn-cookie-accept{padding:.5rem 1.25rem;background:var(--gold);color:var(--dark);border-radius:var(--radius);font-size:.75rem;font-weight:500;transition:all var(--transition)}
 .btn-cookie-decline{padding:.5rem 1rem;background:transparent;color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius);font-size:.75rem;transition:all var(--transition)}
-.btn-cookie-decline:hover{color:white;border-color:rgba(255,255,255,.3)}
-/* ── ADMIN LOGIN ── */
+/* Admin login */
 .admin-login-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);align-items:center;justify-content:center}
 .admin-login-modal.open{display:flex}
 .login-card{background:var(--white);border-radius:var(--radius-lg);padding:2.5rem;width:min(90vw,400px);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .login-card h3{margin-bottom:1.5rem;text-align:center}
 .login-error{background:#A3303015;color:var(--red);padding:.5rem .75rem;border-radius:var(--radius);font-size:.8rem;margin-bottom:1rem;display:none}
 .login-error.visible{display:block}
-/* ── ANIMATIONS ── */
+/* Animations */
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{opacity:0;transform:translate(-50%,1rem)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-8px)}}
-/* ── MOBILE ── */
+/* Mobile */
 @media(max-width:768px){.nav-links{display:none}.mobile-menu-btn{display:block}.admin-stats{grid-template-columns:1fr 1fr}.admin-sidebar{width:200px}}
-@media(max-width:600px){.admin-panel-wrap{flex-direction:column}.admin-sidebar{width:100%;padding:1rem}.admin-stats{grid-template-columns:1fr 1fr}}
-.hidden{display:none!important}.mt1{margin-top:1rem}.mt2{margin-top:2rem}.text-center{text-align:center}.text-gold{color:var(--gold)}.text-gray{color:var(--gray)}.text-sm{font-size:.85rem}
+@media(max-width:600px){.admin-sidebar{width:100%}}
+.hidden{display:none!important}.mt1{margin-top:1rem}.mt2{margin-top:2rem}.text-center{text-align:center}.text-gold{color:var(--gold)}.text-gray{color:var(--gray)}.text-sm{font-size:.82rem}
 </style>
 </head>
 <body>
 
-<!-- TOAST -->
 <div id="toast" class="toast"></div>
 
 <!-- HEADER -->
@@ -259,7 +269,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
       </ul>
     </nav>
     <div class="header-right">
-      <div class="lang-switcher" role="group" aria-label="Language selector">
+      <div class="lang-switcher" role="group">
         <button class="lang-btn active" data-lang="it" onclick="setLanguage('it')">IT</button>
         <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
       </div>
@@ -283,7 +293,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
   </div>
 </section>
 
-<!-- RESERVATION SECTION -->
+<!-- RESERVATION -->
 <section id="reservation" aria-labelledby="res-heading">
   <div class="container">
     <div class="reservation-wrap">
@@ -309,25 +319,24 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
           <div class="info-block-value text-sm" data-i18n="info.deposit.val">Richiesta nei weekend e giorni festivi. €25 per persona, scalabile dalla nota finale.</div>
         </div>
       </div>
-
       <div class="res-card" role="main">
-        <form id="reservation-form" novalidate aria-label="Reservation form">
+        <form id="reservation-form" novalidate>
           <div class="form-section-title serif" data-i18n="form.section.contact">Dati Personali</div>
           <div class="form-group">
             <label for="full-name"><span data-i18n="field.name">Nome Completo</span> <span class="req">*</span></label>
-            <input type="text" id="full-name" name="full-name" autocomplete="name" required aria-required="true" placeholder="Mario Rossi">
+            <input type="text" id="full-name" autocomplete="name" required placeholder="Mario Rossi">
             <span class="field-error" id="full-name-error" role="alert"></span>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label for="email"><span data-i18n="field.email">Email</span> <span class="req">*</span></label>
-              <input type="email" id="email" name="email" autocomplete="email" required aria-required="true" placeholder="mario@esempio.it">
+              <input type="email" id="email" autocomplete="email" required placeholder="mario@esempio.it">
               <span class="field-error" id="email-error" role="alert"></span>
             </div>
             <div class="form-group">
-              <label for="phone"><span data-i18n="field.phone">Telefono</span> <span class="req">*</span></label>
+              <label><span data-i18n="field.phone">Telefono</span> <span class="req">*</span></label>
               <div class="phone-row">
-                <select id="phone-prefix" name="phone-prefix" aria-label="Prefisso">
+                <select id="phone-prefix">
                   <option value="+39">🇮🇹 +39</option>
                   <option value="+1">🇺🇸 +1</option>
                   <option value="+44">🇬🇧 +44</option>
@@ -339,7 +348,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
                   <option value="+81">🇯🇵 +81</option>
                   <option value="+86">🇨🇳 +86</option>
                 </select>
-                <input type="tel" id="phone" name="phone" autocomplete="tel" required aria-required="true" placeholder="081 807 2200">
+                <input type="tel" id="phone" autocomplete="tel" required placeholder="081 807 2200">
               </div>
               <span class="field-error" id="phone-error" role="alert"></span>
             </div>
@@ -348,22 +357,21 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
           <div class="form-row">
             <div class="form-group">
               <label for="res-date"><span data-i18n="field.date">Data</span> <span class="req">*</span></label>
-              <input type="date" id="res-date" name="res-date" required aria-required="true" onchange="updateSlots()">
+              <input type="date" id="res-date" required onchange="updateSlots()">
               <span class="field-error" id="date-error" role="alert"></span>
             </div>
             <div class="form-group">
-              <label data-i18n="field.guests">Ospiti <span class="req">*</span></label>
+              <label><span data-i18n="field.guests">Ospiti</span> <span class="req">*</span></label>
               <div class="guest-split">
                 <div>
-                  <input type="number" id="adults" name="adults" min="1" max="20" value="2" aria-label="Adulti" onchange="updateSlots()">
+                  <input type="number" id="adults" min="1" max="20" value="2" onchange="updateSlots()">
                   <div style="font-size:.7rem;color:var(--gray);margin-top:.25rem;text-align:center" data-i18n="field.adults">Adulti</div>
                 </div>
                 <div>
-                  <input type="number" id="children" name="children" min="0" max="10" value="0" aria-label="Bambini">
+                  <input type="number" id="children" min="0" max="10" value="0">
                   <div style="font-size:.7rem;color:var(--gray);margin-top:.25rem;text-align:center" data-i18n="field.children">Bambini</div>
                 </div>
               </div>
-              <span class="field-error" id="guests-error" role="alert"></span>
             </div>
           </div>
           <div class="form-group">
@@ -371,20 +379,20 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
               <span data-i18n="field.time">Orario</span> <span class="req">*</span>
               <span id="avail-badge" class="avail-badge" aria-live="polite"></span>
             </label>
-            <div class="slots-grid" id="slots-grid" role="group" aria-label="Seleziona orario">
+            <div class="slots-grid" id="slots-grid">
               <div class="text-gray text-sm" data-i18n="slots.select.date">Seleziona prima una data</div>
             </div>
             <span class="field-error" id="time-error" role="alert"></span>
           </div>
           <div class="form-group">
             <label for="notes" data-i18n="field.notes">Richieste Speciali</label>
-            <textarea id="notes" name="notes" rows="3" placeholder="Allergie, occasioni speciali, preferenze tavolo..."></textarea>
+            <textarea id="notes" rows="3" placeholder="Allergie, occasioni speciali, preferenze tavolo..."></textarea>
           </div>
           <div id="deposit-section" class="deposit-box" aria-live="polite">
             <div class="deposit-highlight" id="deposit-info"></div>
             <label class="check-row">
-              <input type="checkbox" id="pay-deposit" name="pay-deposit">
-              <span class="check-label">
+              <input type="checkbox" id="pay-deposit">
+              <span style="font-size:.85rem;color:var(--gray)">
                 <strong data-i18n="deposit.check.title">Paga la caparra ora</strong><br>
                 <span data-i18n="deposit.check.sub">Garantisci il tuo tavolo con un pagamento sicuro Stripe</span>
               </span>
@@ -392,9 +400,10 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
           </div>
           <div class="gdpr-row mt1">
             <label class="check-row" style="align-items:flex-start">
-              <input type="checkbox" id="gdpr" name="gdpr" required aria-required="true" style="margin-top:.1rem">
+              <input type="checkbox" id="gdpr" required style="margin-top:.1rem">
               <span style="font-size:.78rem;color:var(--gray)">
-                <span data-i18n="gdpr.text">Acconsento al trattamento dei dati personali ai sensi del GDPR. </span><a href="#" data-i18n-href="privacy.link">Privacy Policy</a> <span class="req">*</span>
+                <span data-i18n="gdpr.text">Acconsento al trattamento dei dati personali ai sensi del GDPR. </span>
+                <a href="#" data-i18n="privacy.link">Privacy Policy</a> <span class="req">*</span>
               </span>
             </label>
           </div>
@@ -402,7 +411,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
           <div class="form-group mt1">
             <button type="submit" class="btn-primary" id="submit-btn">
               <span data-i18n="form.submit">Conferma Prenotazione</span>
-              <div class="loading-spinner" id="loading-spinner" aria-hidden="true"></div>
+              <div class="loading-spinner" id="loading-spinner"></div>
             </button>
           </div>
         </form>
@@ -412,13 +421,13 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
 </section>
 
 <!-- CONFIRMATION -->
-<section id="confirmation" role="region" aria-label="Confirmation">
+<section id="confirmation" role="region">
   <div class="container">
     <div class="confirm-card">
-      <div class="confirm-icon" aria-hidden="true">✓</div>
+      <div class="confirm-icon">✓</div>
       <h2 class="serif" data-i18n="confirm.heading">Prenotazione Confermata</h2>
       <p class="subtitle" data-i18n="confirm.sub">Ti aspettiamo con piacere</p>
-      <div class="booking-summary" id="booking-summary" aria-live="polite"></div>
+      <div class="booking-summary" id="booking-summary"></div>
       <p class="confirm-note" data-i18n="confirm.note">Una conferma è stata inviata al tuo indirizzo email. Per modifiche contattaci al +39 081 807 22 00.</p>
       <button class="btn-secondary" onclick="resetForm()" data-i18n="confirm.new">Nuova Prenotazione</button>
     </div>
@@ -426,14 +435,12 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
 </section>
 
 <!-- PAYMENT REDIRECT -->
-<div id="payment-redirect" class="confirmation" style="display:none;background:var(--cream2);min-height:60vh;align-items:center;justify-content:center;padding:5rem 1rem" role="dialog" aria-modal="true">
+<div id="payment-redirect" class="confirmation" style="display:none;background:var(--cream2);min-height:60vh;align-items:center;justify-content:center;padding:5rem 1rem">
   <div class="payment-card">
-    <div class="confirm-icon" style="background:rgba(99,91,255,.1)" aria-hidden="true">💳</div>
+    <div class="confirm-icon" style="background:rgba(99,91,255,.1)">💳</div>
     <h3 class="serif mt1" data-i18n="payment.heading">Pagamento Caparra</h3>
     <p class="text-gray text-sm mt1" style="margin-bottom:1.5rem" id="payment-amount-text"></p>
-    <button class="stripe-btn" onclick="simulateStripeCheckout()">
-      <span data-i18n="payment.pay">Paga ora con Stripe</span>
-    </button>
+    <button class="stripe-btn" onclick="simulateStripeCheckout()"><span data-i18n="payment.pay">Paga ora con Stripe</span></button>
     <button class="btn-secondary" style="width:100%" onclick="skipPayment()" data-i18n="payment.skip">Continua senza pagamento</button>
     <p class="text-sm text-gray" style="margin-top:1rem;font-size:.73rem" data-i18n="payment.secure">Pagamento sicuro gestito da Stripe.</p>
   </div>
@@ -443,7 +450,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
 <footer>
   <div class="container">
     <div class="logo" style="display:inline-block;margin-bottom:.5rem">Antico <span>Frantoio</span></div>
-    <nav class="footer-links" aria-label="Footer navigation">
+    <nav class="footer-links">
       <a href="#" data-i18n="footer.privacy">Privacy Policy</a>
       <a href="#" data-i18n="footer.cookies">Cookie Policy</a>
       <a href="#" data-i18n="footer.terms">Termini</a>
@@ -455,58 +462,66 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
 </footer>
 
 <!-- COOKIE BANNER -->
-<div id="cookie-banner" role="alertdialog" aria-label="Cookie consent" aria-describedby="cookie-desc">
-  <p id="cookie-desc"><span data-i18n="cookie.text">Utilizziamo cookie per migliorare la tua esperienza. </span><a href="#" data-i18n="cookie.link">Cookie Policy</a></p>
+<div id="cookie-banner" role="alertdialog">
+  <p><span data-i18n="cookie.text">Utilizziamo cookie per migliorare la tua esperienza. </span><a href="#">Cookie Policy</a></p>
   <div class="cookie-actions">
-    <button class="btn-cookie-decline" onclick="dismissCookies(false)" data-i18n="cookie.decline">Rifiuta</button>
-    <button class="btn-cookie-accept" onclick="dismissCookies(true)" data-i18n="cookie.accept">Accetta</button>
+    <button class="btn-cookie-decline" onclick="dismissCookies(false)">Rifiuta</button>
+    <button class="btn-cookie-accept" onclick="dismissCookies(true)">Accetta</button>
   </div>
 </div>
 
-<!-- ADMIN LOGIN MODAL -->
-<div id="admin-login-modal" class="admin-login-modal" role="dialog" aria-modal="true" aria-label="Admin login">
+<!-- ADMIN LOGIN -->
+<div id="admin-login-modal" class="admin-login-modal" role="dialog" aria-modal="true">
   <div class="login-card">
-    <h3 class="serif" data-i18n="admin.login.title">Accesso Admin</h3>
-    <div class="login-error" id="login-error" role="alert">Credenziali non valide.</div>
-    <div class="form-group">
-      <label for="admin-user" data-i18n="admin.login.user">Username</label>
+    <h3 class="serif">Accesso Admin</h3>
+    <div class="login-error" id="login-error">Credenziali non valide.</div>
+    <div class="form-group mt1">
+      <label>Username</label>
       <input type="text" id="admin-user" autocomplete="username">
     </div>
     <div class="form-group">
-      <label for="admin-pass" data-i18n="admin.login.pass">Password</label>
+      <label>Password</label>
       <input type="password" id="admin-pass" autocomplete="current-password" onkeydown="if(event.key==='Enter')tryAdminLogin()">
     </div>
-    <button class="btn-primary mt1" onclick="tryAdminLogin()"><span data-i18n="admin.login.btn">Accedi</span></button>
+    <button class="btn-primary mt1" onclick="tryAdminLogin()"><span>Accedi</span></button>
     <div class="text-center mt1">
-      <button class="btn-secondary" onclick="closeAdminLogin()" data-i18n="admin.login.cancel">Annulla</button>
+      <button class="btn-secondary" onclick="closeAdminLogin()">Annulla</button>
     </div>
   </div>
 </div>
 
 <!-- ADMIN PANEL -->
-<div id="admin-panel" role="dialog" aria-modal="true" aria-label="Admin panel">
-  <div style="display:flex;flex:1;overflow:hidden" class="admin-panel-wrap">
+<div id="admin-panel" role="dialog" aria-modal="true">
+  <div style="display:flex;flex:1;overflow:hidden">
     <aside class="admin-sidebar">
-      <div class="admin-logo">Antico Frantoio <span style="font-size:.65rem;opacity:.5;font-family:'Jost';letter-spacing:.1em">ADMIN</span></div>
+      <div class="admin-logo">
+        Antico Frantoio
+        <small id="admin-role-label">ADMIN</small>
+      </div>
       <ul class="admin-nav">
-        <li><a href="#" class="active" onclick="switchAdminTab('dashboard',this)">Dashboard</a></li>
-        <li><a href="#" onclick="switchAdminTab('bookings',this)">Prenotazioni</a></li>
-        <li><a href="#" onclick="switchAdminTab('new-booking',this)">+ Nuova Prenotazione</a></li>
-        <li><a href="#" onclick="switchAdminTab('schedule',this)">Calendario</a></li>
-        <li><a href="#" onclick="switchAdminTab('settings',this)">Impostazioni</a></li>
+        <li class="nav-section">Gestione</li>
+        <li><a href="#" class="active" onclick="switchAdminTab('dashboard',this)">📊 Dashboard</a></li>
+        <li><a href="#" onclick="switchAdminTab('bookings',this)" id="nav-bookings">📋 Prenotazioni</a></li>
+        <li><a href="#" onclick="switchAdminTab('new-booking',this)" id="nav-new-booking">➕ Nuova Prenotazione</a></li>
+        <li class="nav-section admin-only-nav">Calendario</li>
+        <li class="admin-only-nav"><a href="#" onclick="switchAdminTab('schedule',this)">📅 Chiusure & Orari</a></li>
+        <li class="nav-section admin-only-nav">Configurazione</li>
+        <li class="admin-only-nav"><a href="#" onclick="switchAdminTab('settings',this)">⚙️ Impostazioni</a></li>
+        <li class="admin-only-nav"><a href="#" onclick="switchAdminTab('users',this)">👤 Utenti</a></li>
       </ul>
     </aside>
     <div class="admin-main">
       <div class="admin-topbar">
         <h3 class="serif" id="admin-tab-title">Dashboard</h3>
         <div style="display:flex;gap:.75rem;align-items:center">
-          <button class="btn-export" onclick="adminExportCSV()">↓ Esporta CSV</button>
-          <button class="admin-close" onclick="closeAdmin()" aria-label="Chiudi">✕</button>
+          <span class="admin-user-badge" id="admin-user-label"></span>
+          <button class="btn-export" onclick="adminExportCSV()">↓ CSV</button>
+          <button class="admin-close" onclick="closeAdmin()">✕</button>
         </div>
       </div>
       <div class="admin-content">
 
-        <!-- DASHBOARD TAB -->
+        <!-- DASHBOARD -->
         <div id="tab-dashboard">
           <div class="admin-stats" id="admin-stats-grid"></div>
           <div class="admin-section-title">Prenotazioni di Oggi</div>
@@ -520,20 +535,20 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
           </div>
         </div>
 
-        <!-- BOOKINGS TAB -->
+        <!-- BOOKINGS -->
         <div id="tab-bookings" style="display:none">
           <div class="admin-filter-bar">
             <input type="date" id="filter-date" onchange="renderBookingsTable()">
             <select id="filter-status" onchange="renderBookingsTable()">
-              <option value="">Tutti</option>
+              <option value="">Tutti gli stati</option>
               <option value="confirmed">Confermati</option>
               <option value="pending">In attesa</option>
               <option value="cancelled">Cancellati</option>
             </select>
             <select id="filter-source" onchange="renderBookingsTable()">
               <option value="">Tutte le fonti</option>
-              <option value="online">Online</option>
-              <option value="manual">Manuale</option>
+              <option value="online">🌐 Online</option>
+              <option value="manual">📞 Manuale</option>
             </select>
             <input type="text" id="filter-search" placeholder="Cerca nome o email..." oninput="renderBookingsTable()" style="min-width:180px">
           </div>
@@ -547,11 +562,11 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
           </div>
         </div>
 
-        <!-- NEW BOOKING TAB (manual) -->
+        <!-- NEW BOOKING -->
         <div id="tab-new-booking" style="display:none">
           <div class="admin-card">
             <h4>Nuova Prenotazione Manuale</h4>
-            <p class="text-gray text-sm" style="margin-bottom:1.5rem">Per prenotazioni ricevute via telefono o di persona.</p>
+            <p class="desc">Per prenotazioni ricevute via telefono o di persona.</p>
             <div class="form-row">
               <div class="form-group">
                 <label>Nome Completo <span class="req">*</span></label>
@@ -604,9 +619,9 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
                 <label>Metodo Pagamento Caparra</label>
                 <select id="mb-payment">
                   <option value="">— Nessuno —</option>
-                  <option value="cash">Contanti</option>
-                  <option value="card">Carta</option>
-                  <option value="bank_transfer">Bonifico</option>
+                  <option value="cash">💵 Contanti</option>
+                  <option value="card">💳 Carta</option>
+                  <option value="bank_transfer">🏦 Bonifico</option>
                 </select>
               </div>
             </div>
@@ -614,7 +629,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
               <label>Note</label>
               <textarea id="mb-notes" rows="2" placeholder="Allergie, occasioni speciali..."></textarea>
             </div>
-            <div class="settings-row" style="border:none;padding-top:0">
+            <div style="display:flex;gap:2rem;padding:.5rem 0;flex-wrap:wrap">
               <label class="check-row" style="cursor:pointer">
                 <input type="checkbox" id="mb-deposit-paid" style="width:1rem;height:1rem;accent-color:var(--gold)">
                 <span style="font-size:.85rem">Caparra pagata</span>
@@ -633,124 +648,74 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
           </div>
         </div>
 
-        <!-- SCHEDULE / CALENDAR TAB -->
+        <!-- SCHEDULE -->
         <div id="tab-schedule" style="display:none">
-
-          <!-- Full Day Closures -->
           <div class="admin-card">
             <h4>Chiusure Giornaliere</h4>
-            <p class="text-gray text-sm" style="margin-bottom:1rem">Blocca un intero giorno — nessun slot disponibile.</p>
-            <div class="inline-form" style="margin-bottom:1rem">
-              <div class="form-group">
-                <label>Data</label>
-                <input type="date" id="cl-date">
-              </div>
-              <div class="form-group">
-                <label>Motivo</label>
-                <input type="text" id="cl-reason" placeholder="Es. Natale">
-              </div>
-              <div class="form-group" style="justify-content:flex-end">
-                <button class="btn-secondary" onclick="addFullClosure()">+ Aggiungi</button>
-              </div>
+            <p class="desc">Blocca un intero giorno — nessun slot disponibile.</p>
+            <div class="inline-form">
+              <div class="form-group"><label>Data</label><input type="date" id="cl-date"></div>
+              <div class="form-group"><label>Motivo</label><input type="text" id="cl-reason" placeholder="Es. Natale"></div>
+              <div class="form-group" style="justify-content:flex-end"><button class="btn-secondary" onclick="addFullClosure()">+ Aggiungi</button></div>
             </div>
             <div id="full-closures-list"></div>
           </div>
-
-          <!-- Partial Closures -->
           <div class="admin-card">
             <h4>Chiusure Parziali</h4>
-            <p class="text-gray text-sm" style="margin-bottom:1rem">Blocca una fascia oraria — Es. dalle 19:00 per un evento privato serale.</p>
-            <div class="inline-form" style="margin-bottom:1rem">
-              <div class="form-group">
-                <label>Data</label>
-                <input type="date" id="pc-date">
-              </div>
-              <div class="form-group">
-                <label>Dalle</label>
-                <input type="time" id="pc-from" value="19:00">
-              </div>
-              <div class="form-group">
-                <label>Alle</label>
-                <input type="time" id="pc-until" value="23:00">
-              </div>
-              <div class="form-group">
-                <label>Motivo</label>
-                <input type="text" id="pc-reason" placeholder="Es. Evento privato">
-              </div>
-              <div class="form-group" style="justify-content:flex-end">
-                <button class="btn-secondary" onclick="addPartialClosure()">+ Aggiungi</button>
-              </div>
+            <p class="desc">Blocca una fascia oraria su una data specifica. Es. dalle 19:00 per un evento privato serale.</p>
+            <div class="inline-form">
+              <div class="form-group"><label>Data</label><input type="date" id="pc-date"></div>
+              <div class="form-group"><label>Dalle</label><input type="time" id="pc-from" value="19:00"></div>
+              <div class="form-group"><label>Alle</label><input type="time" id="pc-until" value="23:00"></div>
+              <div class="form-group"><label>Motivo</label><input type="text" id="pc-reason" placeholder="Es. Evento privato"></div>
+              <div class="form-group" style="justify-content:flex-end"><button class="btn-secondary" onclick="addPartialClosure()">+ Aggiungi</button></div>
             </div>
             <div id="partial-closures-list"></div>
           </div>
-
-          <!-- Special Hours -->
           <div class="admin-card">
             <h4>Orari Speciali</h4>
-            <p class="text-gray text-sm" style="margin-bottom:1rem">Modifica gli orari di apertura per un giorno specifico. Es. apertura solo serale per un giorno festivo.</p>
-            <div class="inline-form" style="margin-bottom:1rem">
-              <div class="form-group">
-                <label>Data</label>
-                <input type="date" id="sh-date">
-              </div>
-              <div class="form-group">
-                <label>Apertura 1</label>
-                <input type="time" id="sh-open1" value="12:00">
-              </div>
-              <div class="form-group">
-                <label>Chiusura 1</label>
-                <input type="time" id="sh-close1" value="15:00">
-              </div>
-              <div class="form-group">
-                <label>Apertura 2 (opz.)</label>
-                <input type="time" id="sh-open2">
-              </div>
-              <div class="form-group">
-                <label>Chiusura 2 (opz.)</label>
-                <input type="time" id="sh-close2">
-              </div>
-              <div class="form-group">
-                <label>Motivo</label>
-                <input type="text" id="sh-reason" placeholder="Es. Ferragosto">
-              </div>
-              <div class="form-group" style="justify-content:flex-end">
-                <button class="btn-secondary" onclick="addSpecialHours()">+ Aggiungi</button>
-              </div>
+            <p class="desc">Modifica gli orari di apertura per un giorno specifico.</p>
+            <div class="inline-form">
+              <div class="form-group"><label>Data</label><input type="date" id="sh-date"></div>
+              <div class="form-group"><label>Apertura 1</label><input type="time" id="sh-open1" value="12:00"></div>
+              <div class="form-group"><label>Chiusura 1</label><input type="time" id="sh-close1" value="15:00"></div>
+              <div class="form-group"><label>Apertura 2 (opz.)</label><input type="time" id="sh-open2"></div>
+              <div class="form-group"><label>Chiusura 2 (opz.)</label><input type="time" id="sh-close2"></div>
+              <div class="form-group"><label>Motivo</label><input type="text" id="sh-reason" placeholder="Es. Ferragosto"></div>
+              <div class="form-group" style="justify-content:flex-end"><button class="btn-secondary" onclick="addSpecialHours()">+ Aggiungi</button></div>
             </div>
             <div id="special-hours-list"></div>
           </div>
-
-          <!-- Send Reminders -->
           <div class="admin-card">
-            <h4>Email Promemoria</h4>
-            <p class="text-gray text-sm" style="margin-bottom:1rem">Invia email di promemoria a tutti i clienti con prenotazione domani che non hanno ancora ricevuto il promemoria.</p>
-            <button class="btn-secondary" onclick="sendReminders()">⏰ Invia promemoria di domani</button>
+            <h4>⏰ Email Promemoria</h4>
+            <p class="desc">Invia promemoria a tutti i clienti prenotati per domani.</p>
+            <button class="btn-secondary" onclick="sendReminders()">Invia promemoria di domani</button>
             <p class="text-sm text-gray mt1" id="reminder-result"></p>
           </div>
         </div>
 
-        <!-- SETTINGS TAB -->
+        <!-- SETTINGS -->
         <div id="tab-settings" style="display:none">
-
-          <!-- Restaurant info -->
           <div class="admin-card">
-            <h4>Informazioni Ristorante</h4>
+            <h4>Orari di Apertura</h4>
+            <p class="desc">Modifica gli orari settimanali predefiniti. Attiva o disattiva ogni giorno e imposta fino a due sessioni (pranzo e cena).</p>
+            <div id="opening-hours-editor"></div>
+            <button class="btn-secondary mt1" onclick="saveOpeningHours()">💾 Salva Orari</button>
+          </div>
+          <div class="admin-card">
+            <h4>Email Notifiche Ristorante</h4>
             <div class="form-group">
-              <label>Email Notifiche Ristorante</label>
+              <label>Email</label>
               <input type="email" id="setting-restaurant-email" placeholder="prenotazioni@anticofrantoio.it">
-              <span style="font-size:.72rem;color:var(--gray);margin-top:.25rem">Riceverai una notifica ad ogni nuova prenotazione.</span>
+              <span style="font-size:.72rem;color:var(--gray);margin-top:.25rem">Ricevi una notifica ad ogni nuova prenotazione o cancellazione.</span>
             </div>
             <button class="btn-secondary btn-sm mt1" onclick="saveRestaurantSettings()">Salva</button>
           </div>
-
-          <!-- Deposit settings -->
           <div class="admin-card">
             <h4>Impostazioni Caparra</h4>
             <div class="settings-row">
-              <div>
-                <div class="settings-label">Quando richiedere la caparra</div>
-              </div>
-              <select id="deposit-mode" style="padding:.5rem .75rem;font-size:.85rem" onchange="updateDepositModeUI()">
+              <div class="settings-label">Quando richiedere la caparra</div>
+              <select id="deposit-mode" style="padding:.5rem .75rem;font-size:.85rem">
                 <option value="weekends">Solo nei weekend</option>
                 <option value="always">Sempre</option>
                 <option value="never">Mai</option>
@@ -759,24 +724,46 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
             <div class="settings-row">
               <div class="settings-label">Importo caparra per persona</div>
               <div style="display:flex;align-items:center;gap:.5rem">
-                <span style="font-size:.85rem">€</span>
+                <span>€</span>
                 <input type="number" id="deposit-amount-input" value="25" style="width:70px;padding:.4rem .6rem">
               </div>
             </div>
             <button class="btn-secondary btn-sm mt1" onclick="saveDepositSettings()">Salva</button>
-          </div>
 
-          <!-- Capacity -->
+            <div class="admin-section-title" style="margin-top:1.5rem">Date con caparra obbligatoria</div>
+            <p class="text-sm text-gray" style="margin-bottom:1rem">Aggiungi date specifiche (una tantum) o ricorrenti ogni anno (es. ogni 25 dicembre).</p>
+            <div class="inline-form">
+              <div class="form-group">
+                <label>Data</label>
+                <input type="date" id="dd-date" title="Per date una tantum">
+              </div>
+              <div class="form-group">
+                <label>Tipo</label>
+                <select id="dd-recurring">
+                  <option value="false">Una tantum (YYYY-MM-DD)</option>
+                  <option value="true">Ricorrente ogni anno (MM-GG)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Motivo</label>
+                <input type="text" id="dd-reason" placeholder="Es. Ferragosto">
+              </div>
+              <div class="form-group" style="justify-content:flex-end"><button class="btn-secondary" onclick="addDepositDate()">+ Aggiungi</button></div>
+            </div>
+            <div id="deposit-dates-list"></div>
+          </div>
           <div class="admin-card">
-            <h4>Capacità e Orari</h4>
+            <h4>Capacità</h4>
             <div class="settings-row">
               <div class="settings-label">Tavoli massimi per slot</div>
               <input type="number" id="max-tables-input" value="8" style="width:60px;padding:.4rem .6rem">
             </div>
             <div class="settings-row">
-              <div class="settings-label">Totale tavoli nel ristorante</div>
+              <div>
+                <div class="settings-label">Totale tavoli nel ristorante</div>
+                <div class="settings-sub">Solo uso interno — non comunicato ai clienti</div>
+              </div>
               <input type="number" id="total-tables-input" value="15" style="width:60px;padding:.4rem .6rem">
-              <span style="font-size:.72rem;color:var(--gray);display:block;margin-top:.25rem">Non comunicato ai clienti — solo per gestione interna.</span>
             </div>
             <div class="settings-row">
               <div class="settings-label">Durata slot (minuti)</div>
@@ -787,21 +774,53 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
               </select>
             </div>
             <div class="settings-row">
-              <div class="settings-label">Preavviso minimo prenotazione (ore)</div>
+              <div class="settings-label">Preavviso minimo (ore)</div>
               <input type="number" id="min-notice-input" value="3" style="width:60px;padding:.4rem .6rem">
             </div>
             <button class="btn-secondary btn-sm mt1" onclick="saveCapacitySettings()">Salva</button>
           </div>
         </div>
 
-      </div><!-- /admin-content -->
-    </div><!-- /admin-main -->
+        <!-- USERS -->
+        <div id="tab-users" style="display:none">
+          <div class="admin-card">
+            <h4>Crea Nuovo Utente</h4>
+            <p class="desc">Gli utenti Staff possono vedere e cancellare le prenotazioni, ma non accedere alle impostazioni o al calendario.</p>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Username <span class="req">*</span></label>
+                <input type="text" id="nu-username" placeholder="mario_staff" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label>Password <span class="req">*</span></label>
+                <input type="password" id="nu-password" placeholder="min. 8 caratteri" autocomplete="new-password">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Ruolo</label>
+                <select id="nu-role">
+                  <option value="staff">Staff (solo prenotazioni)</option>
+                  <option value="admin">Admin (accesso completo)</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn-secondary" onclick="createUser()">+ Crea Utente</button>
+          </div>
+          <div class="admin-card">
+            <h4>Utenti Attivi</h4>
+            <div id="users-list"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- EDIT BOOKING MODAL -->
-<div id="edit-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center" role="dialog" aria-modal="true">
-  <div style="background:var(--white);border-radius:var(--radius-lg);padding:2rem;width:min(90vw,500px);max-height:90vh;overflow-y:auto;box-shadow:var(--shadow)">
+<div id="edit-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center">
+  <div style="background:var(--white);border-radius:var(--radius-lg);padding:2rem;width:min(90vw,480px);max-height:90vh;overflow-y:auto;box-shadow:var(--shadow)">
     <h3 class="serif" style="margin-bottom:1.5rem">Modifica Prenotazione</h3>
     <input type="hidden" id="edit-id">
     <div class="form-row">
@@ -818,14 +837,14 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
         <input type="number" id="edit-table" min="1" placeholder="Es. 5">
       </div>
     </div>
-    <div class="form-row">
+    <div class="form-row" id="edit-admin-fields">
       <div class="form-group">
         <label>Metodo Pagamento Caparra</label>
         <select id="edit-payment">
           <option value="">— Nessuno —</option>
-          <option value="cash">Contanti</option>
-          <option value="card">Carta</option>
-          <option value="bank_transfer">Bonifico</option>
+          <option value="cash">💵 Contanti</option>
+          <option value="card">💳 Carta</option>
+          <option value="bank_transfer">🏦 Bonifico</option>
         </select>
       </div>
       <div class="form-group" style="justify-content:center;align-items:center;flex-direction:row;gap:.5rem;padding-top:1.5rem">
@@ -833,7 +852,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
         <label style="text-transform:none;letter-spacing:0;font-size:.85rem;cursor:pointer" for="edit-deposit-paid">Caparra pagata</label>
       </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" id="edit-notes-field">
       <label>Note</label>
       <textarea id="edit-notes" rows="2"></textarea>
     </div>
@@ -850,6 +869,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
 // ═══════════════════════════════════════════════════════════════
 const API_BASE = 'https://antico-frantoio-api.onrender.com';
 let adminToken = null;
+let currentUser = { username: '', role: '' };
 
 // ═══════════════════════════════════════════════════════════════
 // TRANSLATIONS
@@ -876,7 +896,7 @@ const translations = {
     'form.submit':'Conferma Prenotazione','form.submitting':'Invio in corso...',
     'valid.name':'Inserisci il tuo nome','valid.email':'Email non valida',
     'valid.phone':'Numero di telefono non valido','valid.date':'Seleziona una data',
-    'valid.time':'Seleziona un orario','valid.gdpr':'Il consenso al trattamento dei dati è obbligatorio',
+    'valid.time':'Seleziona un orario','valid.gdpr':'Il consenso è obbligatorio',
     'confirm.heading':'Prenotazione Confermata','confirm.sub':'Ti aspettiamo con piacere',
     'confirm.note':'Una conferma è stata inviata al tuo indirizzo email. Per modifiche contattaci al +39 081 807 22 00.',
     'confirm.new':'Nuova Prenotazione',
@@ -885,14 +905,10 @@ const translations = {
     'summary.notes':'Note','summary.deposit':'Caparra',
     'payment.heading':'Pagamento Caparra','payment.pay':'Paga ora con Stripe',
     'payment.skip':'Continua senza pagamento','payment.secure':'Pagamento sicuro gestito da Stripe.',
-    'cookie.text':'Utilizziamo cookie per migliorare la tua esperienza. ','cookie.link':'Cookie Policy',
-    'cookie.accept':'Accetta','cookie.decline':'Rifiuta',
+    'cookie.text':'Utilizziamo cookie per migliorare la tua esperienza. ',
     'footer.privacy':'Privacy Policy','footer.cookies':'Cookie Policy',
     'footer.terms':'Termini','footer.menu':'Menu','footer.admin':'Admin',
     'footer.copy':'© 2025 Antico Frantoio · Via Casarlano 5, 80067 Sorrento (NA), Italia',
-    'admin.login.title':'Accesso Admin','admin.login.user':'Username',
-    'admin.login.pass':'Password','admin.login.btn':'Accedi',
-    'admin.login.cancel':'Annulla','admin.login.error':'Credenziali non valide.',
     'paid':'Pagata','unpaid':'—',
   },
   en: {
@@ -916,35 +932,29 @@ const translations = {
     'form.submit':'Confirm Reservation','form.submitting':'Submitting...',
     'valid.name':'Please enter your name','valid.email':'Invalid email address',
     'valid.phone':'Invalid phone number','valid.date':'Please select a date',
-    'valid.time':'Please select a time slot','valid.gdpr':'Consent to data processing is required',
+    'valid.time':'Please select a time slot','valid.gdpr':'Consent is required',
     'confirm.heading':'Reservation Confirmed','confirm.sub':'We look forward to welcoming you',
-    'confirm.note':'A confirmation has been sent to your email address. For changes, call us at +39 081 807 22 00.',
+    'confirm.note':'A confirmation has been sent to your email address. For changes call us at +39 081 807 22 00.',
     'confirm.new':'New Reservation',
     'summary.name':'Name','summary.date':'Date','summary.time':'Time',
     'summary.guests':'Guests','summary.adults':'adults','summary.children':'children',
     'summary.notes':'Notes','summary.deposit':'Deposit',
     'payment.heading':'Deposit Payment','payment.pay':'Pay now with Stripe',
     'payment.skip':'Continue without payment','payment.secure':'Secure payment handled by Stripe.',
-    'cookie.text':'We use cookies to improve your experience. ','cookie.link':'Cookie Policy',
-    'cookie.accept':'Accept','cookie.decline':'Decline',
+    'cookie.text':'We use cookies to improve your experience. ',
     'footer.privacy':'Privacy Policy','footer.cookies':'Cookie Policy',
     'footer.terms':'Terms','footer.menu':'Menu','footer.admin':'Admin',
     'footer.copy':'© 2025 Antico Frantoio · Via Casarlano 5, 80067 Sorrento (NA), Italy',
-    'admin.login.title':'Admin Login','admin.login.user':'Username',
-    'admin.login.pass':'Password','admin.login.btn':'Sign In',
-    'admin.login.cancel':'Cancel','admin.login.error':'Invalid credentials.',
     'paid':'Paid','unpaid':'—',
   }
 };
 
 let lang = (navigator.language || 'it').startsWith('it') ? 'it' : 'en';
-
 function t(key, vars = {}) {
   let str = translations[lang][key] || translations['it'][key] || key;
-  Object.entries(vars).forEach(([k, v]) => { str = str.replace(`{${k}}`, v); });
+  Object.entries(vars).forEach(([k,v]) => { str = str.replace(`{${k}}`, v); });
   return str;
 }
-
 function setLanguage(l) {
   lang = l;
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === l));
@@ -952,13 +962,12 @@ function setLanguage(l) {
   applyTranslations();
   updateSlots();
 }
-
 function applyTranslations() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     const text = t(key);
     if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = text;
-    else el.innerHTML = text.replace(/\n/g, '<br>');
+    else el.innerHTML = text.replace(/\n/g,'<br>');
   });
 }
 
@@ -973,16 +982,14 @@ function showToast(msg, type = 'success') {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AVAILABILITY ENGINE (frontend uses real API)
+// AVAILABILITY
 // ═══════════════════════════════════════════════════════════════
-const OPENING_HOURS = {
-  0: [['12:00','15:30'],['18:30','23:00']],
-  1: null,
-  2: [['12:00','15:00'],['18:30','23:00']],
-  3: [['12:00','15:00'],['18:30','23:00']],
-  4: [['12:00','15:00'],['18:30','23:00']],
-  5: [['12:00','15:00'],['18:30','23:00']],
-  6: [['12:00','15:00'],['18:30','23:00']],
+// Fallback opening hours (used if API is unavailable)
+const FALLBACK_HOURS = {
+  0:[['12:00','15:30'],['18:30','23:00']],1:null,
+  2:[['12:00','15:00'],['18:30','23:00']],3:[['12:00','15:00'],['18:30','23:00']],
+  4:[['12:00','15:00'],['18:30','23:00']],5:[['12:00','15:00'],['18:30','23:00']],
+  6:[['12:00','15:00'],['18:30','23:00']],
 };
 
 let selectedTime = '';
@@ -1004,8 +1011,7 @@ async function updateSlots() {
   if (!date) {
     grid.innerHTML = `<div class="text-gray text-sm">${t('slots.select.date')}</div>`;
     badge.className = 'avail-badge'; badge.innerHTML = '';
-    depSec.classList.remove('visible');
-    return;
+    depSec.classList.remove('visible'); return;
   }
 
   grid.innerHTML = `<div class="text-gray text-sm">⏳ Verifica disponibilità...</div>`;
@@ -1021,12 +1027,11 @@ async function updateSlots() {
       grid.innerHTML = `<div class="text-gray text-sm" style="color:var(--red)">${msg}</div>`;
       badge.className = 'avail-badge low';
       badge.innerHTML = `<span class="avail-dot"></span>${t('avail.low')}`;
-      depSec.classList.remove('visible');
-      return;
+      depSec.classList.remove('visible'); return;
     }
 
     depositRequired = data.depositRequired;
-    depositAmount = data.depositAmount / adults || 25;
+    depositAmount = data.depositRequired ? Math.round(data.depositAmount / adults) : 25;
 
     let availCount = 0;
     let html = '';
@@ -1035,42 +1040,34 @@ async function updateSlots() {
       const low = slot.tablesLeft <= 2 && slot.available;
       if (slot.available) availCount++;
       html += `<button type="button" class="slot-btn${disabled?' ':(low?' low ':' ')}"
-        ${disabled ? 'disabled aria-disabled="true"' : ''}
-        onclick="selectSlot('${slot.time}',this)"
-        aria-label="Orario ${slot.time}">
-        ${slot.time}${low && !disabled ? '<br><span style="font-size:.65rem;color:var(--gold-dk)">●</span>' : ''}
-      </button>`;
+        ${disabled?'disabled':''}
+        onclick="selectSlot('${slot.time}',this)">${slot.time}${low&&!disabled?'<br><span style="font-size:.65rem;color:var(--gold-dk)">●</span>':''}</button>`;
     });
     grid.innerHTML = html;
 
-    const pct = availCount / data.slots.length;
+    const pct = data.slots.length ? availCount / data.slots.length : 0;
     if (pct > .6) { badge.className='avail-badge high'; badge.innerHTML=`<span class="avail-dot"></span>${t('avail.high')}`; }
     else if (pct > .25) { badge.className='avail-badge medium'; badge.innerHTML=`<span class="avail-dot"></span>${t('avail.medium')}`; }
     else { badge.className='avail-badge low'; badge.innerHTML=`<span class="avail-dot"></span>${t('avail.low')}`; }
 
     if (depositRequired) {
-      const total = adults * depositAmount;
-      document.getElementById('deposit-info').innerHTML = t('deposit.info', { amount: total });
+      document.getElementById('deposit-info').innerHTML = t('deposit.info', { amount: adults * depositAmount });
       depSec.classList.add('visible');
     } else {
       depSec.classList.remove('visible');
       document.getElementById('pay-deposit').checked = false;
     }
-
   } catch(err) {
-    // Fallback to local slot generation if API unavailable
+    // Fallback to local hours
     const dt = new Date(date + 'T00:00:00');
-    const hours = OPENING_HOURS[dt.getDay()];
-    if (!hours) {
-      grid.innerHTML = `<div class="text-gray text-sm">${t('slots.unavailable')}</div>`;
-      return;
-    }
+    const hours = FALLBACK_HOURS[dt.getDay()];
+    if (!hours) { grid.innerHTML = `<div class="text-gray text-sm">${t('slots.unavailable')}</div>`; return; }
     let html = '';
     hours.forEach(([open, close]) => {
-      const [oh, om] = open.split(':').map(Number);
-      const [ch, cm] = close.split(':').map(Number);
-      let cur = oh * 60 + om;
-      while (cur + 60 <= ch * 60 + cm) {
+      const [oh,om] = open.split(':').map(Number);
+      const [ch,cm] = close.split(':').map(Number);
+      let cur = oh*60+om;
+      while (cur+60 <= ch*60+cm) {
         const hh = String(Math.floor(cur/60)).padStart(2,'0');
         const mm = String(cur%60).padStart(2,'0');
         html += `<button type="button" class="slot-btn" onclick="selectSlot('${hh}:${mm}',this)">${hh}:${mm}</button>`;
@@ -1090,16 +1087,15 @@ function selectSlot(slot, btn) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// FORM VALIDATION & SUBMISSION
+// FORM
 // ═══════════════════════════════════════════════════════════════
 function clearErrors() {
   document.querySelectorAll('.field-error').forEach(e => e.textContent = '');
   document.querySelectorAll('.error').forEach(e => e.classList.remove('error'));
 }
-function setError(fieldId, errorId, msg) {
-  const f = document.getElementById(fieldId); const e = document.getElementById(errorId);
-  if (f) f.classList.add('error');
-  if (e) e.textContent = msg;
+function setError(fId, eId, msg) {
+  const f = document.getElementById(fId); const e = document.getElementById(eId);
+  if(f) f.classList.add('error'); if(e) e.textContent = msg;
 }
 function validateEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
 
@@ -1110,9 +1106,9 @@ function validateForm() {
   const phone = document.getElementById('phone').value.trim();
   const date = document.getElementById('res-date').value;
   const gdpr = document.getElementById('gdpr').checked;
-  if (!name || name.length < 2) { setError('full-name','full-name-error',t('valid.name')); valid=false; }
-  if (!email || !validateEmail(email)) { setError('email','email-error',t('valid.email')); valid=false; }
-  if (!phone || phone.length < 6) { setError('phone','phone-error',t('valid.phone')); valid=false; }
+  if (!name||name.length<2) { setError('full-name','full-name-error',t('valid.name')); valid=false; }
+  if (!email||!validateEmail(email)) { setError('email','email-error',t('valid.email')); valid=false; }
+  if (!phone||phone.length<6) { setError('phone','phone-error',t('valid.phone')); valid=false; }
   if (!date) { setError('res-date','date-error',t('valid.date')); valid=false; }
   if (!selectedTime) { document.getElementById('time-error').textContent = t('valid.time'); valid=false; }
   if (!gdpr) { document.getElementById('gdpr-error').textContent = t('valid.gdpr'); valid=false; }
@@ -1142,26 +1138,17 @@ document.getElementById('reservation-form').addEventListener('submit', async fun
   };
 
   try {
-    const response = await fetch(`${API_BASE}/api/reservations`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Server error');
-
-    currentBookingData = { id: data.booking.id, date, time: selectedTime, name: payload.name, email: payload.email, phone: payload.phone, adults, children, notes: payload.notes, status: data.booking.status, deposit: depositRequired, depositPaid: false };
-    btn.disabled = false; spinner.style.display = 'none';
-    btn.querySelector('[data-i18n]').textContent = t('form.submit');
-    if (data.requiresPayment && data.stripeUrl) { window.location.href = data.stripeUrl; }
-    else if (payDeposit) { showPaymentRedirect(); }
-    else { showConfirmation(); }
-
-  } catch (err) {
-    console.warn('API fallback:', err.message);
-    currentBookingData = { id: 'B'+Date.now().toString().slice(-4), date, time: selectedTime, name: payload.name, email: payload.email, phone: payload.phone, adults, children, notes: payload.notes, status: 'confirmed', deposit: depositRequired, depositPaid: false };
-    btn.disabled = false; spinner.style.display = 'none';
-    btn.querySelector('[data-i18n]').textContent = t('form.submit');
+    const res = await fetch(`${API_BASE}/api/reservations`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Server error');
+    currentBookingData = { id:data.booking.id, date, time:selectedTime, name:payload.name, email:payload.email, phone:payload.phone, adults, children, notes:payload.notes, status:data.booking.status, deposit:depositRequired, depositPaid:false };
+    btn.disabled=false; spinner.style.display='none'; btn.querySelector('[data-i18n]').textContent=t('form.submit');
+    if (data.requiresPayment && data.stripeUrl) window.location.href = data.stripeUrl;
+    else if (payDeposit) showPaymentRedirect();
+    else showConfirmation();
+  } catch(err) {
+    currentBookingData = { id:'B'+Date.now().toString().slice(-4), date, time:selectedTime, name:payload.name, email:payload.email, phone:payload.phone, adults, children, notes:payload.notes, status:'confirmed', deposit:depositRequired, depositPaid:false };
+    btn.disabled=false; spinner.style.display='none'; btn.querySelector('[data-i18n]').textContent=t('form.submit');
     if (payDeposit) showPaymentRedirect(); else showConfirmation();
   }
 });
@@ -1171,70 +1158,56 @@ function showConfirmation() {
   document.getElementById('confirmation').classList.add('visible');
   const b = currentBookingData;
   const dateFormatted = new Date(b.date+'T00:00:00').toLocaleDateString(lang==='it'?'it-IT':'en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  const guestStr = `${b.adults} ${t('summary.adults')}` + (b.children > 0 ? `, ${b.children} ${t('summary.children')}` : '');
+  const guestStr = `${b.adults} ${t('summary.adults')}${b.children>0?`, ${b.children} ${t('summary.children')}`:''}`;
   const rows = [[t('summary.name'),b.name],[t('summary.date'),dateFormatted],[t('summary.time'),b.time],[t('summary.guests'),guestStr]];
   if (b.notes) rows.push([t('summary.notes'),b.notes]);
   if (b.deposit) rows.push([t('summary.deposit'),b.depositPaid?t('paid'):t('unpaid')]);
-  document.getElementById('booking-summary').innerHTML = rows.map(([l,v]) => `<div class="summary-row"><span class="summary-label">${l}</span><span class="summary-value">${v}</span></div>`).join('');
+  document.getElementById('booking-summary').innerHTML = rows.map(([l,v])=>`<div class="summary-row"><span class="summary-label">${l}</span><span class="summary-value">${v}</span></div>`).join('');
   window.scrollTo({top:0,behavior:'smooth'});
 }
-
 function showPaymentRedirect() {
   document.getElementById('reservation').style.display = 'none';
-  const pr = document.getElementById('payment-redirect');
-  pr.style.display = 'flex';
-  const total = currentBookingData.adults * depositAmount;
-  document.getElementById('payment-amount-text').textContent = `${currentBookingData.name} · ${currentBookingData.date} ${currentBookingData.time} · €${total}`;
+  document.getElementById('payment-redirect').style.display = 'flex';
+  document.getElementById('payment-amount-text').textContent = `${currentBookingData.name} · ${currentBookingData.date} ${currentBookingData.time} · €${currentBookingData.adults * depositAmount}`;
   window.scrollTo({top:0,behavior:'smooth'});
 }
-
 async function simulateStripeCheckout() {
-  const btn = document.querySelector('.stripe-btn');
-  btn.textContent = '⏳ Reindirizzamento...';
-  await new Promise(r => setTimeout(r, 1200));
+  document.querySelector('.stripe-btn').textContent = '⏳ Reindirizzamento...';
+  await new Promise(r=>setTimeout(r,1200));
   document.getElementById('payment-redirect').style.display = 'none';
   currentBookingData.depositPaid = true;
   showConfirmation();
 }
-
-function skipPayment() {
-  document.getElementById('payment-redirect').style.display = 'none';
-  showConfirmation();
-}
-
+function skipPayment() { document.getElementById('payment-redirect').style.display='none'; showConfirmation(); }
 function resetForm() {
   document.getElementById('confirmation').classList.remove('visible');
   document.getElementById('reservation').style.display = '';
   document.getElementById('reservation-form').reset();
   document.getElementById('slots-grid').innerHTML = `<div class="text-gray text-sm">${t('slots.select.date')}</div>`;
-  selectedTime = ''; currentBookingData = null;
-  document.getElementById('avail-badge').innerHTML = '';
+  selectedTime=''; currentBookingData=null;
+  document.getElementById('avail-badge').innerHTML='';
   document.getElementById('deposit-section').classList.remove('visible');
-  window.scrollTo({top: document.getElementById('reservation').offsetTop - 80, behavior:'smooth'});
+  window.scrollTo({top:document.getElementById('reservation').offsetTop-80,behavior:'smooth'});
 }
 
 // ═══════════════════════════════════════════════════════════════
-// COOKIE BANNER
+// COOKIE & HEADER
 // ═══════════════════════════════════════════════════════════════
 function dismissCookies(accepted) {
-  const banner = document.getElementById('cookie-banner');
-  banner.style.opacity = '0'; banner.style.transform = 'translate(-50%, 1rem)'; banner.style.transition = 'all .3s ease';
-  setTimeout(() => banner.remove(), 300);
-  try { localStorage.setItem('cookie_consent', accepted ? 'accepted' : 'declined'); } catch(e) {}
+  const b = document.getElementById('cookie-banner');
+  b.style.opacity='0'; b.style.transform='translate(-50%,1rem)'; b.style.transition='all .3s ease';
+  setTimeout(()=>b.remove(),300);
+  try { localStorage.setItem('cookie_consent',accepted?'accepted':'declined'); } catch(e) {}
 }
-try { if (localStorage.getItem('cookie_consent')) document.getElementById('cookie-banner').style.display = 'none'; } catch(e) {}
-
-// Header scroll
-window.addEventListener('scroll', () => { document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 50); }, {passive:true});
-
-// Date limits
+try { if (localStorage.getItem('cookie_consent')) document.getElementById('cookie-banner').style.display='none'; } catch(e) {}
+window.addEventListener('scroll',()=>{ document.getElementById('site-header').classList.toggle('scrolled',window.scrollY>50); },{passive:true});
 const dateInput = document.getElementById('res-date');
 dateInput.min = todayStr();
-const maxDate = new Date(); maxDate.setMonth(maxDate.getMonth() + 3);
+const maxDate = new Date(); maxDate.setMonth(maxDate.getMonth()+3);
 dateInput.max = maxDate.toISOString().split('T')[0];
 
 // ═══════════════════════════════════════════════════════════════
-// ADMIN — AUTH
+// ADMIN AUTH
 // ═══════════════════════════════════════════════════════════════
 function openAdminLogin() {
   document.getElementById('admin-login-modal').classList.add('open');
@@ -1245,27 +1218,14 @@ function closeAdminLogin() {
   document.getElementById('login-error').classList.remove('visible');
 }
 async function tryAdminLogin() {
-  const username = document.getElementById('admin-user').value;
+  const username = document.getElementById('admin-user').value.trim();
   const password = document.getElementById('admin-pass').value;
-
-  // Local check first (fast)
-  if (username === 'admin' && password === 'anticofrantoio2025') {
-    adminToken = 'local';
-    closeAdminLogin();
-    openAdmin();
-    return;
-  }
-
-  // Try real API login
   try {
-    const res = await fetch(`${API_BASE}/api/admin/login`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({username, password}),
-    });
+    const res = await fetch(`${API_BASE}/api/admin/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
     const data = await res.json();
     if (res.ok && data.token) {
       adminToken = data.token;
+      currentUser = { username: data.username, role: data.role };
       closeAdminLogin();
       openAdmin();
     } else {
@@ -1276,101 +1236,110 @@ async function tryAdminLogin() {
     document.getElementById('login-error').classList.add('visible');
   }
 }
-
 function openAdmin() {
   document.getElementById('admin-panel').classList.add('open');
+  // Show/hide nav items based on role
+  const isAdmin = currentUser.role === 'admin';
+  document.querySelectorAll('.admin-only-nav').forEach(el => el.style.display = isAdmin ? '' : 'none');
+  document.getElementById('admin-role-label').textContent = currentUser.role.toUpperCase();
+  document.getElementById('admin-user-label').textContent = `👤 ${currentUser.username}`;
   renderAdminDashboard();
 }
 function closeAdmin() { document.getElementById('admin-panel').classList.remove('open'); }
 
 function switchAdminTab(tab, link) {
-  ['dashboard','bookings','new-booking','schedule','settings'].forEach(t => {
-    document.getElementById('tab-'+t).style.display = t === tab ? 'block' : 'none';
+  const allTabs = ['dashboard','bookings','new-booking','schedule','settings','users'];
+  allTabs.forEach(t => {
+    const el = document.getElementById('tab-'+t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
   });
   document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
   if (link) link.classList.add('active');
-  const titles = {dashboard:'Dashboard',bookings:'Prenotazioni','new-booking':'Nuova Prenotazione',schedule:'Calendario',settings:'Impostazioni'};
+  const titles = {dashboard:'Dashboard',bookings:'Prenotazioni','new-booking':'Nuova Prenotazione',schedule:'Chiusure & Orari',settings:'Impostazioni',users:'Utenti'};
   document.getElementById('admin-tab-title').textContent = titles[tab] || tab;
-  if (tab === 'bookings') renderBookingsTable();
-  if (tab === 'schedule') renderScheduleTab();
-  if (tab === 'settings') renderSettingsTab();
+  if (tab==='bookings') renderBookingsTable();
+  if (tab==='schedule') renderScheduleTab();
+  if (tab==='settings') renderSettingsTab();
+  if (tab==='users') renderUsers();
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ADMIN API HELPERS
+// ADMIN API HELPER
 // ═══════════════════════════════════════════════════════════════
-async function adminFetch(path, options = {}) {
-  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-  if (adminToken && adminToken !== 'local') headers['Authorization'] = `Bearer ${adminToken}`;
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
-  return res;
+async function adminFetch(path, options={}) {
+  const headers = {'Content-Type':'application/json', ...(options.headers||{})};
+  if (adminToken) headers['Authorization'] = `Bearer ${adminToken}`;
+  return fetch(`${API_BASE}${path}`, {...options, headers});
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ADMIN — DASHBOARD
+// DASHBOARD
 // ═══════════════════════════════════════════════════════════════
 async function renderAdminDashboard() {
-  const today = todayStr();
   try {
-    const res = await adminFetch(`/api/admin/bookings?date=${today}`);
-    const data = await res.json();
-    const todayBookings = data.bookings || [];
+    const today = todayStr();
+    const [todayRes, allRes] = await Promise.all([
+      adminFetch(`/api/admin/bookings?date=${today}`),
+      adminFetch(`/api/admin/bookings?limit=200`),
+    ]);
+    const todayBookings = (await todayRes.json()).bookings || [];
+    const allBookings = (await allRes.json()).bookings || [];
 
-    const weekRes = await adminFetch(`/api/admin/bookings?limit=200`);
-    const weekData = await weekRes.json();
-    const allBookings = weekData.bookings || [];
     const now = new Date(); now.setHours(0,0,0,0);
-    const weekEnd = new Date(now); weekEnd.setDate(now.getDate() + 7);
-    const weekBookings = allBookings.filter(b => {
-      const bd = new Date(b.date+'T00:00:00');
-      return bd >= now && bd <= weekEnd && b.status !== 'cancelled';
-    });
+    const weekEnd = new Date(now); weekEnd.setDate(now.getDate()+7);
+    const weekBookings = allBookings.filter(b=>{const bd=new Date(b.date+'T00:00:00');return bd>=now&&bd<=weekEnd&&b.status!=='cancelled';});
 
-    const covers = todayBookings.filter(b => b.status !== 'cancelled').reduce((s,b) => s + b.adults + b.children, 0);
-    const revenue = allBookings.filter(b => b.deposit_paid).reduce((s,b) => {
-      const amt = parseInt(b.adults) * 25;
-      return s + amt;
-    }, 0);
+    const active = todayBookings.filter(b=>b.status!=='cancelled');
+    const covers = active.reduce((s,b)=>s+b.adults+b.children,0);
+    const revenue = allBookings.filter(b=>b.deposit_paid).reduce((s,b)=>s+b.adults*25,0);
 
     document.getElementById('admin-stats-grid').innerHTML = `
-      <div class="stat-card"><div class="stat-label">Oggi</div><div class="stat-value serif">${todayBookings.filter(b=>b.status!=='cancelled').length}</div><div class="stat-sub">prenotazioni</div></div>
+      <div class="stat-card"><div class="stat-label">Oggi</div><div class="stat-value serif">${active.length}</div><div class="stat-sub">prenotazioni</div></div>
       <div class="stat-card"><div class="stat-label">Questa settimana</div><div class="stat-value serif">${weekBookings.length}</div><div class="stat-sub">prenotazioni</div></div>
       <div class="stat-card"><div class="stat-label">Coperti oggi</div><div class="stat-value serif">${covers}</div><div class="stat-sub">ospiti</div></div>
-      <div class="stat-card"><div class="stat-label">Caparre (€)</div><div class="stat-value serif">€${revenue}</div><div class="stat-sub">incassate</div></div>
+      <div class="stat-card"><div class="stat-label">Caparre incassate</div><div class="stat-value serif">€${revenue}</div><div class="stat-sub">totale</div></div>
     `;
 
     const tbody = document.getElementById('today-tbody');
-    const active = todayBookings.filter(b => b.status !== 'cancelled').sort((a,b) => a.time.localeCompare(b.time));
-    if (!active.length) {
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--gray)">Nessuna prenotazione oggi</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = active.map(b => `
+    if (!active.length) { tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--gray)">Nessuna prenotazione oggi</td></tr>`; return; }
+    tbody.innerHTML = active.sort((a,b)=>a.time.localeCompare(b.time)).map(b=>`
       <tr>
         <td><strong>${b.time.substring(0,5)}</strong></td>
-        <td>${b.name}${b.notes?`<br><span style="font-size:.72rem;color:var(--gray)">${b.notes.substring(0,25)}…</span>`:''}</td>
+        <td>${b.name}${b.notes?`<br><span style="font-size:.7rem;color:var(--gray)">${b.notes.substring(0,25)}…</span>`:''}</td>
         <td>${b.adults+b.children} (${b.adults}A+${b.children}B)</td>
-        <td>${b.table_number ? `<span style="font-weight:500">T${b.table_number}</span>` : '—'}</td>
-        <td><span class="status-badge status-${b.status}">${b.status==='confirmed'?'Conf.':b.status==='pending'?'Att.':'Ann.'}</span></td>
-        <td>${b.deposit_paid ? `<span style="color:var(--green)">✓</span>` : (b.deposit_required?'<span style="color:var(--gold-dk)">⏳</span>':'—')}</td>
+        <td>
+          <input type="number" class="table-input" value="${b.table_number||''}" placeholder="—"
+            min="1" onchange="saveTableNumber('${b.id}',this.value)" title="Numero tavolo">
+        </td>
+        <td><span class="status-badge status-${b.status}">${statusLabel(b.status)}</span></td>
+        <td>${b.deposit_paid?`<span style="color:var(--green)">✓</span>`:(b.deposit_required?'<span style="color:var(--gold-dk)">⏳</span>':'—')}</td>
         <td>${paymentPill(b.payment_method)}</td>
         <td><span class="source-badge source-${b.source||'online'}">${b.source==='manual'?'📞':'🌐'}</span></td>
       </tr>
     `).join('');
   } catch(err) {
-    document.getElementById('admin-stats-grid').innerHTML = `<div class="stat-card" style="grid-column:1/-1"><p class="text-gray text-sm">Impossibile caricare i dati. Verifica la connessione al server.</p></div>`;
+    document.getElementById('admin-stats-grid').innerHTML = `<div class="stat-card" style="grid-column:1/-1"><p class="text-gray text-sm">Impossibile caricare i dati. Verifica connessione.</p></div>`;
   }
 }
 
-function paymentPill(method) {
-  if (!method) return '<span class="pay-none text-sm">—</span>';
-  const labels = {cash:'Contanti', card:'Carta', bank_transfer:'Bonifico'};
-  const cls = {cash:'pay-cash', card:'pay-card', bank_transfer:'pay-bank'};
-  return `<span class="payment-pill ${cls[method]||''}">${labels[method]||method}</span>`;
+function statusLabel(s) { return s==='confirmed'?'Confermato':s==='pending'?'In attesa':'Cancellato'; }
+function paymentPill(m) {
+  if (!m) return '<span style="color:var(--gray);font-size:.75rem">—</span>';
+  const labels={cash:'💵 Contanti',card:'💳 Carta',bank_transfer:'🏦 Bonifico'};
+  const cls={cash:'pay-cash',card:'pay-card',bank_transfer:'pay-bank'};
+  return `<span class="payment-pill ${cls[m]||''}">${labels[m]||m}</span>`;
+}
+
+async function saveTableNumber(bookingId, value) {
+  try {
+    const tableNum = value ? parseInt(value) : null;
+    await adminFetch(`/api/admin/bookings/${bookingId}`,{method:'PATCH',body:JSON.stringify({table_number:tableNum})});
+    showToast('Tavolo aggiornato ✓');
+  } catch(e) { showToast('Errore nel salvataggio','error'); }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ADMIN — BOOKINGS TABLE
+// BOOKINGS TABLE
 // ═══════════════════════════════════════════════════════════════
 async function renderBookingsTable() {
   const filterDate = document.getElementById('filter-date').value;
@@ -1381,38 +1350,44 @@ async function renderBookingsTable() {
   let url = `/api/admin/bookings?limit=100`;
   if (filterDate) url += `&date=${filterDate}`;
   if (filterStatus) url += `&status=${filterStatus}`;
+  if (filterSource) url += `&source=${filterSource}`;
   if (filterSearch) url += `&search=${encodeURIComponent(filterSearch)}`;
 
   try {
     const res = await adminFetch(url);
     const data = await res.json();
-    let bookings = data.bookings || [];
-    if (filterSource) bookings = bookings.filter(b => (b.source || 'online') === filterSource);
-
+    const bookings = data.bookings || [];
     const tbody = document.getElementById('all-bookings-tbody');
+
     if (!bookings.length) {
       tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--gray)">Nessuna prenotazione trovata</td></tr>`;
       return;
     }
 
+    const isAdmin = currentUser.role === 'admin';
     tbody.innerHTML = bookings.map(b => `
       <tr>
         <td>${b.date}</td>
         <td>${b.time.substring(0,5)}</td>
         <td>
           <strong>${b.name}</strong>
-          ${b.notes?`<br><span style="font-size:.72rem;color:var(--gray)">${b.notes.substring(0,25)}…</span>`:''}
           <br><a href="mailto:${b.email}" style="font-size:.72rem;color:var(--gold)">${b.email}</a>
+          ${b.notes?`<br><span style="font-size:.7rem;color:var(--gray)">${b.notes.substring(0,25)}…</span>`:''}
+          ${b.cancelled_by?`<br><span style="font-size:.68rem;color:var(--red)">Ann. da: ${b.cancelled_by}</span>`:''}
+          ${b.created_by?`<br><span style="font-size:.68rem;color:var(--green)">Creata da: ${b.created_by}</span>`:''}
         </td>
         <td>${b.adults+b.children} (${b.adults}A+${b.children}B)</td>
-        <td>${b.table_number ? `T${b.table_number}` : '—'}</td>
-        <td><span class="status-badge status-${b.status}">${b.status==='confirmed'?'Confermato':b.status==='pending'?'In attesa':'Cancellato'}</span></td>
-        <td>${b.deposit_paid ? `<span style="color:var(--green)">✓ Pagata</span>` : (b.deposit_required?'<span style="color:var(--gold-dk)">Richiesta</span>':'—')}</td>
+        <td>
+          <input type="number" class="table-input" value="${b.table_number||''}" placeholder="—"
+            min="1" onchange="saveTableNumber('${b.id}',this.value)" title="Numero tavolo">
+        </td>
+        <td><span class="status-badge status-${b.status}">${statusLabel(b.status)}</span></td>
+        <td>${b.deposit_paid?`<span style="color:var(--green)">✓ Pagata</span>`:(b.deposit_required?'<span style="color:var(--gold-dk)">Richiesta</span>':'—')}</td>
         <td>${paymentPill(b.payment_method)}</td>
         <td><span class="source-badge source-${b.source||'online'}">${b.source==='manual'?'📞 Tel':'🌐 Web'}</span></td>
         <td style="white-space:nowrap">
-          <button class="btn-secondary btn-sm" onclick="openEditModal('${b.id}','${b.status}','${b.table_number||''}','${b.payment_method||''}',${b.deposit_paid},'${(b.notes||'').replace(/'/g,"\\'")}')">✏️</button>
-          ${b.status!=='cancelled'?`<button class="btn-secondary btn-sm btn-danger" onclick="cancelBookingById('${b.id}')" style="margin-left:.25rem">✕</button>`:''}
+          ${isAdmin?`<button class="btn-secondary btn-sm" onclick="openEditModal('${b.id}','${b.status}','${b.table_number||''}','${b.payment_method||''}',${b.deposit_paid},'${(b.notes||'').replace(/'/g,"\\'")}')">✏️</button> `:''}
+          ${b.status!=='cancelled'?`<button class="btn-secondary btn-sm btn-danger" onclick="cancelBookingById('${b.id}')">✕</button>`:''}
         </td>
       </tr>
     `).join('');
@@ -1424,11 +1399,10 @@ async function renderBookingsTable() {
 async function cancelBookingById(id) {
   if (!confirm('Confermi la cancellazione di questa prenotazione?')) return;
   try {
-    await adminFetch(`/api/admin/bookings/${id}`, { method: 'DELETE' });
+    await adminFetch(`/api/admin/bookings/${id}`,{method:'PATCH',body:JSON.stringify({status:'cancelled'})});
     showToast('Prenotazione cancellata');
-    renderBookingsTable();
-    renderAdminDashboard();
-  } catch(err) { showToast('Errore nella cancellazione', 'error'); }
+    renderBookingsTable(); renderAdminDashboard();
+  } catch(e) { showToast('Errore','error'); }
 }
 
 function openEditModal(id, status, tableNum, paymentMethod, depositPaid, notes) {
@@ -1436,49 +1410,49 @@ function openEditModal(id, status, tableNum, paymentMethod, depositPaid, notes) 
   document.getElementById('edit-status').value = status;
   document.getElementById('edit-table').value = tableNum || '';
   document.getElementById('edit-payment').value = paymentMethod || '';
-  document.getElementById('edit-deposit-paid').checked = depositPaid === true || depositPaid === 'true';
+  document.getElementById('edit-deposit-paid').checked = depositPaid===true||depositPaid==='true';
   document.getElementById('edit-notes').value = notes || '';
+  // Staff can only cancel
+  const isAdmin = currentUser.role === 'admin';
+  document.getElementById('edit-admin-fields').style.display = isAdmin ? '' : 'none';
+  document.getElementById('edit-notes-field').style.display = isAdmin ? '' : 'none';
+  if (!isAdmin) {
+    const sel = document.getElementById('edit-status');
+    Array.from(sel.options).forEach(o => o.disabled = o.value !== 'cancelled');
+  }
   document.getElementById('edit-modal').style.display = 'flex';
 }
-
-function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
+function closeEditModal() { document.getElementById('edit-modal').style.display='none'; }
 
 async function saveBookingEdit() {
   const id = document.getElementById('edit-id').value;
-  const body = {
-    status: document.getElementById('edit-status').value,
-    table_number: document.getElementById('edit-table').value || null,
-    payment_method: document.getElementById('edit-payment').value || null,
-    deposit_paid: document.getElementById('edit-deposit-paid').checked,
-    notes: document.getElementById('edit-notes').value,
-  };
+  const isAdmin = currentUser.role === 'admin';
+  const body = { status: document.getElementById('edit-status').value, table_number: document.getElementById('edit-table').value||null };
+  if (isAdmin) {
+    body.payment_method = document.getElementById('edit-payment').value || null;
+    body.deposit_paid = document.getElementById('edit-deposit-paid').checked;
+    body.notes = document.getElementById('edit-notes').value;
+  }
   try {
-    const res = await adminFetch(`/api/admin/bookings/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
-    if (res.ok) {
-      showToast('Prenotazione aggiornata ✓');
-      closeEditModal();
-      renderBookingsTable();
-      renderAdminDashboard();
-    } else { showToast('Errore nel salvataggio', 'error'); }
-  } catch(err) { showToast('Errore di connessione', 'error'); }
+    const res = await adminFetch(`/api/admin/bookings/${id}`,{method:'PATCH',body:JSON.stringify(body)});
+    if (res.ok) { showToast('Aggiornato ✓'); closeEditModal(); renderBookingsTable(); renderAdminDashboard(); }
+    else { const d=await res.json(); showToast(d.error||'Errore','error'); }
+  } catch(e) { showToast('Errore di connessione','error'); }
 }
 
-// CSV export via API
 async function adminExportCSV() {
   try {
     const res = await adminFetch('/api/admin/export');
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `antico_frantoio_prenotazioni_${todayStr()}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  } catch(err) { showToast('Errore nell\'esportazione', 'error'); }
+    a.href=url; a.download=`antico_frantoio_prenotazioni_${todayStr()}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  } catch(e) { showToast('Errore esportazione','error'); }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ADMIN — MANUAL BOOKING
+// MANUAL BOOKING
 // ═══════════════════════════════════════════════════════════════
 async function createManualBooking() {
   const name = document.getElementById('mb-name').value.trim();
@@ -1487,11 +1461,9 @@ async function createManualBooking() {
   const date = document.getElementById('mb-date').value;
   const time = document.getElementById('mb-time').value;
   const adults = parseInt(document.getElementById('mb-adults').value);
-  const children = parseInt(document.getElementById('mb-children').value) || 0;
+  const children = parseInt(document.getElementById('mb-children').value)||0;
 
-  if (!name || !email || !phone || !date || !time || !adults) {
-    showToast('Compila tutti i campi obbligatori', 'error'); return;
-  }
+  if (!name||!email||!phone||!date||!time||!adults) { showToast('Compila tutti i campi obbligatori','error'); return; }
 
   const spinner = document.getElementById('mb-spinner');
   spinner.style.display = 'block';
@@ -1502,40 +1474,33 @@ async function createManualBooking() {
     adults, children,
     notes: document.getElementById('mb-notes').value.trim(),
     language: document.getElementById('mb-lang').value,
-    table_number: document.getElementById('mb-table').value || undefined,
-    payment_method: document.getElementById('mb-payment').value || undefined,
+    table_number: document.getElementById('mb-table').value||undefined,
+    payment_method: document.getElementById('mb-payment').value||undefined,
     deposit_paid: document.getElementById('mb-deposit-paid').checked,
     send_email: document.getElementById('mb-send-email').checked,
   };
 
   try {
-    const res = await adminFetch('/api/admin/bookings', { method: 'POST', body: JSON.stringify(body) });
+    const res = await adminFetch('/api/admin/bookings',{method:'POST',body:JSON.stringify(body)});
     const data = await res.json();
     spinner.style.display = 'none';
     if (res.ok) {
-      showToast('Prenotazione creata ✓');
-      document.getElementById('mb-name').value = '';
-      document.getElementById('mb-email').value = '';
-      document.getElementById('mb-phone').value = '';
-      document.getElementById('mb-date').value = '';
-      document.getElementById('mb-time').value = '';
-      document.getElementById('mb-adults').value = '2';
-      document.getElementById('mb-children').value = '0';
-      document.getElementById('mb-notes').value = '';
-      document.getElementById('mb-table').value = '';
-      document.getElementById('mb-payment').value = '';
-      document.getElementById('mb-deposit-paid').checked = false;
+      showToast(`Prenotazione per ${name} creata ✓`);
+      ['mb-name','mb-email','mb-phone','mb-notes'].forEach(id=>document.getElementById(id).value='');
+      ['mb-date','mb-time'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('mb-adults').value='2';
+      document.getElementById('mb-children').value='0';
+      document.getElementById('mb-table').value='';
+      document.getElementById('mb-payment').value='';
+      document.getElementById('mb-deposit-paid').checked=false;
     } else {
-      showToast(data.error || 'Errore nella creazione', 'error');
+      showToast(data.errors?data.errors.map(e=>e.msg).join(', '):(data.error||'Errore nella creazione'),'error');
     }
-  } catch(err) {
-    spinner.style.display = 'none';
-    showToast('Errore di connessione', 'error');
-  }
+  } catch(err) { spinner.style.display='none'; showToast('Errore di connessione','error'); }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ADMIN — SCHEDULE (Closures, Partial Closures, Special Hours)
+// SCHEDULE TAB
 // ═══════════════════════════════════════════════════════════════
 async function renderScheduleTab() {
   await Promise.all([renderFullClosures(), renderPartialClosures(), renderSpecialHours()]);
@@ -1543,189 +1508,348 @@ async function renderScheduleTab() {
 
 async function renderFullClosures() {
   try {
-    const res = await adminFetch('/api/admin/closures');
-    const data = await res.json();
+    const data = await (await adminFetch('/api/admin/closures')).json();
     const list = document.getElementById('full-closures-list');
-    if (!data.closures?.length) { list.innerHTML = '<p class="text-gray text-sm">Nessuna chiusura impostata</p>'; return; }
-    list.innerHTML = data.closures.map(c => `
+    if (!data.closures?.length) { list.innerHTML='<p class="text-gray text-sm">Nessuna chiusura impostata</p>'; return; }
+    list.innerHTML = data.closures.map(c=>`
       <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--gray-lt)">
-        <span style="font-size:.85rem"><strong>${c.date}</strong> — ${c.reason || '—'}</span>
+        <span style="font-size:.85rem"><strong>${c.date}</strong>${c.reason?' — '+c.reason:''}</span>
         <button class="btn-secondary btn-sm btn-danger" onclick="deleteFullClosure(${c.id})">✕</button>
       </div>`).join('');
   } catch(e) {}
 }
-
 async function addFullClosure() {
-  const date = document.getElementById('cl-date').value;
-  const reason = document.getElementById('cl-reason').value.trim();
-  if (!date) { showToast('Seleziona una data', 'error'); return; }
-  try {
-    const res = await adminFetch('/api/admin/closures', { method: 'POST', body: JSON.stringify({date, reason}) });
-    if (res.ok) { showToast('Chiusura aggiunta ✓'); document.getElementById('cl-date').value = ''; document.getElementById('cl-reason').value = ''; renderFullClosures(); }
-    else { const d = await res.json(); showToast(d.error || 'Errore', 'error'); }
-  } catch(e) { showToast('Errore di connessione', 'error'); }
+  const date=document.getElementById('cl-date').value;
+  const reason=document.getElementById('cl-reason').value.trim();
+  if (!date) { showToast('Seleziona una data','error'); return; }
+  const res=await adminFetch('/api/admin/closures',{method:'POST',body:JSON.stringify({date,reason})});
+  if (res.ok) { showToast('Chiusura aggiunta ✓'); document.getElementById('cl-date').value=''; document.getElementById('cl-reason').value=''; renderFullClosures(); }
+  else { const d=await res.json(); showToast(d.error||'Errore','error'); }
 }
-
 async function deleteFullClosure(id) {
   if (!confirm('Rimuovere questa chiusura?')) return;
-  await adminFetch(`/api/admin/closures/${id}`, { method: 'DELETE' });
-  showToast('Chiusura rimossa'); renderFullClosures();
+  await adminFetch(`/api/admin/closures/${id}`,{method:'DELETE'});
+  showToast('Rimossa'); renderFullClosures();
 }
 
 async function renderPartialClosures() {
   try {
-    const res = await adminFetch('/api/admin/partial-closures');
-    const data = await res.json();
+    const data = await (await adminFetch('/api/admin/partial-closures')).json();
     const list = document.getElementById('partial-closures-list');
-    if (!data.partialClosures?.length) { list.innerHTML = '<p class="text-gray text-sm">Nessuna chiusura parziale impostata</p>'; return; }
-    list.innerHTML = data.partialClosures.map(c => `
+    if (!data.partialClosures?.length) { list.innerHTML='<p class="text-gray text-sm">Nessuna chiusura parziale</p>'; return; }
+    list.innerHTML = data.partialClosures.map(c=>`
       <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--gray-lt)">
-        <span style="font-size:.85rem"><strong>${c.date}</strong> — dalle ${c.block_from.substring(0,5)} alle ${c.block_until.substring(0,5)}${c.reason?' — '+c.reason:''}</span>
+        <span style="font-size:.85rem"><strong>${c.date}</strong> — ${c.block_from.substring(0,5)}–${c.block_until.substring(0,5)}${c.reason?' — '+c.reason:''}</span>
         <button class="btn-secondary btn-sm btn-danger" onclick="deletePartialClosure(${c.id})">✕</button>
       </div>`).join('');
   } catch(e) {}
 }
-
 async function addPartialClosure() {
-  const date = document.getElementById('pc-date').value;
-  const block_from = document.getElementById('pc-from').value;
-  const block_until = document.getElementById('pc-until').value;
-  const reason = document.getElementById('pc-reason').value.trim();
-  if (!date || !block_from || !block_until) { showToast('Compila data e orari', 'error'); return; }
-  if (block_from >= block_until) { showToast('L\'orario di inizio deve essere prima della fine', 'error'); return; }
-  try {
-    const res = await adminFetch('/api/admin/partial-closures', { method: 'POST', body: JSON.stringify({date, block_from, block_until, reason}) });
-    if (res.ok) {
-      showToast('Chiusura parziale aggiunta ✓');
-      document.getElementById('pc-date').value = '';
-      document.getElementById('pc-reason').value = '';
-      renderPartialClosures();
-    } else { const d = await res.json(); showToast(d.error || 'Errore', 'error'); }
-  } catch(e) { showToast('Errore di connessione', 'error'); }
+  const date=document.getElementById('pc-date').value;
+  const block_from=document.getElementById('pc-from').value;
+  const block_until=document.getElementById('pc-until').value;
+  const reason=document.getElementById('pc-reason').value.trim();
+  if (!date||!block_from||!block_until) { showToast('Compila data e orari','error'); return; }
+  if (block_from>=block_until) { showToast('Orario inizio deve essere prima della fine','error'); return; }
+  const res=await adminFetch('/api/admin/partial-closures',{method:'POST',body:JSON.stringify({date,block_from,block_until,reason})});
+  if (res.ok) { showToast('Chiusura parziale aggiunta ✓'); document.getElementById('pc-date').value=''; document.getElementById('pc-reason').value=''; renderPartialClosures(); }
+  else { const d=await res.json(); showToast(d.error||'Errore','error'); }
 }
-
 async function deletePartialClosure(id) {
-  if (!confirm('Rimuovere questa chiusura parziale?')) return;
-  await adminFetch(`/api/admin/partial-closures/${id}`, { method: 'DELETE' });
+  if (!confirm('Rimuovere?')) return;
+  await adminFetch(`/api/admin/partial-closures/${id}`,{method:'DELETE'});
   showToast('Rimossa'); renderPartialClosures();
 }
 
 async function renderSpecialHours() {
   try {
-    const res = await adminFetch('/api/admin/special-hours');
-    const data = await res.json();
+    const data = await (await adminFetch('/api/admin/special-hours')).json();
     const list = document.getElementById('special-hours-list');
-    if (!data.specialHours?.length) { list.innerHTML = '<p class="text-gray text-sm">Nessun orario speciale impostato</p>'; return; }
-    list.innerHTML = data.specialHours.map(s => {
-      const h = Array.isArray(s.hours) ? s.hours : JSON.parse(s.hours||'[]');
-      const hoursStr = h.length ? h.map(r => r.join('–')).join(' · ') : 'Chiuso';
-      return `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--gray-lt)">
-          <span style="font-size:.85rem"><strong>${s.date}</strong> — ${hoursStr}${s.reason?' — '+s.reason:''}</span>
-          <button class="btn-secondary btn-sm btn-danger" onclick="deleteSpecialHours(${s.id})">✕</button>
-        </div>`;
+    if (!data.specialHours?.length) { list.innerHTML='<p class="text-gray text-sm">Nessun orario speciale</p>'; return; }
+    list.innerHTML = data.specialHours.map(s=>{
+      const h=Array.isArray(s.hours)?s.hours:JSON.parse(s.hours||'[]');
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--gray-lt)">
+        <span style="font-size:.85rem"><strong>${s.date}</strong> — ${h.length?h.map(r=>r.join('–')).join(' · '):'Chiuso'}${s.reason?' — '+s.reason:''}</span>
+        <button class="btn-secondary btn-sm btn-danger" onclick="deleteSpecialHours(${s.id})">✕</button>
+      </div>`;
     }).join('');
   } catch(e) {}
 }
-
 async function addSpecialHours() {
-  const date = document.getElementById('sh-date').value;
-  const open1 = document.getElementById('sh-open1').value;
-  const close1 = document.getElementById('sh-close1').value;
-  const open2 = document.getElementById('sh-open2').value;
-  const close2 = document.getElementById('sh-close2').value;
-  const reason = document.getElementById('sh-reason').value.trim();
-  if (!date || !open1 || !close1) { showToast('Compila data e primo orario', 'error'); return; }
-  const hours = [[open1, close1]];
-  if (open2 && close2) hours.push([open2, close2]);
-  try {
-    const res = await adminFetch('/api/admin/special-hours', { method: 'POST', body: JSON.stringify({date, hours, reason}) });
-    if (res.ok) {
-      showToast('Orario speciale aggiunto ✓');
-      document.getElementById('sh-date').value = '';
-      document.getElementById('sh-reason').value = '';
-      renderSpecialHours();
-    } else { const d = await res.json(); showToast(d.error || 'Errore', 'error'); }
-  } catch(e) { showToast('Errore di connessione', 'error'); }
+  const date=document.getElementById('sh-date').value;
+  const open1=document.getElementById('sh-open1').value;
+  const close1=document.getElementById('sh-close1').value;
+  const open2=document.getElementById('sh-open2').value;
+  const close2=document.getElementById('sh-close2').value;
+  const reason=document.getElementById('sh-reason').value.trim();
+  if (!date||!open1||!close1) { showToast('Compila data e primo orario','error'); return; }
+  const hours=[[open1,close1]];
+  if (open2&&close2) hours.push([open2,close2]);
+  const res=await adminFetch('/api/admin/special-hours',{method:'POST',body:JSON.stringify({date,hours,reason})});
+  if (res.ok) { showToast('Orario speciale aggiunto ✓'); document.getElementById('sh-date').value=''; document.getElementById('sh-reason').value=''; renderSpecialHours(); }
+  else { showToast('Errore','error'); }
 }
-
 async function deleteSpecialHours(id) {
-  if (!confirm('Rimuovere questi orari speciali?')) return;
-  await adminFetch(`/api/admin/special-hours/${id}`, { method: 'DELETE' });
+  if (!confirm('Rimuovere?')) return;
+  await adminFetch(`/api/admin/special-hours/${id}`,{method:'DELETE'});
   showToast('Rimosso'); renderSpecialHours();
 }
 
 async function sendReminders() {
-  const resultEl = document.getElementById('reminder-result');
-  resultEl.textContent = '⏳ Invio in corso...';
+  const el=document.getElementById('reminder-result');
+  el.textContent='⏳ Invio in corso...';
   try {
-    const res = await adminFetch('/api/reminders/send', {
-      method: 'POST',
-      headers: { 'x-reminder-secret': 'frantoio-reminders-2025' },
-    });
-    const data = await res.json();
-    if (res.ok) {
-      resultEl.textContent = `✓ ${data.remindersSent} email di promemoria inviate per domani.`;
-      showToast(`${data.remindersSent} promemoria inviati ✓`);
-    } else { resultEl.textContent = 'Errore nell\'invio.'; }
-  } catch(e) { resultEl.textContent = 'Errore di connessione.'; }
+    const res=await adminFetch('/api/reminders/send',{method:'POST',headers:{'x-reminder-secret':'frantoio-reminders-2025'}});
+    const data=await res.json();
+    el.textContent=`✓ ${data.remindersSent} promemoria inviati per domani.`;
+    showToast(`${data.remindersSent} promemoria inviati ✓`);
+  } catch(e) { el.textContent='Errore di connessione.'; }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ADMIN — SETTINGS
+// SETTINGS TAB
 // ═══════════════════════════════════════════════════════════════
+const DAY_NAMES = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+let openingHoursData = {};
+
 async function renderSettingsTab() {
   try {
-    const res = await adminFetch('/api/admin/settings');
-    const settings = await res.json();
+    const [settingsRes, ohRes, ddRes] = await Promise.all([
+      adminFetch('/api/admin/settings'),
+      adminFetch('/api/admin/opening-hours'),
+      adminFetch('/api/admin/deposit-dates'),
+    ]);
+    const settings = await settingsRes.json();
+    const ohData = await ohRes.json();
+    const ddData = await ddRes.json();
+
+    // Restaurant email
     document.getElementById('setting-restaurant-email').value = settings.restaurant_email || '';
-    const mode = settings.deposit_required_never === 'true' ? 'never' : settings.deposit_required_always === 'true' ? 'always' : 'weekends';
+
+    // Deposit mode
+    const mode = settings.deposit_required_never==='true'?'never':settings.deposit_required_always==='true'?'always':'weekends';
     document.getElementById('deposit-mode').value = mode;
     document.getElementById('deposit-amount-input').value = settings.deposit_amount || '25';
+
+    // Capacity
     document.getElementById('max-tables-input').value = settings.max_tables_per_slot || '8';
     document.getElementById('total-tables-input').value = settings.total_tables || '15';
     document.getElementById('slot-duration-input').value = settings.slot_duration_minutes || '60';
     document.getElementById('min-notice-input').value = settings.min_booking_notice_hours || '3';
-  } catch(e) {}
+
+    // Opening hours editor
+    openingHoursData = {};
+    (ohData.openingHours || []).forEach(r => {
+      openingHoursData[r.day_of_week] = { is_open: r.is_open, hours: Array.isArray(r.hours) ? r.hours : JSON.parse(r.hours||'[]') };
+    });
+    renderOpeningHoursEditor();
+
+    // Deposit dates
+    renderDepositDates(ddData.depositDates || []);
+
+  } catch(e) { showToast('Errore nel caricamento impostazioni','error'); }
+}
+
+function renderOpeningHoursEditor() {
+  const container = document.getElementById('opening-hours-editor');
+  // Days in order Mon-Sun for display, but store 0-6
+  const displayOrder = [1,2,3,4,5,6,0];
+  container.innerHTML = displayOrder.map(day => {
+    const d = openingHoursData[day] || { is_open: false, hours: [] };
+    const h = d.hours || [];
+    const s1 = h[0] || ['',''];
+    const s2 = h[1] || ['',''];
+    return `
+      <div class="oh-day-row" id="oh-row-${day}">
+        <div class="oh-day-header">
+          <span class="oh-day-name">${DAY_NAMES[day]}</span>
+          <label class="toggle">
+            <input type="checkbox" id="oh-open-${day}" ${d.is_open?'checked':''} onchange="toggleDayOpen(${day})">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:.75rem;color:var(--gray)" id="oh-status-${day}">${d.is_open?'Aperto':'Chiuso'}</span>
+        </div>
+        <div class="oh-sessions" id="oh-sessions-${day}" style="display:${d.is_open?'flex':'none'};flex-direction:column;gap:.5rem">
+          <div class="oh-session">
+            <label>Sessione 1:</label>
+            <input type="time" id="oh-open1-${day}" value="${s1[0]||'12:00'}">
+            <span style="font-size:.8rem;color:var(--gray)">–</span>
+            <input type="time" id="oh-close1-${day}" value="${s1[1]||'15:00'}">
+          </div>
+          <div class="oh-session">
+            <label>Sessione 2 (opz.):</label>
+            <input type="time" id="oh-open2-${day}" value="${s2[0]||''}">
+            <span style="font-size:.8rem;color:var(--gray)">–</span>
+            <input type="time" id="oh-close2-${day}" value="${s2[1]||''}">
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleDayOpen(day) {
+  const isOpen = document.getElementById(`oh-open-${day}`).checked;
+  document.getElementById(`oh-sessions-${day}`).style.display = isOpen ? 'flex' : 'none';
+  document.getElementById(`oh-status-${day}`).textContent = isOpen ? 'Aperto' : 'Chiuso';
+}
+
+async function saveOpeningHours() {
+  const displayOrder = [1,2,3,4,5,6,0];
+  let saved = 0;
+  for (const day of displayOrder) {
+    const isOpen = document.getElementById(`oh-open-${day}`)?.checked || false;
+    const hours = [];
+    if (isOpen) {
+      const o1=document.getElementById(`oh-open1-${day}`).value;
+      const c1=document.getElementById(`oh-close1-${day}`).value;
+      if (o1&&c1) hours.push([o1,c1]);
+      const o2=document.getElementById(`oh-open2-${day}`).value;
+      const c2=document.getElementById(`oh-close2-${day}`).value;
+      if (o2&&c2) hours.push([o2,c2]);
+    }
+    try {
+      const res = await adminFetch(`/api/admin/opening-hours/${day}`,{method:'PATCH',body:JSON.stringify({is_open:isOpen,hours})});
+      if (res.ok) saved++;
+    } catch(e) {}
+  }
+  if (saved===7) showToast('Orari salvati ✓');
+  else showToast(`Salvati ${saved}/7 giorni — controlla la connessione`,'error');
+}
+
+function renderDepositDates(dates) {
+  const list = document.getElementById('deposit-dates-list');
+  if (!dates.length) { list.innerHTML='<p class="text-gray text-sm">Nessuna data speciale impostata</p>'; return; }
+  list.innerHTML = dates.map(d=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--gray-lt)">
+      <span style="font-size:.85rem">
+        <strong>${d.date_value}</strong>
+        <span style="font-size:.7rem;color:var(--gray);margin-left:.5rem">${d.is_recurring?'🔁 Ogni anno':'📅 Una tantum'}</span>
+        ${d.reason?` — ${d.reason}`:''}
+      </span>
+      <button class="btn-secondary btn-sm btn-danger" onclick="deleteDepositDate(${d.id})">✕</button>
+    </div>`).join('');
+}
+
+async function addDepositDate() {
+  const dateInput = document.getElementById('dd-date').value;
+  const isRecurring = document.getElementById('dd-recurring').value === 'true';
+  const reason = document.getElementById('dd-reason').value.trim();
+  if (!dateInput) { showToast('Seleziona una data','error'); return; }
+
+  // For recurring: convert YYYY-MM-DD to MM-DD
+  let dateValue = dateInput;
+  if (isRecurring) {
+    const parts = dateInput.split('-');
+    dateValue = `${parts[1]}-${parts[2]}`; // MM-DD
+  }
+
+  try {
+    const res = await adminFetch('/api/admin/deposit-dates',{method:'POST',body:JSON.stringify({date_value:dateValue,is_recurring:isRecurring,reason})});
+    if (res.ok) {
+      showToast('Data aggiunta ✓');
+      document.getElementById('dd-date').value='';
+      document.getElementById('dd-reason').value='';
+      const ddRes = await adminFetch('/api/admin/deposit-dates');
+      const ddData = await ddRes.json();
+      renderDepositDates(ddData.depositDates||[]);
+    } else { const d=await res.json(); showToast(d.error||'Errore','error'); }
+  } catch(e) { showToast('Errore di connessione','error'); }
+}
+
+async function deleteDepositDate(id) {
+  if (!confirm('Rimuovere questa data?')) return;
+  await adminFetch(`/api/admin/deposit-dates/${id}`,{method:'DELETE'});
+  showToast('Rimossa');
+  const ddRes = await adminFetch('/api/admin/deposit-dates');
+  const ddData = await ddRes.json();
+  renderDepositDates(ddData.depositDates||[]);
 }
 
 async function saveRestaurantSettings() {
   const email = document.getElementById('setting-restaurant-email').value.trim();
-  try {
-    const res = await adminFetch('/api/admin/settings', { method: 'PATCH', body: JSON.stringify({ restaurant_email: email }) });
-    if (res.ok) showToast('Impostazioni salvate ✓'); else showToast('Errore nel salvataggio', 'error');
-  } catch(e) { showToast('Errore di connessione', 'error'); }
+  const res = await adminFetch('/api/admin/settings',{method:'PATCH',body:JSON.stringify({restaurant_email:email})});
+  if (res.ok) showToast('Email salvata ✓'); else showToast('Errore','error');
 }
-
 async function saveDepositSettings() {
   const mode = document.getElementById('deposit-mode').value;
   const amount = document.getElementById('deposit-amount-input').value;
   const body = {
-    deposit_amount: amount,
-    deposit_required_never: mode === 'never' ? 'true' : 'false',
-    deposit_required_always: mode === 'always' ? 'true' : 'false',
-    deposit_required_weekends: mode === 'weekends' ? 'true' : 'false',
+    deposit_amount:amount,
+    deposit_required_never:mode==='never'?'true':'false',
+    deposit_required_always:mode==='always'?'true':'false',
+    deposit_required_weekends:mode==='weekends'?'true':'false',
   };
-  try {
-    const res = await adminFetch('/api/admin/settings', { method: 'PATCH', body: JSON.stringify(body) });
-    if (res.ok) showToast('Impostazioni caparra salvate ✓'); else showToast('Errore', 'error');
-  } catch(e) { showToast('Errore di connessione', 'error'); }
+  const res = await adminFetch('/api/admin/settings',{method:'PATCH',body:JSON.stringify(body)});
+  if (res.ok) showToast('Impostazioni caparra salvate ✓'); else showToast('Errore','error');
 }
-
 async function saveCapacitySettings() {
   const body = {
-    max_tables_per_slot: document.getElementById('max-tables-input').value,
-    total_tables: document.getElementById('total-tables-input').value,
-    slot_duration_minutes: document.getElementById('slot-duration-input').value,
-    min_booking_notice_hours: document.getElementById('min-notice-input').value,
+    max_tables_per_slot:document.getElementById('max-tables-input').value,
+    total_tables:document.getElementById('total-tables-input').value,
+    slot_duration_minutes:document.getElementById('slot-duration-input').value,
+    min_booking_notice_hours:document.getElementById('min-notice-input').value,
   };
-  try {
-    const res = await adminFetch('/api/admin/settings', { method: 'PATCH', body: JSON.stringify(body) });
-    if (res.ok) showToast('Impostazioni salvate ✓'); else showToast('Errore', 'error');
-  } catch(e) { showToast('Errore di connessione', 'error'); }
+  const res = await adminFetch('/api/admin/settings',{method:'PATCH',body:JSON.stringify(body)});
+  if (res.ok) showToast('Capacità salvata ✓'); else showToast('Errore','error');
 }
 
-function updateDepositModeUI() {}
+// ═══════════════════════════════════════════════════════════════
+// USERS TAB
+// ═══════════════════════════════════════════════════════════════
+async function renderUsers() {
+  try {
+    const data = await (await adminFetch('/api/admin/users')).json();
+    const users = data.users || [];
+    const list = document.getElementById('users-list');
+    if (!users.length) { list.innerHTML='<p class="text-gray text-sm">Nessun utente</p>'; return; }
+    list.innerHTML = `<table class="bookings-table">
+      <thead><tr><th>Username</th><th>Ruolo</th><th>Stato</th><th>Creato</th><th>Azioni</th></tr></thead>
+      <tbody>
+        ${users.map(u=>`<tr>
+          <td><strong>${u.username}</strong>${u.username===currentUser.username?' <span style="font-size:.68rem;color:var(--gray)">(tu)</span>':''}</td>
+          <td><span class="role-badge role-${u.role}">${u.role}</span></td>
+          <td><span style="font-size:.75rem;color:${u.active?'var(--green)':'var(--red)'}">${u.active?'Attivo':'Disattivato'}</span></td>
+          <td style="font-size:.75rem">${new Date(u.created_at).toLocaleDateString('it-IT')}</td>
+          <td style="white-space:nowrap">
+            ${u.username!==currentUser.username?`
+              <button class="btn-secondary btn-sm" onclick="toggleUserActive(${u.id},${!u.active})">${u.active?'Disattiva':'Riattiva'}</button>
+              <button class="btn-secondary btn-sm btn-danger" onclick="deleteUser(${u.id})" style="margin-left:.25rem">✕</button>
+            `:'—'}
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  } catch(e) { document.getElementById('users-list').innerHTML='<p class="text-gray text-sm" style="color:var(--red)">Errore nel caricamento</p>'; }
+}
+
+async function createUser() {
+  const username = document.getElementById('nu-username').value.trim();
+  const password = document.getElementById('nu-password').value;
+  const role = document.getElementById('nu-role').value;
+  if (!username||!password) { showToast('Compila username e password','error'); return; }
+  if (password.length < 8) { showToast('Password minimo 8 caratteri','error'); return; }
+  try {
+    const res = await adminFetch('/api/admin/users',{method:'POST',body:JSON.stringify({username,password,role})});
+    const data = await res.json();
+    if (res.ok) {
+      showToast(`Utente ${username} creato ✓`);
+      document.getElementById('nu-username').value='';
+      document.getElementById('nu-password').value='';
+      renderUsers();
+    } else { showToast(data.error||'Errore','error'); }
+  } catch(e) { showToast('Errore di connessione','error'); }
+}
+
+async function toggleUserActive(id, active) {
+  await adminFetch(`/api/admin/users/${id}`,{method:'PATCH',body:JSON.stringify({active})});
+  showToast(active?'Utente riattivato ✓':'Utente disattivato'); renderUsers();
+}
+async function deleteUser(id) {
+  if (!confirm('Disattivare questo utente?')) return;
+  await adminFetch(`/api/admin/users/${id}`,{method:'DELETE'});
+  showToast('Utente disattivato'); renderUsers();
+}
 
 // ═══════════════════════════════════════════════════════════════
 // INIT
