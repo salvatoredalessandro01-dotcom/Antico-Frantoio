@@ -831,13 +831,27 @@ app.patch('/api/admin/bookings/:id', authMiddleware, adminOrAbove, [
   res.json({ success:true, booking:{ ...b, date_display:formatDateDisplay(b.date), time_display:formatTime(b.time) } });
 });
 
-// Admin and above: cancel booking
+// Admin and above: cancel booking (soft delete — sets status to cancelled)
 app.delete('/api/admin/bookings/:id', authMiddleware, adminOrAbove, async (req, res) => {
   const result = await pool.query('SELECT * FROM bookings WHERE id=$1', [req.params.id]);
   if (result.rows.length) {
     await pool.query(`UPDATE bookings SET status='cancelled',cancelled_by=$1,updated_at=NOW() WHERE id=$2`, [req.user.username, req.params.id]);
     await sendCancellationEmail({ ...result.rows[0], status:'cancelled', cancelled_by:req.user.username });
   }
+  res.json({ success: true });
+});
+
+// Superadmin only: permanently delete a cancelled booking from the database
+app.delete('/api/admin/bookings/:id/permanent', authMiddleware, superadminOnly, async (req, res) => {
+  const { id } = req.params;
+  // Safety check — only allow deletion of cancelled bookings
+  const result = await pool.query('SELECT status FROM bookings WHERE id=$1', [id]);
+  if (!result.rows.length) return res.status(404).json({ error: 'Booking not found' });
+  if (result.rows[0].status !== 'cancelled') {
+    return res.status(400).json({ error: 'Only cancelled bookings can be permanently deleted. Cancel it first.' });
+  }
+  await pool.query('DELETE FROM bookings WHERE id=$1', [id]);
+  console.log(`Booking ${id} permanently deleted by ${req.user.username}`);
   res.json({ success: true });
 });
 
