@@ -512,6 +512,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
         <h3 class="serif" id="admin-tab-title">—</h3>
         <div style="display:flex;gap:.75rem;align-items:center">
           <span class="admin-user-badge" id="admin-user-label"></span>
+          <button class="btn-export" onclick="refreshAdminPanel()" title="Aggiorna dati">↻</button>
           <button class="btn-export" id="btn-export" onclick="adminExportCSV()" style="display:none">↓ CSV</button>
           <button class="admin-close" onclick="closeAdmin()">✕</button>
         </div>
@@ -1069,6 +1070,8 @@ async function tryAdminLogin(){
     if(res.ok&&data.token){
       adminToken=data.token;
       currentUser={username:data.username,role:data.role};
+      // Persist session across refresh
+      try{localStorage.setItem('adminSession',JSON.stringify({token:data.token,username:data.username,role:data.role,ts:Date.now()}));}catch(e){}
       closeAdminLogin();openAdmin();
     } else {
       document.getElementById('login-error').classList.add('visible');
@@ -1083,19 +1086,30 @@ function openAdmin(){
   document.getElementById('admin-user-label').textContent=`👤 ${currentUser.username}`;
   document.getElementById('admin-nav-list').innerHTML=buildNav(currentUser.role);
   // Show export for admin and above
-  document.getElementById('btn-export').style.display = ['superadmin','admin'].includes(currentUser.role)?'':'none';
+  document.getElementById('btn-export').style.display=['superadmin','admin'].includes(currentUser.role)?'':'none';
   // Open default tab
-  const defaultTab = currentUser.role==='staff' ? 'bookings' : 'dashboard';
-  const firstLink = document.querySelector('#admin-nav-list a');
-  if(firstLink) switchAdminTab(defaultTab, firstLink);
+  const defaultTab=currentUser.role==='staff'?'bookings':'dashboard';
+  const firstLink=document.querySelector('#admin-nav-list a');
+  if(firstLink)switchAdminTab(defaultTab,firstLink);
 }
 
 function closeAdmin(){document.getElementById('admin-panel').classList.remove('open');}
 
 function logoutAdmin(){
   adminToken=null;currentUser={username:'',role:''};
+  try{localStorage.removeItem('adminSession');}catch(e){}
   closeAdmin();
   showToast('Disconnesso');
+}
+
+// Refresh current tab data without logging out
+function refreshAdminPanel(){
+  const activeLink=document.querySelector('#admin-nav-list a.active');
+  if(activeLink){
+    const tab=activeLink.getAttribute('onclick').match(/'([^']+)'/)?.[1];
+    if(tab)switchAdminTab(tab,activeLink);
+  }
+  showToast('Dati aggiornati ✓');
 }
 
 function switchAdminTab(tab,link){
@@ -1716,6 +1730,22 @@ applyTranslations();
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeAdmin();closeAdminLogin();closeAmendModal();}
 });
+
+// Restore admin session after page refresh (token valid for 8h)
+try {
+  const saved=localStorage.getItem('adminSession');
+  if(saved){
+    const session=JSON.parse(saved);
+    const ageHours=(Date.now()-session.ts)/(1000*60*60);
+    if(ageHours<7.5&&session.token&&session.username&&session.role){
+      adminToken=session.token;
+      currentUser={username:session.username,role:session.role};
+      openAdmin();
+    } else {
+      localStorage.removeItem('adminSession');
+    }
+  }
+} catch(e){}
 
 // Check for cancellation URL on page load
 (async()=>{
