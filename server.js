@@ -98,6 +98,7 @@ async function initDB() {
       id SERIAL PRIMARY KEY,
       date_value VARCHAR(10) NOT NULL,
       is_recurring BOOLEAN DEFAULT false,
+      shift VARCHAR(10) NOT NULL DEFAULT 'all',
       reason VARCHAR(200),
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
@@ -120,6 +121,7 @@ async function initDB() {
     INSERT INTO settings (key, value) VALUES
       ('deposit_amount', '25'),
       ('deposit_required_weekends', 'true'),
+      ('deposit_required_weekends_shift', 'all'),
       ('deposit_required_always', 'false'),
       ('deposit_required_never', 'false'),
       ('max_tables_per_slot', '8'),
@@ -130,6 +132,9 @@ async function initDB() {
       ('restaurant_email', ''),
       ('restaurant_name', 'Antico Frantoio')
     ON CONFLICT (key) DO NOTHING;
+
+    -- Migrate existing deposit_dates table: add shift column if missing
+    ALTER TABLE deposit_dates ADD COLUMN IF NOT EXISTS shift VARCHAR(10) NOT NULL DEFAULT 'all';
 
     INSERT INTO opening_hours (day_of_week, is_open, hours) VALUES
       (0, true,  '[["12:00","15:30"],["18:30","23:00"]]'),
@@ -238,7 +243,17 @@ function isWeekend(date) {
   return d === 0 || d === 6;
 }
 
-async function requiresDeposit(date) {
+// Returns true if a given time falls within a shift window
+// shift: 'all' | 'lunch' (before 17:00) | 'evening' (17:00 onwards)
+function timeMatchesShift(time, shift) {
+  if (!shift || shift === 'all') return true;
+  const [h] = (typeof time === 'string' ? time.substring(0,5) : '00:00').split(':').map(Number);
+  if (shift === 'lunch') return h < 17;
+  if (shift === 'evening') return h >= 17;
+  return true;
+}
+
+async function requiresDeposit(date, time = null) {
   const never = await getSetting('deposit_required_never') === 'true';
   if (never) return false;
   const always = await getSetting('deposit_required_always') === 'true';
@@ -248,12 +263,20 @@ async function requiresDeposit(date) {
   const mmdd = `${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
   const depositDates = await pool.query('SELECT * FROM deposit_dates');
   for (const dd of depositDates.rows) {
-    if (dd.is_recurring && dd.date_value === mmdd) return true;
-    if (!dd.is_recurring && dd.date_value === date) return true;
+    const dateMatch = (dd.is_recurring && dd.date_value === mmdd) || (!dd.is_recurring && dd.date_value === date);
+    if (dateMatch) {
+      // If no time provided (e.g. just checking the date), return true if any shift matches
+      if (!time) return true;
+      if (timeMatchesShift(time, dd.shift)) return true;
+    }
   }
 
   const weekendRequired = await getSetting('deposit_required_weekends') === 'true';
-  if (weekendRequired && isWeekend(date)) return true;
+  if (weekendRequired && isWeekend(date)) {
+    if (!time) return true;
+    const weekendShift = await getSetting('deposit_required_weekends_shift') || 'all';
+    if (timeMatchesShift(time, weekendShift)) return true;
+  }
   return false;
 }
 
@@ -542,27 +565,51 @@ app.get('/api/availability', async (req, res) => {
     const closure = await pool.query('SELECT reason FROM special_closures WHERE date=$1', [date]);
     if (closure.rows.length) return res.json({ available: false, reason: 'closed', closureReason: closure.rows[0].reason });
 
-    const minNoticeHours = parseInt(await getSetting('min_booking_notice_hours')) || 3;
-    const hoursUntil = (new Date(date+'T00:00:00') - new Date()) / (1000*60*60);
-    if (hoursUntil < minNoticeHours) return res.json({ available: false, reason: 'too_soon', minNoticeHours });
-
     const slotDuration = parseInt(await getSetting('slot_duration_minutes')) || 60;
     const slots = await generateSlots(date, slotDuration);
     if (!slots.length) return res.json({ available: false, reason: 'closed' });
 
+    const minNoticeHours = parseInt(await getSetting('min_booking_notice_hours')) || 3;
+    const now = new Date();
+
     const slotsWithAvail = await Promise.all(slots.map(async time => {
+      // Check min notice against actual slot datetime, not midnight
+      const [sh, sm] = time.split(':').map(Number);
+      const slotDateTime = new Date(date + 'T00:00:00');
+      slotDateTime.setHours(sh, sm, 0, 0);
+      const hoursUntilSlot = (slotDateTime - now) / (1000*60*60);
+      if (hoursUntilSlot < minNoticeHours) {
+        return { time, available: false, tablesLeft: 0, reason: 'too_soon' };
+      }
+
       const avail = await getSlotAvailability(date, time);
       return { time, available: avail.available && avail.tablesAvail >= 1, tablesLeft: avail.tablesAvail };
     }));
 
-    const depositReq = await requiresDeposit(date);
+    // If ALL slots are too_soon, return a top-level too_soon response
+    const tooSoonAll = slotsWithAvail.every(s => s.reason === 'too_soon');
+    if (tooSoonAll) return res.json({ available: false, reason: 'too_soon', minNoticeHours });
+
+    // Deposit: check per-slot since shift may vary
+    // Use first available slot time to determine deposit for display purposes;
+    // actual per-slot deposit is included in each slot
+    const slotsWithDeposit = await Promise.all(slotsWithAvail.map(async s => {
+      const dep = await requiresDeposit(date, s.time);
+      return { ...s, depositRequired: dep };
+    }));
+
+    // Overall depositRequired = true if ANY available slot requires deposit
+    // (frontend will show deposit section if the selected slot requires it)
     const depositAmt = parseInt(await getSetting('deposit_amount')) || 25;
 
     res.json({
-      available: slotsWithAvail.some(s => s.available),
-      date, slots: slotsWithAvail,
-      depositRequired: depositReq,
-      depositAmount: depositReq ? depositAmt * parseInt(adults) : 0,
+      available: slotsWithDeposit.some(s => s.available),
+      date,
+      slots: slotsWithDeposit,
+      // Legacy fields — reflect the first available slot
+      depositRequired: slotsWithDeposit.find(s => s.available)?.depositRequired || false,
+      depositAmount: (slotsWithDeposit.find(s => s.available)?.depositRequired ? depositAmt * parseInt(adults) : 0),
+      minNoticeHours,
     });
   } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
@@ -589,9 +636,13 @@ app.post('/api/reservations', reservationLimiter, [
     const closure = await pool.query('SELECT 1 FROM special_closures WHERE date=$1', [date]);
     if (closure.rows.length) return res.status(409).json({ error: 'Restaurant closed on this date' });
 
+    // Check min notice against the actual slot time, not midnight
     const minNoticeHours = parseInt(await getSetting('min_booking_notice_hours')) || 3;
-    const hoursUntil = (new Date(date+'T00:00:00') - new Date()) / (1000*60*60);
-    if (hoursUntil < minNoticeHours) return res.status(400).json({ error: 'too_soon', minNoticeHours });
+    const [sh, sm] = time.split(':').map(Number);
+    const slotDateTime = new Date(date + 'T00:00:00');
+    slotDateTime.setHours(sh, sm, 0, 0);
+    const hoursUntilSlot = (slotDateTime - new Date()) / (1000*60*60);
+    if (hoursUntilSlot < minNoticeHours) return res.status(400).json({ error: 'too_soon', minNoticeHours });
 
     const validSlots = await generateSlots(date);
     if (!validSlots.includes(time)) return res.status(400).json({ error: 'Invalid time slot' });
@@ -599,7 +650,7 @@ app.post('/api/reservations', reservationLimiter, [
     const avail = await getSlotAvailability(date, time);
     if (!avail.available) return res.status(409).json({ error: 'No availability', code: 'SLOT_FULL' });
 
-    const depositReq = await requiresDeposit(date);
+    const depositReq = await requiresDeposit(date, time);
     const depositAmt = parseInt(await getSetting('deposit_amount')) || 25;
     const depositTotal = depositReq ? depositAmt * parseInt(adults) : 0;
     const status = (depositReq && payDeposit) ? 'pending' : 'confirmed';
@@ -749,7 +800,7 @@ app.post('/api/admin/bookings', authMiddleware, adminOrAbove, [
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
   const { name, email, phone, date, time, adults, children, notes, language='it', table_number, payment_method, deposit_paid=false, send_email=true } = req.body;
   try {
-    const depositReq = await requiresDeposit(date);
+    const depositReq = await requiresDeposit(date, time);
     const result = await pool.query(`
       INSERT INTO bookings (name,email,phone,date,time,adults,children,notes,status,deposit_required,deposit_paid,payment_method,table_number,language,source,created_by)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'confirmed',$9,$10,$11,$12,$13,'manual',$14) RETURNING *
@@ -943,13 +994,19 @@ app.get('/api/admin/deposit-dates', authMiddleware, async (req, res) => {
   res.json({ depositDates: result.rows });
 });
 app.post('/api/admin/deposit-dates', authMiddleware, superadminOnly, [
-  body('date_value').trim().isLength({ min:4, max:10 }), body('is_recurring').isBoolean(), body('reason').optional().trim(),
+  body('date_value').trim().isLength({ min:4, max:10 }),
+  body('is_recurring').isBoolean(),
+  body('shift').optional().isIn(['all','lunch','evening']),
+  body('reason').optional().trim(),
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
-  const { date_value, is_recurring, reason } = req.body;
-  const result = await pool.query('INSERT INTO deposit_dates (date_value,is_recurring,reason) VALUES ($1,$2,$3) RETURNING *', [date_value,is_recurring,reason||null]);
-  res.status(201).json({ depositDate:result.rows[0] });
+  const { date_value, is_recurring, shift = 'all', reason } = req.body;
+  const result = await pool.query(
+    'INSERT INTO deposit_dates (date_value,is_recurring,shift,reason) VALUES ($1,$2,$3,$4) RETURNING *',
+    [date_value, is_recurring, shift, reason||null]
+  );
+  res.status(201).json({ depositDate: result.rows[0] });
 });
 app.delete('/api/admin/deposit-dates/:id', authMiddleware, superadminOnly, async (req, res) => {
   await pool.query('DELETE FROM deposit_dates WHERE id=$1', [req.params.id]);
