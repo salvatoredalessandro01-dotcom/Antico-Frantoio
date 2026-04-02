@@ -246,6 +246,18 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
 @media(max-width:768px){.nav-links{display:none}.mobile-menu-btn{display:block}.admin-stats{grid-template-columns:1fr 1fr}.admin-sidebar{width:200px}}
 @media(max-width:600px){.admin-sidebar{width:100%}}
 .hidden{display:none!important}.mt1{margin-top:1rem}.mt2{margin-top:2rem}.text-center{text-align:center}.text-gold{color:var(--gold)}.text-gray{color:var(--gray)}.text-sm{font-size:.82rem}
+/* Policy modal prose */
+.policy-body h2{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;margin:1.5rem 0 .75rem;color:var(--dark)}
+.policy-body h3{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:400;margin:1.25rem 0 .5rem;color:var(--dark)}
+.policy-body p{font-size:.88rem;line-height:1.8;color:var(--gray);margin-bottom:.85rem}
+.policy-body ul{padding-left:1.25rem;margin-bottom:.85rem}
+.policy-body ul li{font-size:.88rem;line-height:1.8;color:var(--gray);margin-bottom:.25rem}
+.policy-body strong{color:var(--dark)}
+.policy-body a{color:var(--gold);text-decoration:underline}
+.policy-body .policy-header{text-align:center;padding-bottom:1.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--gray-lt)}
+.policy-body .policy-header h1{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--dark);margin-bottom:.5rem}
+.policy-body .policy-header p{font-size:.78rem;color:var(--gray);margin:0}
+.policy-body .policy-box{background:var(--cream2);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;font-size:.85rem;color:var(--gray);line-height:1.7}
 </style>
 </head>
 <body>
@@ -309,10 +321,6 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
         <div class="info-block">
           <span class="info-block-label" data-i18n="info.phone">Telefono</span>
           <div class="info-block-value">+39 081 807 22 00</div>
-        </div>
-        <div class="info-block mt2">
-          <span class="info-block-label" data-i18n="info.deposit.label">Caparra</span>
-          <div class="info-block-value text-sm" data-i18n="info.deposit.val">Richiesta nei weekend e giorni festivi. €25 per persona, scalabile dalla nota finale.</div>
         </div>
       </div>
       <div class="res-card">
@@ -397,7 +405,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
               <input type="checkbox" id="gdpr" required style="margin-top:.1rem">
               <span style="font-size:.78rem;color:var(--gray)">
                 <span data-i18n="gdpr.text">Acconsento al trattamento dei dati personali ai sensi del GDPR. </span>
-                <a href="#" data-i18n="privacy.link">Privacy Policy</a> <span class="req">*</span>
+                <a href="#" onclick="openModal('privacy')" style="color:var(--gold);text-decoration:underline" data-i18n="privacy.link">Privacy Policy</a> <span class="req">*</span>
               </span>
             </label>
           </div>
@@ -453,22 +461,30 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
   <div class="container">
     <div class="logo" style="display:inline-block;margin-bottom:.5rem">Antico <span>Frantoio</span></div>
     <nav class="footer-links">
-      <a href="#" data-i18n="footer.privacy">Privacy Policy</a>
-      <a href="#" data-i18n="footer.cookies">Cookie Policy</a>
-      <a href="#" data-i18n="footer.terms">Termini</a>
+      <a href="#" onclick="openModal('privacy');return false;">Privacy Policy</a>
+      <a href="#" onclick="openModal('cookie');return false;">Cookie Policy</a>
+      <a href="#" onclick="openModal('terms');return false;">Termini e Condizioni</a>
       <a href="#" data-i18n="footer.menu">Menu</a>
       <a href="#" onclick="openAdminLogin()" data-i18n="footer.admin">Admin</a>
     </nav>
-    <p style="font-size:.72rem" data-i18n="footer.copy">© 2025 Antico Frantoio · Via Casarlano 5, 80067 Sorrento (NA), Italia</p>
+    <p style="font-size:.72rem">© 2025 Antico Frantoio · Tree Legs and More S.r.l. · P.IVA 10428621212 · Via degli Aranci 33, 80067 Sorrento (NA)</p>
   </div>
 </footer>
 
 <!-- COOKIE BANNER -->
 <div id="cookie-banner" role="alertdialog">
-  <p><span data-i18n="cookie.text">Utilizziamo cookie per migliorare la tua esperienza. </span><a href="#">Cookie Policy</a></p>
+  <p><span data-i18n="cookie.text">Utilizziamo cookie tecnici e, previo consenso, cookie analitici. </span><a href="#" onclick="openModal('cookie');return false;" style="color:var(--gold)">Cookie Policy</a></p>
   <div class="cookie-actions">
     <button class="btn-cookie-decline" onclick="dismissCookies(false)">Rifiuta</button>
     <button class="btn-cookie-accept" onclick="dismissCookies(true)">Accetta</button>
+  </div>
+</div>
+
+<!-- POLICY MODALS -->
+<div id="policy-modal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto" onclick="if(event.target===this)closeModal()">
+  <div style="background:var(--white);border-radius:var(--radius-lg);width:min(94vw,760px);max-width:760px;padding:2.5rem;position:relative;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <button onclick="closeModal()" style="position:absolute;top:1rem;right:1rem;background:none;color:var(--gray);font-size:1.4rem;line-height:1;padding:.25rem .5rem;border-radius:var(--radius);transition:color var(--transition)" onmouseover="this.style.color='var(--dark)'" onmouseout="this.style.color='var(--gray)'">✕</button>
+    <div id="policy-modal-content"></div>
   </div>
 </div>
 
@@ -1746,11 +1762,230 @@ async function toggleUser(id,active){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// INIT
+// POLICY MODALS
 // ═══════════════════════════════════════════════════════════════
+const TODAY_YEAR = new Date().getFullYear();
+const COMPANY = 'Tree Legs and More S.r.l.';
+const VAT = '10428621212';
+const REG_OFFICE = 'Via degli Aranci 33, 80067 Sorrento (NA), Italia';
+const REA = 'NA-1105641';
+const RESTAURANT = 'Antico Frantoio';
+const RESTAURANT_ADDRESS = 'Via Casarlano 5, 80067 Sorrento (NA), Italia';
+const RESTAURANT_EMAIL = 'info@anticofrantoio.it';
+const RESTAURANT_PHONE = '+39 081 807 22 00';
+
+const POLICIES = {
+  privacy: `
+    <div class="policy-body">
+      <div class="policy-header">
+        <h1>Privacy Policy</h1>
+        <p>Informativa sul trattamento dei dati personali ai sensi dell'art. 13 del Regolamento UE 2016/679 (GDPR),<br>del D.Lgs. 196/2003 e del D.Lgs. 101/2018</p>
+        <p style="margin-top:.5rem">Ultimo aggiornamento: 1° gennaio ${TODAY_YEAR}</p>
+      </div>
+
+      <h2>1. Titolare del Trattamento</h2>
+      <div class="policy-box">
+        <strong>${COMPANY}</strong><br>
+        P.IVA: ${VAT} · REA: ${REA}<br>
+        Sede legale: ${REG_OFFICE}<br>
+        Ristorante: ${RESTAURANT_ADDRESS}<br>
+        Email: ${RESTAURANT_EMAIL}<br>
+        Telefono: ${RESTAURANT_PHONE}
+      </div>
+
+      <h2>2. Dati Raccolti e Finalità</h2>
+      <p>Nell'ambito del servizio di prenotazione online, raccogliamo i seguenti dati personali:</p>
+      <ul>
+        <li><strong>Dati anagrafici e di contatto</strong> (nome, cognome, indirizzo email, numero di telefono): necessari per la gestione della prenotazione, l'invio della conferma e delle comunicazioni relative al servizio.</li>
+        <li><strong>Dati della prenotazione</strong> (data, orario, numero di ospiti, richieste speciali): necessari per l'erogazione del servizio richiesto.</li>
+        <li><strong>Dati di pagamento</strong> (in caso di caparra): trattati esclusivamente tramite il gestore del pagamento Stripe Inc., che opera come autonomo titolare del trattamento secondo i propri standard PCI-DSS. Non conserviamo dati di carta di credito.</li>
+      </ul>
+
+      <h2>3. Base Giuridica del Trattamento</h2>
+      <ul>
+        <li><strong>Esecuzione di un contratto</strong> (art. 6, par. 1, lett. b GDPR): il trattamento è necessario per gestire la prenotazione e il rapporto contrattuale.</li>
+        <li><strong>Consenso dell'interessato</strong> (art. 6, par. 1, lett. a GDPR): per l'invio di comunicazioni promozionali, ove espressamente richiesto.</li>
+        <li><strong>Legittimo interesse</strong> (art. 6, par. 1, lett. f GDPR): per la prevenzione di frodi e la sicurezza del servizio.</li>
+      </ul>
+
+      <h2>4. Modalità di Trattamento e Conservazione</h2>
+      <p>I dati sono trattati con strumenti informatici e telematici e conservati su server protetti. I dati relativi alle prenotazioni sono conservati per un periodo di <strong>5 anni</strong> dalla data della prenotazione, in conformità agli obblighi fiscali e contabili previsti dalla normativa italiana. I dati di contatto utilizzati per le sole comunicazioni di servizio vengono cancellati entro 12 mesi dall'ultimo contatto.</p>
+
+      <h2>5. Comunicazione dei Dati</h2>
+      <p>I dati non vengono diffusi. Possono essere comunicati a:</p>
+      <ul>
+        <li>Fornitori di servizi tecnici (hosting, email transazionale) che operano come responsabili del trattamento ex art. 28 GDPR;</li>
+        <li>Stripe Inc. per la gestione dei pagamenti;</li>
+        <li>Autorità competenti, ove previsto per legge.</li>
+      </ul>
+
+      <h2>6. Trasferimento Dati Extra-UE</h2>
+      <p>Alcuni fornitori tecnici (es. Stripe, servizi di hosting) potrebbero trattare dati al di fuori dell'Unione Europea. In tali casi, il trasferimento avviene nel rispetto delle garanzie previste dagli artt. 44–49 GDPR (es. Clausole Contrattuali Standard approvate dalla Commissione Europea).</p>
+
+      <h2>7. Diritti dell'Interessato</h2>
+      <p>In conformità agli artt. 15–22 GDPR, l'interessato ha diritto di:</p>
+      <ul>
+        <li>Accedere ai propri dati personali (art. 15);</li>
+        <li>Ottenere la rettifica dei dati inesatti (art. 16);</li>
+        <li>Ottenere la cancellazione dei dati ("diritto all'oblio") (art. 17);</li>
+        <li>Ottenere la limitazione del trattamento (art. 18);</li>
+        <li>Ricevere i dati in formato strutturato (portabilità) (art. 20);</li>
+        <li>Opporsi al trattamento (art. 21);</li>
+        <li>Revocare il consenso in qualsiasi momento, senza pregiudizio per la liceità del trattamento precedente.</li>
+      </ul>
+      <p>Per esercitare tali diritti, scrivere a: <a href="mailto:${RESTAURANT_EMAIL}">${RESTAURANT_EMAIL}</a>. Il Titolare risponderà entro 30 giorni. In caso di mancata risposta o risposta insoddisfacente, è possibile proporre reclamo al Garante per la Protezione dei Dati Personali (<a href="https://www.garanteprivacy.it" target="_blank">www.garanteprivacy.it</a>).</p>
+
+      <h2>8. Cookie</h2>
+      <p>Per informazioni sui cookie utilizzati, si rimanda alla <a href="#" onclick="openModal('cookie');return false;">Cookie Policy</a>.</p>
+
+      <h2>9. Modifiche alla Privacy Policy</h2>
+      <p>Il Titolare si riserva di aggiornare la presente informativa. Le modifiche saranno pubblicate su questa pagina con indicazione della data di aggiornamento. Si invita a consultarla periodicamente.</p>
+    </div>
+  `,
+
+  cookie: `
+    <div class="policy-body">
+      <div class="policy-header">
+        <h1>Cookie Policy</h1>
+        <p>Informativa sull'uso dei cookie ai sensi del Provvedimento del Garante Privacy dell'8 maggio 2014,<br>del Provvedimento del 10 giugno 2021 e della Direttiva ePrivacy 2002/58/CE</p>
+        <p style="margin-top:.5rem">Ultimo aggiornamento: 1° gennaio ${TODAY_YEAR}</p>
+      </div>
+
+      <h2>1. Titolare del Trattamento</h2>
+      <div class="policy-box">
+        <strong>${COMPANY}</strong> · P.IVA: ${VAT}<br>
+        ${REG_OFFICE}<br>
+        Email: <a href="mailto:${RESTAURANT_EMAIL}">${RESTAURANT_EMAIL}</a>
+      </div>
+
+      <h2>2. Cosa sono i Cookie</h2>
+      <p>I cookie sono piccoli file di testo che i siti web salvano sul dispositivo dell'utente durante la navigazione. Vengono utilizzati per far funzionare il sito in modo efficiente, per ricordare le preferenze dell'utente e per raccogliere informazioni statistiche.</p>
+
+      <h2>3. Tipologie di Cookie Utilizzati</h2>
+
+      <h3>3.1 Cookie Tecnici Necessari (senza consenso)</h3>
+      <p>Questi cookie sono indispensabili per il funzionamento del sito e non possono essere disattivati. Non raccolgono informazioni personali identificabili.</p>
+      <ul>
+        <li><strong>cookie_consent</strong> — Memorizza la scelta dell'utente riguardo all'accettazione dei cookie. Durata: 12 mesi.</li>
+        <li><strong>adminSession</strong> — Mantiene attiva la sessione autenticata del personale interno. Durata: 8 ore. Non accessibile da terze parti.</li>
+      </ul>
+
+      <h3>3.2 Cookie Analitici (con consenso)</h3>
+      <p>Questo sito <strong>non utilizza</strong> attualmente cookie analitici di terze parti (es. Google Analytics). Qualora venissero introdotti, la presente Cookie Policy sarà aggiornata e il consenso sarà richiesto preventivamente.</p>
+
+      <h3>3.3 Cookie di Profilazione e Marketing</h3>
+      <p>Questo sito <strong>non utilizza</strong> cookie di profilazione o marketing.</p>
+
+      <h3>3.4 Cookie di Terze Parti</h3>
+      <p>In caso di pagamento della caparra tramite Stripe, il servizio potrebbe impostare cookie tecnici propri per la sicurezza della transazione. Si rimanda alla <a href="https://stripe.com/it/privacy" target="_blank">Privacy Policy di Stripe</a> per i dettagli.</p>
+
+      <h2>4. Gestione e Revoca del Consenso</h2>
+      <p>Al primo accesso al sito viene mostrato un banner che consente di accettare o rifiutare i cookie non tecnici. La scelta viene memorizzata per 12 mesi.</p>
+      <p>È possibile modificare le preferenze in qualsiasi momento:</p>
+      <ul>
+        <li><strong>Tramite il browser</strong>: ogni browser consente di cancellare i cookie memorizzati o di bloccare quelli futuri. Di seguito i link alle guide dei principali browser:
+          <a href="https://support.google.com/chrome/answer/95647" target="_blank">Chrome</a> ·
+          <a href="https://support.mozilla.org/it/kb/protezione-antitracciamento-avanzata" target="_blank">Firefox</a> ·
+          <a href="https://support.apple.com/it-it/guide/safari/sfri11471/mac" target="_blank">Safari</a> ·
+          <a href="https://support.microsoft.com/it-it/microsoft-edge/eliminare-i-cookie-in-microsoft-edge" target="_blank">Edge</a>
+        </li>
+        <li><strong>Tramite opt-out specifici</strong>: per eventuali cookie analitici di terze parti, è possibile utilizzare gli strumenti di opt-out forniti da ciascun fornitore.</li>
+      </ul>
+      <p>La disattivazione dei cookie tecnici potrebbe compromettere alcune funzionalità del sito.</p>
+
+      <h2>5. Aggiornamenti</h2>
+      <p>La presente Cookie Policy può essere aggiornata per riflettere modifiche normative o tecniche. La data di ultima revisione è indicata in cima al documento.</p>
+    </div>
+  `,
+
+  terms: `
+    <div class="policy-body">
+      <div class="policy-header">
+        <h1>Termini e Condizioni</h1>
+        <p>Condizioni generali di prenotazione e utilizzo del servizio<br>ai sensi del D.Lgs. 206/2005 (Codice del Consumo) e del D.Lgs. 70/2003</p>
+        <p style="margin-top:.5rem">Ultimo aggiornamento: 1° gennaio ${TODAY_YEAR}</p>
+      </div>
+
+      <h2>1. Fornitore del Servizio</h2>
+      <div class="policy-box">
+        <strong>${COMPANY}</strong> — esercente il ristorante <strong>${RESTAURANT}</strong><br>
+        P.IVA: ${VAT} · REA: ${REA}<br>
+        Sede legale: ${REG_OFFICE}<br>
+        Ristorante: ${RESTAURANT_ADDRESS}<br>
+        Email: <a href="mailto:${RESTAURANT_EMAIL}">${RESTAURANT_EMAIL}</a> · Tel: ${RESTAURANT_PHONE}
+      </div>
+
+      <h2>2. Oggetto e Ambito di Applicazione</h2>
+      <p>I presenti Termini e Condizioni regolano l'utilizzo del sistema di prenotazione online del ristorante ${RESTAURANT} e il rapporto contrattuale che si instaura tra il Fornitore e il Cliente al momento della conferma della prenotazione. L'utilizzo del servizio implica l'accettazione integrale dei presenti Termini.</p>
+
+      <h2>3. Processo di Prenotazione</h2>
+      <p>La prenotazione si perfeziona attraverso i seguenti passaggi:</p>
+      <ul>
+        <li>Compilazione del modulo online con i dati richiesti;</li>
+        <li>Conferma della disponibilità da parte del sistema;</li>
+        <li>Ricezione dell'email di conferma all'indirizzo indicato.</li>
+      </ul>
+      <p>La prenotazione è considerata confermata solo al ricevimento dell'email di conferma. Il Fornitore si riserva il diritto di non accettare prenotazioni in caso di indisponibilità o circostanze eccezionali, dandone tempestiva comunicazione.</p>
+
+      <h2>4. Caparra Confirmatoria</h2>
+      <p>Per alcune date (festività, weekend, eventi speciali) potrà essere richiesta una caparra confirmatoria ai sensi dell'art. 1385 c.c. L'importo e le modalità di pagamento saranno indicati chiaramente durante il processo di prenotazione.</p>
+      <ul>
+        <li>La caparra verrà <strong>detratta integralmente</strong> dall'importo finale del conto;</li>
+        <li>In caso di cancellazione nei termini previsti (v. art. 5), la caparra sarà <strong>integralmente rimborsata</strong>;</li>
+        <li>In caso di mancata presentazione senza preavviso o di cancellazione oltre i termini, la caparra sarà <strong>trattenuta</strong> a titolo di risarcimento del danno subito.</li>
+      </ul>
+      <p>I pagamenti online sono gestiti da Stripe Inc. in ambiente sicuro PCI-DSS. Il Fornitore non conserva i dati della carta di pagamento.</p>
+
+      <h2>5. Politica di Cancellazione</h2>
+      <ul>
+        <li><strong>Cancellazione gratuita</strong>: entro le <strong>24 ore precedenti</strong> all'orario della prenotazione. Eventuale caparra rimborsata integralmente entro 5–10 giorni lavorativi.</li>
+        <li><strong>Cancellazione tardiva</strong>: oltre le 24 ore, la caparra (se versata) sarà trattenuta.</li>
+        <li><strong>No-show</strong>: in caso di mancata presentazione senza comunicazione, la caparra sarà trattenuta e il Fornitore si riserva il diritto di non accettare future prenotazioni.</li>
+      </ul>
+      <p>Per cancellare una prenotazione è possibile utilizzare il link contenuto nell'email di conferma oppure contattare direttamente il ristorante al <a href="tel:${RESTAURANT_PHONE}">${RESTAURANT_PHONE}</a>.</p>
+
+      <h2>6. Ritardi e No-Show</h2>
+      <p>Il tavolo sarà mantenuto disponibile per un massimo di <strong>15 minuti</strong> oltre l'orario prenotato. Superato tale termine, in assenza di comunicazione, il ristorante si riserva il diritto di disporre del tavolo.</p>
+
+      <h2>7. Responsabilità del Cliente</h2>
+      <p>Il Cliente si impegna a fornire informazioni veritiere e complete durante la prenotazione. Il Cliente è responsabile di comunicare tempestivamente eventuali allergie, intolleranze alimentari o esigenze particolari, che il Fornitore si adopererà a soddisfare nei limiti del possibile.</p>
+
+      <h2>8. Responsabilità del Fornitore</h2>
+      <p>Il Fornitore si impegna a garantire il servizio prenotato nella misura del possibile. In caso di circostanze eccezionali (forza maggiore, eventi imprevedibili) che rendano impossibile l'erogazione del servizio, il Fornitore si impegna a darne tempestiva comunicazione e a rimborsare integralmente qualsiasi caparra versata.</p>
+
+      <h2>9. Diritto di Recesso</h2>
+      <p>Ai sensi dell'art. 59, comma 1, lett. a) del D.Lgs. 206/2005 (Codice del Consumo), il diritto di recesso <strong>non si applica</strong> ai contratti di prestazione di servizi relativi ad attività del tempo libero quando il contratto prevede una data o un periodo di esecuzione specifici (quale è la prenotazione di un tavolo per una data determinata). La cancellazione è pertanto regolata dall'art. 5 dei presenti Termini.</p>
+
+      <h2>10. Proprietà Intellettuale</h2>
+      <p>Tutti i contenuti del sito (testi, immagini, loghi, grafica) sono di proprietà di ${COMPANY} o dei rispettivi titolari e sono protetti dalla normativa sul diritto d'autore (L. 633/1941). È vietata qualsiasi riproduzione senza autorizzazione scritta.</p>
+
+      <h2>11. Legge Applicabile e Foro Competente</h2>
+      <p>I presenti Termini sono regolati dal diritto italiano. Per qualsiasi controversia derivante dall'utilizzo del servizio è competente il Foro di Napoli, salvo diversa previsione di legge a tutela del consumatore (art. 66-bis D.Lgs. 206/2005).</p>
+      <p>Per i consumatori residenti nell'Unione Europea è disponibile la piattaforma europea per la risoluzione alternativa delle controversie (ODR) all'indirizzo <a href="https://ec.europa.eu/consumers/odr" target="_blank">ec.europa.eu/consumers/odr</a>.</p>
+
+      <h2>12. Contatti</h2>
+      <p>Per qualsiasi informazione o reclamo: <a href="mailto:${RESTAURANT_EMAIL}">${RESTAURANT_EMAIL}</a> · <a href="tel:${RESTAURANT_PHONE}">${RESTAURANT_PHONE}</a></p>
+    </div>
+  `
+};
+
+function openModal(type) {
+  const content = POLICIES[type];
+  if (!content) return;
+  const modal = document.getElementById('policy-modal');
+  document.getElementById('policy-modal-content').innerHTML = content;
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  modal.scrollTop = 0;
+}
+
+function closeModal() {
+  document.getElementById('policy-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
 applyTranslations();
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeAdmin();closeAdminLogin();closeAmendModal();}
+  if(e.key==='Escape'){closeAdmin();closeAdminLogin();closeAmendModal();closeModal();}
 });
 
 // Restore admin session after page refresh (token valid for 8h)
