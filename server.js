@@ -2,14 +2,9 @@
  * Antico Frantoio — Reservation API Server
  * Node.js + Express + PostgreSQL
  *
- * Features:
- * - Dynamic opening hours (DB-driven, admin-configurable)
- * - Flexible deposit dates (one-off + recurring)
- * - Role-based access (admin / staff)
- * - Action logging (who cancelled / created bookings)
- * - Partial closures, special hours
- * - Manual bookings with payment method
- * - Reminder emails via Brevo HTTP API
+ * Roles: superadmin (full access) | admin (bookings) | staff (read-only)
+ * Features: dynamic opening hours, flexible deposits, amendment emails,
+ *           cancellation flow, role-based access, action logging
  */
 
 require('dotenv').config();
@@ -64,6 +59,7 @@ async function initDB() {
       reminder_sent BOOLEAN DEFAULT false,
       created_by VARCHAR(100) DEFAULT NULL,
       cancelled_by VARCHAR(100) DEFAULT NULL,
+      amended_by VARCHAR(100) DEFAULT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     );
@@ -92,16 +88,12 @@ async function initDB() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
 
-    -- Dynamic opening hours per day of week (0=Sun ... 6=Sat)
-    -- hours stored as JSONB array: [["12:00","15:00"],["18:30","23:00"]]
-    -- null hours = closed
     CREATE TABLE IF NOT EXISTS opening_hours (
       day_of_week INTEGER PRIMARY KEY CHECK (day_of_week BETWEEN 0 AND 6),
       is_open BOOLEAN DEFAULT false,
       hours JSONB DEFAULT '[]'
     );
 
-    -- Deposit special dates
     CREATE TABLE IF NOT EXISTS deposit_dates (
       id SERIAL PRIMARY KEY,
       date_value VARCHAR(10) NOT NULL,
@@ -110,7 +102,6 @@ async function initDB() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
 
-    -- Staff / admin users
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       username VARCHAR(50) NOT NULL UNIQUE,
@@ -140,7 +131,6 @@ async function initDB() {
       ('restaurant_name', 'Antico Frantoio')
     ON CONFLICT (key) DO NOTHING;
 
-    -- Default opening hours (Antico Frantoio schedule)
     INSERT INTO opening_hours (day_of_week, is_open, hours) VALUES
       (0, true,  '[["12:00","15:30"],["18:30","23:00"]]'),
       (1, false, '[]'),
@@ -153,33 +143,33 @@ async function initDB() {
 
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS created_by VARCHAR(100) DEFAULT NULL;
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS cancelled_by VARCHAR(100) DEFAULT NULL;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS amended_by VARCHAR(100) DEFAULT NULL;
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_method VARCHAR(20) DEFAULT NULL;
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS table_number INTEGER DEFAULT NULL;
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS source VARCHAR(20) DEFAULT 'online';
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reminder_sent BOOLEAN DEFAULT false;
   `);
 
-  // Create default admin user if no users exist
+  // Create default superadmin if no users exist
   const userCount = await pool.query('SELECT COUNT(*) FROM users');
   if (parseInt(userCount.rows[0].count) === 0) {
     const hash = await bcrypt.hash('anticofrantoio2025', 10);
     await pool.query(
-      `INSERT INTO users (username, password_hash, role) VALUES ($1, $2, 'admin') ON CONFLICT DO NOTHING`,
+      `INSERT INTO users (username, password_hash, role) VALUES ($1, $2, 'superadmin') ON CONFLICT DO NOTHING`,
       ['admin', hash]
     );
-    console.log('✅ Default admin user created');
+    console.log('✅ Default superadmin created: admin / anticofrantoio2025');
   }
-
   console.log('✅ Database initialized');
 }
 
 // ── HELPERS ─────────────────────────────────────────────────────
 async function getSetting(key) {
-  const res = await pool.query('SELECT value FROM settings WHERE key = $1', [key]);
+  const res = await pool.query('SELECT value FROM settings WHERE key=$1', [key]);
   return res.rows[0]?.value;
 }
 
-// Load opening hours from DB (with cache)
+// Opening hours cache
 let ohCache = null;
 let ohCacheTime = 0;
 async function getOpeningHours() {
@@ -192,7 +182,6 @@ async function getOpeningHours() {
   ohCacheTime = Date.now();
   return ohCache;
 }
-
 function invalidateOHCache() { ohCache = null; }
 
 function generateSlotsFromHours(hours, slotDuration) {
@@ -211,14 +200,11 @@ function generateSlotsFromHours(hours, slotDuration) {
 }
 
 async function generateSlots(date, slotDuration = 60) {
-  const dt = new Date(date + 'T00:00:00');
-  const dayOfWeek = dt.getDay();
+  const dayOfWeek = new Date(date + 'T00:00:00').getDay();
 
-  // Full closure check
   const closure = await pool.query('SELECT 1 FROM special_closures WHERE date=$1', [date]);
   if (closure.rows.length) return [];
 
-  // Special hours override
   const specialHours = await pool.query('SELECT hours FROM special_hours WHERE date=$1', [date]);
   let hours;
   if (specialHours.rows.length) {
@@ -232,7 +218,6 @@ async function generateSlots(date, slotDuration = 60) {
 
   let slots = generateSlotsFromHours(hours, slotDuration);
 
-  // Remove partial closure slots
   const partials = await pool.query('SELECT block_from, block_until FROM partial_closures WHERE date=$1', [date]);
   if (partials.rows.length) {
     slots = slots.filter(slot => {
@@ -259,18 +244,12 @@ async function requiresDeposit(date) {
   const always = await getSetting('deposit_required_always') === 'true';
   if (always) return true;
 
-  // Check special deposit dates (one-off and recurring)
   const dt = new Date(date + 'T00:00:00');
   const mmdd = `${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
   const depositDates = await pool.query('SELECT * FROM deposit_dates');
   for (const dd of depositDates.rows) {
-    if (dd.is_recurring) {
-      // Recurring: match MM-DD regardless of year
-      if (dd.date_value === mmdd) return true;
-    } else {
-      // One-off: match full YYYY-MM-DD
-      if (dd.date_value === date) return true;
-    }
+    if (dd.is_recurring && dd.date_value === mmdd) return true;
+    if (!dd.is_recurring && dd.date_value === date) return true;
   }
 
   const weekendRequired = await getSetting('deposit_required_weekends') === 'true';
@@ -278,13 +257,13 @@ async function requiresDeposit(date) {
   return false;
 }
 
-async function getSlotAvailability(date, time) {
+async function getSlotAvailability(date, time, excludeBookingId = null) {
   const maxTables = parseInt(await getSetting('max_tables_per_slot')) || 8;
   const maxGuests = parseInt(await getSetting('max_guests_per_slot')) || 45;
-  const result = await pool.query(`
-    SELECT COUNT(*) as tables, COALESCE(SUM(adults + children), 0) as guests
-    FROM bookings WHERE date=$1 AND time=$2 AND status != 'cancelled'
-  `, [date, time]);
+  let query = `SELECT COUNT(*) as tables, COALESCE(SUM(adults + children), 0) as guests FROM bookings WHERE date=$1 AND time=$2 AND status != 'cancelled'`;
+  const params = [date, time];
+  if (excludeBookingId) { params.push(excludeBookingId); query += ` AND id != $${params.length}`; }
+  const result = await pool.query(query, params);
   const tablesUsed = parseInt(result.rows[0].tables) || 0;
   const guestsIn = parseInt(result.rows[0].guests) || 0;
   return {
@@ -294,7 +273,27 @@ async function getSlotAvailability(date, time) {
   };
 }
 
-// ── EMAIL SERVICE (Brevo HTTP API) ──────────────────────────────
+// ── DATE HELPERS ─────────────────────────────────────────────────
+function formatDateDisplay(date) {
+  // Returns dd/mm/yyyy from any date input
+  try {
+    const d = new Date(typeof date === 'string' && date.length === 10 ? date + 'T00:00:00' : date);
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  } catch { return String(date); }
+}
+
+function formatDateLong(date, lang) {
+  try {
+    const d = new Date(typeof date === 'string' && date.length === 10 ? date + 'T00:00:00' : date);
+    return d.toLocaleDateString(lang === 'it' ? 'it-IT' : 'en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  } catch { return String(date); }
+}
+
+function formatTime(time) {
+  return typeof time === 'string' ? time.substring(0,5) : String(time);
+}
+
+// ── EMAIL SERVICE ────────────────────────────────────────────────
 async function sendEmail({ to, toName, subject, html }) {
   try {
     const controller = new AbortController();
@@ -316,7 +315,7 @@ async function sendEmail({ to, toName, subject, html }) {
     });
     clearTimeout(timeout);
     const data = await response.json();
-    if (!response.ok) { console.error('Brevo API error:', JSON.stringify(data)); return false; }
+    if (!response.ok) { console.error('Brevo error:', JSON.stringify(data)); return false; }
     console.log('Email sent to:', to);
     return true;
   } catch (err) {
@@ -325,19 +324,29 @@ async function sendEmail({ to, toName, subject, html }) {
   }
 }
 
-function formatDate(date, lang) {
-  try {
-    const d = new Date(typeof date === 'string' ? date + 'T00:00:00' : date);
-    return d.toLocaleDateString(lang === 'it' ? 'it-IT' : 'en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-  } catch { return String(date); }
+function emailWrapper(content) {
+  return `<div style="font-family:'Georgia',serif;max-width:600px;margin:0 auto;padding:40px 20px;color:#1A1612">
+    <div style="text-align:center;margin-bottom:32px">
+      <h1 style="font-size:2rem;font-weight:300;color:#C9A84C;margin:0">Antico Frantoio</h1>
+      <p style="color:#6B6460;font-size:.85rem;letter-spacing:.1em;text-transform:uppercase">Via Casarlano 5, 80067 Sorrento (NA), Italia</p>
+    </div>
+    <hr style="border:none;border-top:1px solid #D4CEC8;margin-bottom:32px">
+    ${content}
+    <hr style="border:none;border-top:1px solid #D4CEC8;margin:24px 0">
+    <p style="color:#6B6460;font-size:.85rem;line-height:1.6;text-align:center">
+      Per informazioni: <a href="tel:+390818072200" style="color:#C9A84C">+39 081 807 22 00</a>
+    </p>
+    <div style="text-align:center;margin-top:24px">
+      <p style="color:#C9A84C;font-size:1.1rem;font-style:italic">Antico Frantoio</p>
+    </div>
+  </div>`;
 }
-function formatTime(time) { return typeof time === 'string' ? time.substring(0,5) : String(time); }
 
 function buildBookingTable(booking, lang) {
   const isIT = lang === 'it';
   const rows = [
     [isIT?'Nome':'Name', booking.name],
-    [isIT?'Data':'Date', formatDate(booking.date, lang)],
+    [isIT?'Data':'Date', formatDateLong(booking.date, lang)],
     [isIT?'Orario':'Time', formatTime(booking.time)],
     [isIT?'Ospiti':'Guests', `${booking.adults} ${isIT?'adulti':'adults'}, ${booking.children} ${isIT?'bambini':'children'}`],
     ...(booking.phone ? [[isIT?'Telefono':'Phone', booking.phone]] : []),
@@ -352,37 +361,21 @@ function buildBookingTable(booking, lang) {
   </table>`;
 }
 
-function emailWrapper(content) {
-  return `<div style="font-family:'Georgia',serif;max-width:600px;margin:0 auto;padding:40px 20px;color:#1A1612">
-    <div style="text-align:center;margin-bottom:32px">
-      <h1 style="font-size:2rem;font-weight:300;color:#C9A84C;margin:0">Antico Frantoio</h1>
-      <p style="color:#6B6460;font-size:.85rem;letter-spacing:.1em;text-transform:uppercase">Via Casarlano 5, 80067 Sorrento (NA), Italia</p>
-    </div>
-    <hr style="border:none;border-top:1px solid #D4CEC8;margin-bottom:32px">
-    ${content}
-    <hr style="border:none;border-top:1px solid #D4CEC8;margin:24px 0">
-    <p style="color:#6B6460;font-size:.85rem;line-height:1.6;text-align:center">
-      Per modifiche contattaci al <a href="tel:+390818072200" style="color:#C9A84C">+39 081 807 22 00</a>
-    </p>
-    <div style="text-align:center;margin-top:24px">
-      <p style="color:#C9A84C;font-size:1.1rem;font-style:italic">Antico Frantoio</p>
-    </div>
-  </div>`;
-}
-
+// ── EMAIL SENDERS ────────────────────────────────────────────────
 async function sendConfirmationEmail(booking, lang = 'it') {
   const isIT = lang === 'it';
   const cancelUrl = `${process.env.FRONTEND_URL || 'https://your-site.vercel.app'}?cancel=${booking.id}`;
+
   const cancelBlock = `<div style="background:#FAF7F2;border-radius:4px;padding:14px;margin:16px 0;text-align:center">
     <p style="color:#6B6460;font-size:.82rem;margin:0 0 8px">${isIT?'Hai bisogno di cancellare?':'Need to cancel?'}</p>
-    <a href="${cancelUrl}" style="color:#A33030;font-size:.82rem">${isIT?'Clicca qui per cancellare':'Click here to cancel'}</a>
+    <a href="${cancelUrl}" style="color:#A33030;font-size:.82rem">${isIT?'Clicca qui per cancellare la prenotazione':'Click here to cancel your reservation'}</a>
   </div>`;
 
   await sendEmail({
     to: booking.email, toName: booking.name,
     subject: isIT
-      ? `Prenotazione confermata — ${formatDate(booking.date,lang)} ${formatTime(booking.time)}`
-      : `Reservation confirmed — ${formatDate(booking.date,lang)} ${formatTime(booking.time)}`,
+      ? `Prenotazione confermata — ${formatDateLong(booking.date,lang)} ${formatTime(booking.time)}`
+      : `Reservation confirmed — ${formatDateLong(booking.date,lang)} ${formatTime(booking.time)}`,
     html: emailWrapper(`
       <h2 style="font-weight:300;font-size:1.4rem;margin-bottom:8px">${isIT?'La tua prenotazione è confermata ✓':'Your reservation is confirmed ✓'}</h2>
       ${buildBookingTable(booking, lang)}
@@ -391,18 +384,94 @@ async function sendConfirmationEmail(booking, lang = 'it') {
   });
 
   const restaurantEmail = await getSetting('restaurant_email');
-  if (restaurantEmail && restaurantEmail.trim()) {
+  if (restaurantEmail?.trim()) {
     const source = booking.source === 'manual' ? '📞 Telefono' : '🌐 Online';
     const createdBy = booking.created_by ? ` · Inserita da: <strong>${booking.created_by}</strong>` : '';
     await sendEmail({
       to: restaurantEmail.trim(), toName: 'Antico Frantoio',
-      subject: `🍽️ Nuova prenotazione — ${booking.name} — ${formatDate(booking.date,'it')} ${formatTime(booking.time)}`,
+      subject: `🍽️ Nuova prenotazione — ${booking.name} — ${formatDateDisplay(booking.date)} ${formatTime(booking.time)}`,
       html: emailWrapper(`
         <h2 style="font-weight:300;font-size:1.4rem;margin-bottom:8px">Nuova prenotazione ricevuta</h2>
         ${buildBookingTable(booking, 'it')}
         <div style="background:#C9A84C15;border-radius:4px;padding:10px;font-size:.82rem;color:#8A6820">
-          Fonte: ${source}${createdBy} · Lingua: ${booking.language || 'it'}
+          Fonte: ${source}${createdBy}
         </div>
+      `),
+    });
+  }
+}
+
+async function sendAmendmentEmail(booking, lang = 'it') {
+  const isIT = lang === 'it';
+  const cancelUrl = `${process.env.FRONTEND_URL || 'https://your-site.vercel.app'}?cancel=${booking.id}`;
+
+  await sendEmail({
+    to: booking.email, toName: booking.name,
+    subject: isIT
+      ? `Prenotazione modificata — ${formatDateLong(booking.date,lang)} ${formatTime(booking.time)}`
+      : `Reservation amended — ${formatDateLong(booking.date,lang)} ${formatTime(booking.time)}`,
+    html: emailWrapper(`
+      <h2 style="font-weight:300;font-size:1.4rem;margin-bottom:8px">${isIT?'La tua prenotazione è stata modificata':'Your reservation has been updated'}</h2>
+      <div style="background:#C9A84C15;border-radius:4px;padding:12px;margin-bottom:16px;font-size:.85rem;color:#8A6820;text-align:center">
+        ${isIT?'Di seguito i dettagli aggiornati della tua prenotazione.':'Below are the updated details of your reservation.'}
+      </div>
+      ${buildBookingTable(booking, lang)}
+      <div style="background:#FAF7F2;border-radius:4px;padding:14px;margin:16px 0;text-align:center">
+        <p style="color:#6B6460;font-size:.82rem;margin:0 0 8px">${isIT?'Hai bisogno di cancellare?':'Need to cancel?'}</p>
+        <a href="${cancelUrl}" style="color:#A33030;font-size:.82rem">${isIT?'Clicca qui per cancellare':'Click here to cancel'}</a>
+      </div>
+    `),
+  });
+
+  const restaurantEmail = await getSetting('restaurant_email');
+  if (restaurantEmail?.trim()) {
+    const amendedBy = booking.amended_by ? ` · Modificata da: <strong>${booking.amended_by}</strong>` : '';
+    await sendEmail({
+      to: restaurantEmail.trim(), toName: 'Antico Frantoio',
+      subject: `✏️ Prenotazione modificata — ${booking.name} — ${formatDateDisplay(booking.date)} ${formatTime(booking.time)}`,
+      html: emailWrapper(`
+        <h2 style="font-weight:300;font-size:1.4rem;margin-bottom:8px">Prenotazione modificata</h2>
+        ${buildBookingTable(booking, 'it')}
+        <div style="background:#C9A84C15;border-radius:4px;padding:10px;font-size:.82rem;color:#8A6820">${amendedBy}</div>
+      `),
+    });
+  }
+}
+
+async function sendCancellationEmail(booking) {
+  const lang = booking.language || 'it';
+  const isIT = lang === 'it';
+
+  await sendEmail({
+    to: booking.email, toName: booking.name,
+    subject: isIT
+      ? `Prenotazione cancellata — ${formatDateDisplay(booking.date)}`
+      : `Reservation cancelled — ${formatDateDisplay(booking.date)}`,
+    html: emailWrapper(`
+      <div style="text-align:center;padding:20px 0">
+        <div style="width:4rem;height:4rem;background:#A3303015;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.75rem">✗</div>
+        <h2 style="font-weight:300;font-size:1.5rem;margin-bottom:12px">${isIT?'Prenotazione cancellata':'Reservation cancelled'}</h2>
+        <p style="color:#6B6460;font-size:.9rem;margin-bottom:24px">${isIT?'La tua prenotazione è stata cancellata con successo.':'Your reservation has been successfully cancelled.'}</p>
+      </div>
+      ${buildBookingTable(booking, lang)}
+      <div style="text-align:center;margin-top:16px">
+        <p style="color:#6B6460;font-size:.85rem">${isIT?'Speriamo di rivederti presto!':'We hope to see you soon!'}</p>
+      </div>
+    `),
+  });
+
+  const restaurantEmail = await getSetting('restaurant_email');
+  if (restaurantEmail?.trim()) {
+    const cancelledBy = booking.cancelled_by ? ` · Ann. da: <strong>${booking.cancelled_by}</strong>` : ' · Ann. dal cliente';
+    await sendEmail({
+      to: restaurantEmail.trim(), toName: 'Antico Frantoio',
+      subject: `❌ Cancellazione — ${booking.name} — ${formatDateDisplay(booking.date)} ${formatTime(booking.time)}`,
+      html: emailWrapper(`
+        <div style="background:#A3303015;border-radius:4px;padding:12px;margin-bottom:16px;text-align:center;color:#A33030">
+          <strong>Prenotazione cancellata</strong>
+        </div>
+        ${buildBookingTable(booking, 'it')}
+        <div style="background:#fafafa;border-radius:4px;padding:10px;font-size:.82rem;color:#6B6460">${cancelledBy}</div>
       `),
     });
   }
@@ -435,10 +504,7 @@ async function processReminders() {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split('T')[0];
-  const result = await pool.query(
-    `SELECT * FROM bookings WHERE date=$1 AND status='confirmed' AND reminder_sent=false`,
-    [tomorrowStr]
-  );
+  const result = await pool.query(`SELECT * FROM bookings WHERE date=$1 AND status='confirmed' AND reminder_sent=false`, [tomorrowStr]);
   for (const booking of result.rows) await sendReminderEmail(booking);
   console.log(`Processed ${result.rows.length} reminders for ${tomorrowStr}`);
   return result.rows.length;
@@ -452,10 +518,18 @@ function authMiddleware(req, res, next) {
   catch { res.status(401).json({ error: 'Invalid token' }); }
 }
 
-function adminOnly(req, res, next) {
-  if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
-  next();
+// Role hierarchy: superadmin > admin > staff
+function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!roles.includes(req.user?.role)) {
+      return res.status(403).json({ error: `Access denied. Required role: ${roles.join(' or ')}` });
+    }
+    next();
+  };
 }
+
+const superadminOnly = requireRole('superadmin');
+const adminOrAbove = requireRole('superadmin', 'admin');
 
 // ── PUBLIC ROUTES ────────────────────────────────────────────────
 
@@ -540,7 +614,7 @@ app.post('/api/reservations', reservationLimiter, [
     if (depositReq && payDeposit) {
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
-        line_items: [{ price_data: { currency: 'eur', unit_amount: depositTotal*100, product_data: { name: 'Caparra — Antico Frantoio', description: `${date} ${time} · ${adults} persone` } }, quantity: 1 }],
+        line_items: [{ price_data: { currency:'eur', unit_amount:depositTotal*100, product_data:{ name:'Caparra — Antico Frantoio', description:`${date} ${time} · ${adults} persone` } }, quantity:1 }],
         mode: 'payment',
         success_url: `${process.env.FRONTEND_URL}?booking=${booking.id}&paid=1`,
         cancel_url: `${process.env.FRONTEND_URL}?cancelled=1`,
@@ -548,57 +622,50 @@ app.post('/api/reservations', reservationLimiter, [
         metadata: { bookingId: booking.id },
       });
       await pool.query('UPDATE bookings SET stripe_session_id=$1 WHERE id=$2', [session.id, booking.id]);
-      return res.status(201).json({ booking: { id: booking.id, status: 'pending' }, stripeUrl: session.url, requiresPayment: true });
+      return res.status(201).json({ booking:{ id:booking.id, status:'pending' }, stripeUrl:session.url, requiresPayment:true });
     }
 
     await sendConfirmationEmail(booking, language);
-    res.status(201).json({ booking: { id: booking.id, status: 'confirmed' }, requiresPayment: false });
+    res.status(201).json({ booking:{ id:booking.id, status:'confirmed' }, requiresPayment:false });
   } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
-// GET /api/cancel/:id — Customer cancellation
-app.get('/api/cancel/:id', async (req, res) => {
+// GET /api/booking/:id — Get booking details (for cancellation page)
+app.get('/api/booking/:id', async (req, res) => {
+  const { id } = req.params;
+  if (!/^[0-9a-f-]{36}$/.test(id)) return res.status(400).json({ error: 'Invalid ID' });
+  try {
+    const result = await pool.query('SELECT id,name,email,date,time,adults,children,notes,status,deposit_required,deposit_paid,language FROM bookings WHERE id=$1', [id]);
+    if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
+    const b = result.rows[0];
+    // Format date for display
+    b.date_display = formatDateDisplay(b.date);
+    b.time_display = formatTime(b.time);
+    res.json({ booking: b });
+  } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+// POST /api/cancel/:id — Customer cancellation (now POST from confirmation page)
+app.post('/api/cancel/:id', async (req, res) => {
   const { id } = req.params;
   if (!/^[0-9a-f-]{36}$/.test(id)) return res.status(400).json({ error: 'Invalid ID' });
   try {
     const result = await pool.query('SELECT * FROM bookings WHERE id=$1', [id]);
     if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
     const booking = result.rows[0];
-    if (booking.status === 'cancelled') return res.json({ message: 'already_cancelled' });
-    const hoursUntil = (new Date(booking.date) - new Date()) / (1000*60*60);
-    if (hoursUntil < 24) return res.status(400).json({ error: 'too_late' });
 
-    await pool.query(`UPDATE bookings SET status='cancelled',cancelled_by='customer',updated_at=NOW() WHERE id=$1`, [id]);
+    if (booking.status === 'cancelled') return res.json({ success: true, message: 'already_cancelled' });
 
-    const lang = booking.language || 'it';
-    const isIT = lang === 'it';
-    await sendEmail({
-      to: booking.email, toName: booking.name,
-      subject: isIT ? 'Prenotazione cancellata — Antico Frantoio' : 'Reservation cancelled — Antico Frantoio',
-      html: emailWrapper(`
-        <div style="text-align:center;padding:20px 0">
-          <p style="font-size:1.1rem;margin-bottom:16px">${isIT?'La tua prenotazione è stata cancellata.':'Your reservation has been cancelled.'}</p>
-          <p style="color:#6B6460;font-size:.85rem">${isIT?'Speriamo di rivederti presto!':'We hope to see you soon!'}</p>
-        </div>
-        ${buildBookingTable(booking, lang)}
-      `),
-    });
+    const hoursUntil = (new Date(booking.date+'T00:00:00') - new Date()) / (1000*60*60);
+    if (hoursUntil < 24) return res.status(400).json({ error: 'too_late', message: 'Cancellations must be made at least 24 hours in advance.' });
 
-    const restaurantEmail = await getSetting('restaurant_email');
-    if (restaurantEmail?.trim()) {
-      await sendEmail({
-        to: restaurantEmail.trim(), toName: 'Antico Frantoio',
-        subject: `❌ Cancellazione — ${booking.name} — ${formatDate(booking.date,'it')}`,
-        html: emailWrapper(`
-          <div style="background:#A3303015;border-radius:4px;padding:12px;margin-bottom:16px;text-align:center;color:#A33030">
-            <strong>Prenotazione cancellata dal cliente</strong>
-          </div>
-          ${buildBookingTable(booking, 'it')}
-        `),
-      });
-    }
+    await pool.query(`UPDATE bookings SET status='cancelled', cancelled_by='customer', updated_at=NOW() WHERE id=$1`, [id]);
 
-    res.json({ success: true });
+    // Send emails
+    const updatedBooking = { ...booking, status: 'cancelled', cancelled_by: 'customer' };
+    await sendCancellationEmail(updatedBooking);
+
+    res.json({ success: true, booking: { name: booking.name, date_display: formatDateDisplay(booking.date), time_display: formatTime(booking.time) } });
   } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -638,21 +705,32 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // ── ADMIN BOOKINGS ───────────────────────────────────────────────
+
+// All roles can read bookings
 app.get('/api/admin/bookings', authMiddleware, async (req, res) => {
-  const { date, status, search, source, page = 1, limit = 100 } = req.query;
+  const { date, status, source, search, page = 1, limit = 100 } = req.query;
   let query = 'SELECT * FROM bookings WHERE 1=1';
   const params = [];
   if (date) { params.push(date); query += ` AND date=$${params.length}`; }
   if (status) { params.push(status); query += ` AND status=$${params.length}`; }
   if (source) { params.push(source); query += ` AND source=$${params.length}`; }
-  if (search) { params.push(`%${search}%`); query += ` AND (name ILIKE $${params.length} OR email ILIKE $${params.length})`; }
-  query += ` ORDER BY date DESC, time ASC LIMIT ${limit} OFFSET ${(page-1)*limit}`;
+  if (search) {
+    params.push(`%${search}%`);
+    query += ` AND (name ILIKE $${params.length} OR email ILIKE $${params.length} OR phone ILIKE $${params.length})`;
+  }
+  query += ` ORDER BY date DESC, time ASC LIMIT ${parseInt(limit)} OFFSET ${(parseInt(page)-1)*parseInt(limit)}`;
   const result = await pool.query(query, params);
-  res.json({ bookings: result.rows });
+  // Format dates for display
+  const bookings = result.rows.map(b => ({
+    ...b,
+    date_display: formatDateDisplay(b.date),
+    time_display: formatTime(b.time),
+  }));
+  res.json({ bookings });
 });
 
-// Manual booking — staff and admin can create
-app.post('/api/admin/bookings', authMiddleware, [
+// Admin and above: create manual booking
+app.post('/api/admin/bookings', authMiddleware, adminOrAbove, [
   body('name').trim().isLength({ min:2, max:100 }),
   body('email').isEmail().normalizeEmail(),
   body('phone').trim().isLength({ min:6, max:30 }),
@@ -675,66 +753,98 @@ app.post('/api/admin/bookings', authMiddleware, [
     const result = await pool.query(`
       INSERT INTO bookings (name,email,phone,date,time,adults,children,notes,status,deposit_required,deposit_paid,payment_method,table_number,language,source,created_by)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'confirmed',$9,$10,$11,$12,$13,'manual',$14) RETURNING *
-    `, [name, email, phone, date, time, adults, children, notes, depositReq, deposit_paid,
-        payment_method || null, table_number || null, language, req.user.username]);
+    `, [name,email,phone,date,time,adults,children,notes,depositReq,deposit_paid,payment_method||null,table_number||null,language,req.user.username]);
     const booking = result.rows[0];
     if (send_email) await sendConfirmationEmail(booking, language);
-    res.status(201).json({ booking });
+    res.status(201).json({ booking: { ...booking, date_display:formatDateDisplay(booking.date), time_display:formatTime(booking.time) } });
   } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
-// Update booking — staff can update table, status(cancel only), payment; admin can update all
-app.patch('/api/admin/bookings/:id', authMiddleware, [
+// Admin and above: amend booking (date, time, guests, notes, table, payment, status)
+app.patch('/api/admin/bookings/:id', authMiddleware, adminOrAbove, [
   param('id').isUUID(),
   body('status').optional().isIn(['confirmed','pending','cancelled']),
+  body('date').optional().isDate(),
+  body('time').optional().matches(/^\d{2}:\d{2}$/),
+  body('adults').optional().isInt({ min:1, max:20 }),
+  body('children').optional().isInt({ min:0, max:10 }),
   body('notes').optional().trim().isLength({ max:500 }),
   body('table_number').optional({ nullable:true }),
   body('payment_method').optional({ nullable:true }).isIn(['cash','card','bank_transfer','']),
   body('deposit_paid').optional().isBoolean(),
+  body('send_amendment_email').optional().isBoolean(),
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
-  const { id } = req.params;
-  const { status, notes, table_number, payment_method, deposit_paid } = req.body;
 
-  // Staff can only cancel, not set other statuses
-  if (req.user.role === 'staff' && status && status !== 'cancelled') {
-    return res.status(403).json({ error: 'Staff can only cancel bookings' });
+  const { id } = req.params;
+  const { status, date, time, adults, children, notes, table_number, payment_method, deposit_paid, send_amendment_email = true } = req.body;
+
+  // If date or time changed, check availability (excluding this booking)
+  if (date || time) {
+    const currentRes = await pool.query('SELECT * FROM bookings WHERE id=$1', [id]);
+    if (!currentRes.rows.length) return res.status(404).json({ error: 'Booking not found' });
+    const current = currentRes.rows[0];
+    const newDate = date || current.date.toISOString().split('T')[0];
+    const newTime = time || formatTime(current.time);
+    const avail = await getSlotAvailability(newDate, newTime, id);
+    if (!avail.available) return res.status(409).json({ error: 'No availability for the new slot', code: 'SLOT_FULL' });
   }
 
   const updates = []; const params = [];
-  if (status !== undefined) {
-    params.push(status); updates.push(`status=$${params.length}`);
-    if (status === 'cancelled') {
-      params.push(req.user.username); updates.push(`cancelled_by=$${params.length}`);
-    }
-  }
-  if (req.user.role === 'admin') {
-    if (notes !== undefined) { params.push(notes); updates.push(`notes=$${params.length}`); }
-    if (payment_method !== undefined) { params.push(payment_method||null); updates.push(`payment_method=$${params.length}`); }
-    if (deposit_paid !== undefined) { params.push(deposit_paid); updates.push(`deposit_paid=$${params.length}`); }
-  }
-  // Both roles can update table number
+  const isAmendment = date || time || adults !== undefined || children !== undefined;
+
+  if (status !== undefined) { params.push(status); updates.push(`status=$${params.length}`); }
+  if (date !== undefined) { params.push(date); updates.push(`date=$${params.length}`); }
+  if (time !== undefined) { params.push(time); updates.push(`time=$${params.length}`); }
+  if (adults !== undefined) { params.push(adults); updates.push(`adults=$${params.length}`); }
+  if (children !== undefined) { params.push(children); updates.push(`children=$${params.length}`); }
+  if (notes !== undefined) { params.push(notes); updates.push(`notes=$${params.length}`); }
   if (table_number !== undefined) { params.push(table_number||null); updates.push(`table_number=$${params.length}`); }
+  if (payment_method !== undefined) { params.push(payment_method||null); updates.push(`payment_method=$${params.length}`); }
+  if (deposit_paid !== undefined) { params.push(deposit_paid); updates.push(`deposit_paid=$${params.length}`); }
+
+  if (isAmendment) { params.push(req.user.username); updates.push(`amended_by=$${params.length}`); }
+  if (status === 'cancelled') { params.push(req.user.username); updates.push(`cancelled_by=$${params.length}`); }
 
   if (!updates.length) return res.status(400).json({ error: 'Nothing to update' });
+
   params.push(id);
   await pool.query(`UPDATE bookings SET ${updates.join(',')},updated_at=NOW() WHERE id=$${params.length}`, params);
+
+  // Send cancellation email if cancelled
+  if (status === 'cancelled') {
+    const bRes = await pool.query('SELECT * FROM bookings WHERE id=$1', [id]);
+    if (bRes.rows.length) await sendCancellationEmail({ ...bRes.rows[0], cancelled_by: req.user.username });
+  }
+
+  // Send amendment email if date/time/guests changed
+  if (isAmendment && status !== 'cancelled' && send_amendment_email) {
+    const bRes = await pool.query('SELECT * FROM bookings WHERE id=$1', [id]);
+    if (bRes.rows.length) await sendAmendmentEmail({ ...bRes.rows[0], amended_by: req.user.username }, bRes.rows[0].language || 'it');
+  }
+
+  const updated = await pool.query('SELECT * FROM bookings WHERE id=$1', [id]);
+  const b = updated.rows[0];
+  res.json({ success:true, booking:{ ...b, date_display:formatDateDisplay(b.date), time_display:formatTime(b.time) } });
+});
+
+// Admin and above: cancel booking
+app.delete('/api/admin/bookings/:id', authMiddleware, adminOrAbove, async (req, res) => {
+  const result = await pool.query('SELECT * FROM bookings WHERE id=$1', [req.params.id]);
+  if (result.rows.length) {
+    await pool.query(`UPDATE bookings SET status='cancelled',cancelled_by=$1,updated_at=NOW() WHERE id=$2`, [req.user.username, req.params.id]);
+    await sendCancellationEmail({ ...result.rows[0], status:'cancelled', cancelled_by:req.user.username });
+  }
   res.json({ success: true });
 });
 
-app.delete('/api/admin/bookings/:id', authMiddleware, adminOnly, async (req, res) => {
-  await pool.query(`UPDATE bookings SET status='cancelled',cancelled_by=$1,updated_at=NOW() WHERE id=$2`, [req.user.username, req.params.id]);
-  res.json({ success: true });
-});
-
-// ── OPENING HOURS (dynamic, DB-driven) ──────────────────────────
+// ── OPENING HOURS ────────────────────────────────────────────────
 app.get('/api/admin/opening-hours', authMiddleware, async (req, res) => {
   const result = await pool.query('SELECT * FROM opening_hours ORDER BY day_of_week');
   res.json({ openingHours: result.rows });
 });
-
-app.patch('/api/admin/opening-hours/:day', authMiddleware, adminOnly, [
+app.patch('/api/admin/opening-hours/:day', authMiddleware, superadminOnly, [
   param('day').isInt({ min:0, max:6 }),
   body('is_open').isBoolean(),
   body('hours').isArray(),
@@ -743,11 +853,7 @@ app.patch('/api/admin/opening-hours/:day', authMiddleware, adminOnly, [
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
   const { day } = req.params;
   const { is_open, hours } = req.body;
-  await pool.query(
-    `INSERT INTO opening_hours (day_of_week, is_open, hours) VALUES ($1,$2,$3)
-     ON CONFLICT (day_of_week) DO UPDATE SET is_open=$2, hours=$3`,
-    [day, is_open, JSON.stringify(hours)]
-  );
+  await pool.query(`INSERT INTO opening_hours (day_of_week,is_open,hours) VALUES ($1,$2,$3) ON CONFLICT (day_of_week) DO UPDATE SET is_open=$2,hours=$3`, [day, is_open, JSON.stringify(hours)]);
   invalidateOHCache();
   res.json({ success: true });
 });
@@ -757,8 +863,7 @@ app.get('/api/admin/settings', authMiddleware, async (req, res) => {
   const result = await pool.query('SELECT key, value FROM settings');
   res.json(Object.fromEntries(result.rows.map(r => [r.key, r.value])));
 });
-
-app.patch('/api/admin/settings', authMiddleware, adminOnly, async (req, res) => {
+app.patch('/api/admin/settings', authMiddleware, superadminOnly, async (req, res) => {
   for (const [key, value] of Object.entries(req.body)) {
     await pool.query(`INSERT INTO settings (key,value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2,updated_at=NOW()`, [key, String(value)]);
   }
@@ -770,37 +875,33 @@ app.get('/api/admin/closures', authMiddleware, async (req, res) => {
   const result = await pool.query('SELECT * FROM special_closures ORDER BY date');
   res.json({ closures: result.rows });
 });
-app.post('/api/admin/closures', authMiddleware, adminOnly, [body('date').isDate(), body('reason').optional().trim()], async (req, res) => {
-  const { date, reason } = req.body;
-  try { await pool.query('INSERT INTO special_closures (date,reason) VALUES ($1,$2)', [date, reason]); res.status(201).json({ success: true }); }
-  catch { res.status(409).json({ error: 'Date already blocked' }); }
+app.post('/api/admin/closures', authMiddleware, superadminOnly, [body('date').isDate(), body('reason').optional().trim()], async (req, res) => {
+  try { await pool.query('INSERT INTO special_closures (date,reason) VALUES ($1,$2)', [req.body.date, req.body.reason]); res.status(201).json({ success:true }); }
+  catch { res.status(409).json({ error:'Date already blocked' }); }
 });
-app.delete('/api/admin/closures/:id', authMiddleware, adminOnly, async (req, res) => {
+app.delete('/api/admin/closures/:id', authMiddleware, superadminOnly, async (req, res) => {
   await pool.query('DELETE FROM special_closures WHERE id=$1', [req.params.id]);
-  res.json({ success: true });
+  res.json({ success:true });
 });
 
 // ── PARTIAL CLOSURES ─────────────────────────────────────────────
 app.get('/api/admin/partial-closures', authMiddleware, async (req, res) => {
-  const result = await pool.query('SELECT * FROM partial_closures ORDER BY date, block_from');
+  const result = await pool.query('SELECT * FROM partial_closures ORDER BY date,block_from');
   res.json({ partialClosures: result.rows });
 });
-app.post('/api/admin/partial-closures', authMiddleware, adminOnly, [
-  body('date').isDate(),
-  body('block_from').matches(/^\d{2}:\d{2}$/),
-  body('block_until').matches(/^\d{2}:\d{2}$/),
-  body('reason').optional().trim(),
+app.post('/api/admin/partial-closures', authMiddleware, superadminOnly, [
+  body('date').isDate(), body('block_from').matches(/^\d{2}:\d{2}$/), body('block_until').matches(/^\d{2}:\d{2}$/), body('reason').optional().trim(),
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
   const { date, block_from, block_until, reason } = req.body;
-  if (block_from >= block_until) return res.status(400).json({ error: 'block_from must be before block_until' });
-  const result = await pool.query('INSERT INTO partial_closures (date,block_from,block_until,reason) VALUES ($1,$2,$3,$4) RETURNING *', [date, block_from, block_until, reason||null]);
-  res.status(201).json({ partialClosure: result.rows[0] });
+  if (block_from >= block_until) return res.status(400).json({ error:'block_from must be before block_until' });
+  const result = await pool.query('INSERT INTO partial_closures (date,block_from,block_until,reason) VALUES ($1,$2,$3,$4) RETURNING *', [date,block_from,block_until,reason||null]);
+  res.status(201).json({ partialClosure:result.rows[0] });
 });
-app.delete('/api/admin/partial-closures/:id', authMiddleware, adminOnly, async (req, res) => {
+app.delete('/api/admin/partial-closures/:id', authMiddleware, superadminOnly, async (req, res) => {
   await pool.query('DELETE FROM partial_closures WHERE id=$1', [req.params.id]);
-  res.json({ success: true });
+  res.json({ success:true });
 });
 
 // ── SPECIAL HOURS ────────────────────────────────────────────────
@@ -808,74 +909,59 @@ app.get('/api/admin/special-hours', authMiddleware, async (req, res) => {
   const result = await pool.query('SELECT * FROM special_hours ORDER BY date');
   res.json({ specialHours: result.rows });
 });
-app.post('/api/admin/special-hours', authMiddleware, adminOnly, [
-  body('date').isDate(), body('hours').isArray(), body('reason').optional().trim(),
-], async (req, res) => {
+app.post('/api/admin/special-hours', authMiddleware, superadminOnly, [body('date').isDate(), body('hours').isArray(), body('reason').optional().trim()], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
   const { date, hours, reason } = req.body;
-  const result = await pool.query(
-    `INSERT INTO special_hours (date,hours,reason) VALUES ($1,$2,$3) ON CONFLICT (date) DO UPDATE SET hours=$2,reason=$3,created_at=NOW() RETURNING *`,
-    [date, JSON.stringify(hours), reason||null]
-  );
-  res.status(201).json({ specialHours: result.rows[0] });
+  const result = await pool.query(`INSERT INTO special_hours (date,hours,reason) VALUES ($1,$2,$3) ON CONFLICT (date) DO UPDATE SET hours=$2,reason=$3,created_at=NOW() RETURNING *`, [date,JSON.stringify(hours),reason||null]);
+  res.status(201).json({ specialHours:result.rows[0] });
 });
-app.delete('/api/admin/special-hours/:id', authMiddleware, adminOnly, async (req, res) => {
+app.delete('/api/admin/special-hours/:id', authMiddleware, superadminOnly, async (req, res) => {
   await pool.query('DELETE FROM special_hours WHERE id=$1', [req.params.id]);
-  res.json({ success: true });
+  res.json({ success:true });
 });
 
 // ── DEPOSIT DATES ────────────────────────────────────────────────
 app.get('/api/admin/deposit-dates', authMiddleware, async (req, res) => {
-  const result = await pool.query('SELECT * FROM deposit_dates ORDER BY is_recurring DESC, date_value');
+  const result = await pool.query('SELECT * FROM deposit_dates ORDER BY is_recurring DESC,date_value');
   res.json({ depositDates: result.rows });
 });
-app.post('/api/admin/deposit-dates', authMiddleware, adminOnly, [
-  body('date_value').trim().isLength({ min:4, max:10 }),
-  body('is_recurring').isBoolean(),
-  body('reason').optional().trim(),
+app.post('/api/admin/deposit-dates', authMiddleware, superadminOnly, [
+  body('date_value').trim().isLength({ min:4, max:10 }), body('is_recurring').isBoolean(), body('reason').optional().trim(),
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
   const { date_value, is_recurring, reason } = req.body;
-  const result = await pool.query(
-    'INSERT INTO deposit_dates (date_value,is_recurring,reason) VALUES ($1,$2,$3) RETURNING *',
-    [date_value, is_recurring, reason||null]
-  );
-  res.status(201).json({ depositDate: result.rows[0] });
+  const result = await pool.query('INSERT INTO deposit_dates (date_value,is_recurring,reason) VALUES ($1,$2,$3) RETURNING *', [date_value,is_recurring,reason||null]);
+  res.status(201).json({ depositDate:result.rows[0] });
 });
-app.delete('/api/admin/deposit-dates/:id', authMiddleware, adminOnly, async (req, res) => {
+app.delete('/api/admin/deposit-dates/:id', authMiddleware, superadminOnly, async (req, res) => {
   await pool.query('DELETE FROM deposit_dates WHERE id=$1', [req.params.id]);
-  res.json({ success: true });
+  res.json({ success:true });
 });
 
-// ── USER MANAGEMENT ──────────────────────────────────────────────
-app.get('/api/admin/users', authMiddleware, adminOnly, async (req, res) => {
+// ── USER MANAGEMENT (superadmin only) ────────────────────────────
+app.get('/api/admin/users', authMiddleware, superadminOnly, async (req, res) => {
   const result = await pool.query('SELECT id,username,role,active,created_at FROM users ORDER BY created_at');
   res.json({ users: result.rows });
 });
-
-app.post('/api/admin/users', authMiddleware, adminOnly, [
-  body('username').trim().isLength({ min:3, max:50 }).isAlphanumeric(),
+app.post('/api/admin/users', authMiddleware, superadminOnly, [
+  body('username').trim().isLength({ min:3, max:50 }).matches(/^[a-zA-Z0-9_]+$/),
   body('password').isLength({ min:8 }),
-  body('role').isIn(['admin','staff']),
+  body('role').isIn(['superadmin','admin','staff']),
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
   const { username, password, role } = req.body;
   try {
     const hash = await bcrypt.hash(password, 10);
-    const result = await pool.query(
-      'INSERT INTO users (username,password_hash,role) VALUES ($1,$2,$3) RETURNING id,username,role,active,created_at',
-      [username, hash, role]
-    );
-    res.status(201).json({ user: result.rows[0] });
-  } catch { res.status(409).json({ error: 'Username already exists' }); }
+    const result = await pool.query('INSERT INTO users (username,password_hash,role) VALUES ($1,$2,$3) RETURNING id,username,role,active,created_at', [username,hash,role]);
+    res.status(201).json({ user:result.rows[0] });
+  } catch { res.status(409).json({ error:'Username already exists' }); }
 });
-
-app.patch('/api/admin/users/:id', authMiddleware, adminOnly, [
+app.patch('/api/admin/users/:id', authMiddleware, superadminOnly, [
   body('active').optional().isBoolean(),
-  body('role').optional().isIn(['admin','staff']),
+  body('role').optional().isIn(['superadmin','admin','staff']),
   body('password').optional().isLength({ min:8 }),
 ], async (req, res) => {
   const errors = validationResult(req);
@@ -885,36 +971,31 @@ app.patch('/api/admin/users/:id', authMiddleware, adminOnly, [
   const updates = []; const params = [];
   if (active !== undefined) { params.push(active); updates.push(`active=$${params.length}`); }
   if (role !== undefined) { params.push(role); updates.push(`role=$${params.length}`); }
-  if (password) { const hash = await bcrypt.hash(password, 10); params.push(hash); updates.push(`password_hash=$${params.length}`); }
-  if (!updates.length) return res.status(400).json({ error: 'Nothing to update' });
+  if (password) { const hash = await bcrypt.hash(password,10); params.push(hash); updates.push(`password_hash=$${params.length}`); }
+  if (!updates.length) return res.status(400).json({ error:'Nothing to update' });
   params.push(id);
   await pool.query(`UPDATE users SET ${updates.join(',')} WHERE id=$${params.length}`, params);
-  res.json({ success: true });
+  res.json({ success:true });
 });
-
-app.delete('/api/admin/users/:id', authMiddleware, adminOnly, async (req, res) => {
-  if (parseInt(req.params.id) === req.user.id) return res.status(400).json({ error: 'Cannot delete yourself' });
+app.delete('/api/admin/users/:id', authMiddleware, superadminOnly, async (req, res) => {
+  if (parseInt(req.params.id) === req.user.id) return res.status(400).json({ error:'Cannot delete yourself' });
   await pool.query('UPDATE users SET active=false WHERE id=$1', [req.params.id]);
-  res.json({ success: true });
+  res.json({ success:true });
 });
 
-// ── TABLE STATS ──────────────────────────────────────────────────
+// ── TABLE STATS & CSV ────────────────────────────────────────────
 app.get('/api/admin/tables', authMiddleware, async (req, res) => {
   const totalTables = parseInt(await getSetting('total_tables')) || 15;
   const today = new Date().toISOString().split('T')[0];
-  const result = await pool.query(
-    `SELECT table_number, COUNT(*) as bookings FROM bookings WHERE date=$1 AND status!='cancelled' AND table_number IS NOT NULL GROUP BY table_number`,
-    [today]
-  );
-  res.json({ totalTables, assignedToday: result.rows });
+  const result = await pool.query(`SELECT table_number,COUNT(*) as bookings FROM bookings WHERE date=$1 AND status!='cancelled' AND table_number IS NOT NULL GROUP BY table_number`, [today]);
+  res.json({ totalTables, assignedToday:result.rows });
 });
 
-// ── CSV EXPORT ───────────────────────────────────────────────────
-app.get('/api/admin/export', authMiddleware, async (req, res) => {
-  const result = await pool.query('SELECT * FROM bookings ORDER BY date, time');
+app.get('/api/admin/export', authMiddleware, adminOrAbove, async (req, res) => {
+  const result = await pool.query('SELECT * FROM bookings ORDER BY date,time');
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', `attachment; filename="antico_frantoio_prenotazioni_${new Date().toISOString().slice(0,10)}.csv"`);
-  const headers = ['id','name','email','phone','date','time','adults','children','notes','status','deposit_required','deposit_paid','payment_method','table_number','source','created_by','cancelled_by','language','created_at'];
+  const headers = ['id','name','email','phone','date','time','adults','children','notes','status','deposit_required','deposit_paid','payment_method','table_number','source','created_by','cancelled_by','amended_by','language','created_at'];
   res.write(headers.join(',') + '\n');
   result.rows.forEach(r => {
     res.write(headers.map(h => `"${String(r[h]??'').replace(/"/g,'""')}"`).join(',') + '\n');
@@ -922,15 +1003,15 @@ app.get('/api/admin/export', authMiddleware, async (req, res) => {
   res.end();
 });
 
-// ── REMINDERS ────────────────────────────────────────────────────
+// Reminders
 app.post('/api/reminders/send', async (req, res) => {
-  if (req.headers['x-reminder-secret'] !== process.env.REMINDER_SECRET) return res.status(401).json({ error: 'Unauthorized' });
+  if (req.headers['x-reminder-secret'] !== process.env.REMINDER_SECRET) return res.status(401).json({ error:'Unauthorized' });
   const count = await processReminders();
-  res.json({ success: true, remindersSent: count });
+  res.json({ success:true, remindersSent:count });
 });
 
-// ── HEALTH ───────────────────────────────────────────────────────
-app.get('/health', (req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));
+// Health
+app.get('/health', (req, res) => res.json({ status:'ok', ts:new Date().toISOString() }));
 
 // ── START ────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
