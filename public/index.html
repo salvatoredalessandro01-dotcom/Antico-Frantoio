@@ -884,6 +884,7 @@ const FALLBACK_HOURS = {
 };
 
 let selectedTime='', currentBookingData=null, depositAmount=25, depositRequired=false;
+let slotsDepositMap={}; // maps time -> depositRequired (per-slot from API)
 function todayStr(){return new Date().toISOString().split('T')[0];}
 
 async function updateSlots() {
@@ -892,20 +893,22 @@ async function updateSlots() {
   const grid=document.getElementById('slots-grid');
   const badge=document.getElementById('avail-badge');
   const depSec=document.getElementById('deposit-section');
-  selectedTime='';
+  selectedTime='';slotsDepositMap={};
   if(!date){grid.innerHTML=`<div class="text-gray text-sm">${t('slots.select.date')}</div>`;badge.className='avail-badge';badge.innerHTML='';depSec.classList.remove('visible');return;}
   grid.innerHTML=`<div class="text-gray text-sm">⏳ Verifica disponibilità...</div>`;
   try {
     const res=await fetch(`${API_BASE}/api/availability?date=${date}&adults=${adults}`);
     const data=await res.json();
-    if(!data.available){
+    if(!data.available&&!data.slots?.some(s=>s.available)){
       const msg=data.reason==='too_soon'?`⏰ Min. ${data.minNoticeHours}h di anticipo`:`🚫 ${t('slots.unavailable')}`;
       grid.innerHTML=`<div class="text-gray text-sm" style="color:var(--red)">${msg}</div>`;
       badge.className='avail-badge low';badge.innerHTML=`<span class="avail-dot"></span>${t('avail.low')}`;
       depSec.classList.remove('visible');return;
     }
-    depositRequired=data.depositRequired;
-    depositAmount=data.depositRequired?Math.round(data.depositAmount/adults):25;
+    depositAmount=data.depositAmount&&adults>0?Math.round(data.depositAmount/adults):25;
+    // Store per-slot deposit map for use in selectSlot
+    (data.slots||[]).forEach(s=>{slotsDepositMap[s.time]=s.depositRequired||false;});
+
     let avCount=0,html='';
     data.slots.forEach(slot=>{
       const dis=!slot.available;const low=slot.tablesLeft<=2&&slot.available;
@@ -917,8 +920,9 @@ async function updateSlots() {
     if(pct>.6){badge.className='avail-badge high';badge.innerHTML=`<span class="avail-dot"></span>${t('avail.high')}`;}
     else if(pct>.25){badge.className='avail-badge medium';badge.innerHTML=`<span class="avail-dot"></span>${t('avail.medium')}`;}
     else{badge.className='avail-badge low';badge.innerHTML=`<span class="avail-dot"></span>${t('avail.low')}`;}
-    if(depositRequired){document.getElementById('deposit-info').innerHTML=t('deposit.info',{amount:adults*depositAmount});depSec.classList.add('visible');}
-    else{depSec.classList.remove('visible');document.getElementById('pay-deposit').checked=false;}
+    // Hide deposit section until a slot is selected
+    depSec.classList.remove('visible');
+    document.getElementById('pay-deposit').checked=false;
   } catch(err) {
     const dt=new Date(date+'T00:00:00');const h=FALLBACK_HOURS[dt.getDay()];
     if(!h){grid.innerHTML=`<div class="text-gray text-sm">${t('slots.unavailable')}</div>`;return;}
@@ -932,6 +936,17 @@ function selectSlot(slot,btn){
   document.querySelectorAll('.slot-btn').forEach(b=>b.classList.remove('selected'));
   btn.classList.add('selected');selectedTime=slot;
   document.getElementById('time-error').textContent='';
+  // Update deposit section based on this specific slot's deposit requirement
+  const adults=parseInt(document.getElementById('adults').value)||2;
+  const depSec=document.getElementById('deposit-section');
+  depositRequired=slotsDepositMap[slot]||false;
+  if(depositRequired){
+    document.getElementById('deposit-info').innerHTML=t('deposit.info',{amount:adults*depositAmount});
+    depSec.classList.add('visible');
+  } else {
+    depSec.classList.remove('visible');
+    document.getElementById('pay-deposit').checked=false;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1581,8 +1596,19 @@ async function renderSettingsTab(container){
       <h4>Impostazioni Caparra</h4>
       <div class="settings-row">
         <div class="settings-label">Quando richiedere la caparra</div>
-        <select id="deposit-mode" style="padding:.5rem .75rem;font-size:.85rem">
+        <select id="deposit-mode" style="padding:.5rem .75rem;font-size:.85rem" onchange="toggleDepositShiftRow()">
           <option value="weekends">Solo nei weekend</option><option value="always">Sempre</option><option value="never">Mai</option>
+        </select>
+      </div>
+      <div class="settings-row" id="deposit-shift-row">
+        <div>
+          <div class="settings-label">Turno nei weekend</div>
+          <div class="settings-sub">Scegli per quale turno richiedere la caparra</div>
+        </div>
+        <select id="deposit-weekends-shift" style="padding:.5rem .75rem;font-size:.85rem">
+          <option value="all">Tutto il giorno</option>
+          <option value="lunch">Solo pranzo (prima delle 17:00)</option>
+          <option value="evening">Solo cena (dalle 17:00)</option>
         </select>
       </div>
       <div class="settings-row">
@@ -1591,10 +1617,18 @@ async function renderSettingsTab(container){
       </div>
       <button class="btn-secondary btn-sm mt1" onclick="saveDepositSettings()">Salva</button>
       <div class="admin-section-title" style="margin-top:1.5rem">Date specifiche con caparra obbligatoria</div>
-      <p class="text-sm text-gray" style="margin-bottom:1rem">Una tantum (es. 25/12/2025) o ricorrente ogni anno (es. ogni 25 dicembre).</p>
+      <p class="text-sm text-gray" style="margin-bottom:1rem">Una tantum o ricorrente ogni anno. Puoi specificare anche il turno.</p>
       <div class="inline-form">
         <div class="form-group"><label>Data</label><input type="date" id="dd-date"></div>
         <div class="form-group"><label>Tipo</label><select id="dd-recurring"><option value="false">Una tantum</option><option value="true">Ricorrente ogni anno</option></select></div>
+        <div class="form-group">
+          <label>Turno</label>
+          <select id="dd-shift">
+            <option value="all">Tutto il giorno</option>
+            <option value="lunch">Solo pranzo</option>
+            <option value="evening">Solo cena</option>
+          </select>
+        </div>
         <div class="form-group"><label>Motivo</label><input type="text" id="dd-reason" placeholder="Es. Ferragosto"></div>
         <div class="form-group" style="justify-content:flex-end"><button class="btn-secondary" onclick="addDepositDate()">+ Aggiungi</button></div>
       </div>
@@ -1616,7 +1650,9 @@ async function renderSettingsTab(container){
     document.getElementById('setting-email').value=s.restaurant_email||'';
     const mode=s.deposit_required_never==='true'?'never':s.deposit_required_always==='true'?'always':'weekends';
     document.getElementById('deposit-mode').value=mode;
+    document.getElementById('deposit-weekends-shift').value=s.deposit_required_weekends_shift||'all';
     document.getElementById('deposit-amt').value=s.deposit_amount||'25';
+    toggleDepositShiftRow();
     document.getElementById('max-tables').value=s.max_tables_per_slot||'8';
     document.getElementById('total-tables').value=s.total_tables||'15';
     document.getElementById('slot-dur').value=s.slot_duration_minutes||'60';
@@ -1675,26 +1711,87 @@ async function saveOpeningHours(){
   showToast(saved===7?'Orari salvati ✓':`Salvati ${saved}/7`);
 }
 
+function shiftLabel(s){return s==='lunch'?'🌞 Solo pranzo':s==='evening'?'🌙 Solo cena':'☀️🌙 Tutto il giorno';}
+
 function renderDepositDatesList(dates){
   const list=document.getElementById('deposit-dates-list');if(!list)return;
-  if(!dates.length){list.innerHTML='<p class="text-gray text-sm">Nessuna data speciale</p>';return;}
-  list.innerHTML=dates.map(d=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--gray-lt)"><span style="font-size:.85rem"><strong>${d.date_value}</strong> <span style="font-size:.7rem;color:var(--gray)">${d.is_recurring?'🔁 Ogni anno':'📅 Una tantum'}</span>${d.reason?' — '+d.reason:''}</span><button class="btn-secondary btn-sm btn-danger" onclick="deleteDepositDate(${d.id})">✕</button></div>`).join('');
+  if(!dates.length){list.innerHTML='<p class="text-gray text-sm">Nessuna data speciale impostata</p>';return;}
+  list.innerHTML=dates.map(d=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--gray-lt);flex-wrap:wrap;gap:.5rem">
+      <span style="font-size:.85rem">
+        <strong>${d.date_value}</strong>
+        <span style="font-size:.7rem;color:var(--gray);margin-left:.4rem">${d.is_recurring?'🔁 Ogni anno':'📅 Una tantum'}</span>
+        <span style="font-size:.7rem;color:var(--gold-dk);margin-left:.4rem">${shiftLabel(d.shift||'all')}</span>
+        ${d.reason?`<span style="font-size:.75rem;color:var(--gray)"> — ${d.reason}</span>`:''}
+      </span>
+      <button class="btn-secondary btn-sm btn-danger" onclick="deleteDepositDate(${d.id})">✕</button>
+    </div>`).join('');
 }
 
 async function addDepositDate(){
-  const dateInput=document.getElementById('dd-date')?.value;const isRec=document.getElementById('dd-recurring')?.value==='true';const reason=document.getElementById('dd-reason')?.value.trim();
+  const dateInput=document.getElementById('dd-date')?.value;
+  const isRec=document.getElementById('dd-recurring')?.value==='true';
+  const shift=document.getElementById('dd-shift')?.value||'all';
+  const reason=document.getElementById('dd-reason')?.value.trim();
   if(!dateInput){showToast('Seleziona una data','error');return;}
   let dateValue=dateInput;
   if(isRec){const p=dateInput.split('-');dateValue=`${p[1]}-${p[2]}`;}
-  const res=await adminFetch('/api/admin/deposit-dates',{method:'POST',body:JSON.stringify({date_value:dateValue,is_recurring:isRec,reason})});
-  if(res.ok){showToast('Data aggiunta ✓');document.getElementById('dd-date').value='';document.getElementById('dd-reason').value='';const d=await(await adminFetch('/api/admin/deposit-dates')).json();renderDepositDatesList(d.depositDates||[]);}
-  else{const d=await res.json();showToast(d.error||'Errore','error');}
+  const res=await adminFetch('/api/admin/deposit-dates',{method:'POST',body:JSON.stringify({date_value:dateValue,is_recurring:isRec,shift,reason})});
+  if(res.ok){
+    showToast('Data aggiunta ✓');
+    document.getElementById('dd-date').value='';
+    document.getElementById('dd-reason').value='';
+    document.getElementById('dd-shift').value='all';
+    const d=await(await adminFetch('/api/admin/deposit-dates')).json();
+    renderDepositDatesList(d.depositDates||[]);
+  } else {const d=await res.json();showToast(d.error||'Errore','error');}
 }
-async function deleteDepositDate(id){if(!confirm('Rimuovere?'))return;await adminFetch(`/api/admin/deposit-dates/${id}`,{method:'DELETE'});showToast('Rimossa');const d=await(await adminFetch('/api/admin/deposit-dates')).json();renderDepositDatesList(d.depositDates||[]);}
 
-async function saveRestaurantEmail(){const email=document.getElementById('setting-email')?.value.trim();const r=await adminFetch('/api/admin/settings',{method:'PATCH',body:JSON.stringify({restaurant_email:email})});showToast(r.ok?'Email salvata ✓':'Errore',r.ok?'success':'error');}
-async function saveDepositSettings(){const mode=document.getElementById('deposit-mode')?.value;const amount=document.getElementById('deposit-amt')?.value;const body={deposit_amount:amount,deposit_required_never:mode==='never'?'true':'false',deposit_required_always:mode==='always'?'true':'false',deposit_required_weekends:mode==='weekends'?'true':'false'};const r=await adminFetch('/api/admin/settings',{method:'PATCH',body:JSON.stringify(body)});showToast(r.ok?'Salvato ✓':'Errore',r.ok?'success':'error');}
-async function saveCapacity(){const body={max_tables_per_slot:document.getElementById('max-tables')?.value,total_tables:document.getElementById('total-tables')?.value,slot_duration_minutes:document.getElementById('slot-dur')?.value,min_booking_notice_hours:document.getElementById('min-notice')?.value};const r=await adminFetch('/api/admin/settings',{method:'PATCH',body:JSON.stringify(body)});showToast(r.ok?'Salvato ✓':'Errore',r.ok?'success':'error');}
+async function deleteDepositDate(id){
+  if(!confirm('Rimuovere?'))return;
+  await adminFetch(`/api/admin/deposit-dates/${id}`,{method:'DELETE'});
+  showToast('Rimossa');
+  const d=await(await adminFetch('/api/admin/deposit-dates')).json();
+  renderDepositDatesList(d.depositDates||[]);
+}
+
+function toggleDepositShiftRow(){
+  const mode=document.getElementById('deposit-mode')?.value;
+  const row=document.getElementById('deposit-shift-row');
+  if(row) row.style.display=mode==='weekends'?'':'none';
+}
+
+async function saveRestaurantEmail(){
+  const email=document.getElementById('setting-email')?.value.trim();
+  const r=await adminFetch('/api/admin/settings',{method:'PATCH',body:JSON.stringify({restaurant_email:email})});
+  showToast(r.ok?'Email salvata ✓':'Errore',r.ok?'success':'error');
+}
+
+async function saveDepositSettings(){
+  const mode=document.getElementById('deposit-mode')?.value;
+  const amount=document.getElementById('deposit-amt')?.value;
+  const weekendsShift=document.getElementById('deposit-weekends-shift')?.value||'all';
+  const body={
+    deposit_amount:amount,
+    deposit_required_never:mode==='never'?'true':'false',
+    deposit_required_always:mode==='always'?'true':'false',
+    deposit_required_weekends:mode==='weekends'?'true':'false',
+    deposit_required_weekends_shift:weekendsShift,
+  };
+  const r=await adminFetch('/api/admin/settings',{method:'PATCH',body:JSON.stringify(body)});
+  showToast(r.ok?'Impostazioni caparra salvate ✓':'Errore',r.ok?'success':'error');
+}
+
+async function saveCapacity(){
+  const body={
+    max_tables_per_slot:document.getElementById('max-tables')?.value,
+    total_tables:document.getElementById('total-tables')?.value,
+    slot_duration_minutes:document.getElementById('slot-dur')?.value,
+    min_booking_notice_hours:document.getElementById('min-notice')?.value,
+  };
+  const r=await adminFetch('/api/admin/settings',{method:'PATCH',body:JSON.stringify(body)});
+  showToast(r.ok?'Salvato ✓':'Errore',r.ok?'success':'error');
+}
 
 // ═══════════════════════════════════════════════════════════════
 // USERS TAB
