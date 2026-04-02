@@ -541,7 +541,7 @@ function authMiddleware(req, res, next) {
   catch { res.status(401).json({ error: 'Invalid token' }); }
 }
 
-// Role hierarchy: superadmin > admin > staff
+// Role hierarchy: superadmin > admin > staff | concierge (separate branch)
 function requireRole(...roles) {
   return (req, res, next) => {
     if (!roles.includes(req.user?.role)) {
@@ -553,6 +553,9 @@ function requireRole(...roles) {
 
 const superadminOnly = requireRole('superadmin');
 const adminOrAbove = requireRole('superadmin', 'admin');
+const adminOrAboveOrConcierge = requireRole('superadmin', 'admin', 'concierge');
+// All authenticated roles can read
+const anyRole = requireRole('superadmin', 'admin', 'staff', 'concierge');
 
 // ── PUBLIC ROUTES ────────────────────────────────────────────────
 
@@ -788,9 +791,9 @@ app.post('/api/admin/login', async (req, res) => {
 
 // ── ADMIN BOOKINGS ───────────────────────────────────────────────
 
-// All roles can read bookings
-app.get('/api/admin/bookings', authMiddleware, async (req, res) => {
-  const { date, status, source, search, page = 1, limit = 100 } = req.query;
+// All roles can read bookings (concierge included)
+app.get('/api/admin/bookings', authMiddleware, anyRole, async (req, res) => {
+  const { date, status, source, search, shift, page = 1, limit = 100 } = req.query;
   let query = 'SELECT * FROM bookings WHERE 1=1';
   const params = [];
   if (date) { params.push(date); query += ` AND date=$${params.length}`; }
@@ -800,9 +803,11 @@ app.get('/api/admin/bookings', authMiddleware, async (req, res) => {
     params.push(`%${search}%`);
     query += ` AND (name ILIKE $${params.length} OR email ILIKE $${params.length} OR phone ILIKE $${params.length})`;
   }
-  query += ` ORDER BY date DESC, time ASC LIMIT ${parseInt(limit)} OFFSET ${(parseInt(page)-1)*parseInt(limit)}`;
+  // Shift filter: lunch = before 17:00, evening = 17:00 and after
+  if (shift === 'lunch') { query += ` AND time < '17:00:00'`; }
+  if (shift === 'evening') { query += ` AND time >= '17:00:00'`; }
+  query += ` ORDER BY date ASC, time ASC LIMIT ${parseInt(limit)} OFFSET ${(parseInt(page)-1)*parseInt(limit)}`;
   const result = await pool.query(query, params);
-  // Format dates for display
   const bookings = result.rows.map(b => ({
     ...b,
     date_display: formatDateDisplay(b.date),
@@ -842,10 +847,10 @@ app.post('/api/admin/bookings', authMiddleware, adminOrAbove, [
   } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
-// Admin and above: amend booking (date, time, guests, notes, table, payment, status)
-app.patch('/api/admin/bookings/:id', authMiddleware, adminOrAbove, [
+// Admin/above: full amend. Concierge: arrived toggle only.
+app.patch('/api/admin/bookings/:id', authMiddleware, adminOrAboveOrConcierge, [
   param('id').isUUID(),
-  body('status').optional().isIn(['confirmed','pending','cancelled']),
+  body('status').optional().isIn(['confirmed','pending','cancelled','arrived']),
   body('date').optional().isDate(),
   body('time').optional().matches(/^\d{2}:\d{2}$/),
   body('adults').optional().isInt({ min:1, max:20 }),
@@ -861,6 +866,17 @@ app.patch('/api/admin/bookings/:id', authMiddleware, adminOrAbove, [
 
   const { id } = req.params;
   const { status, date, time, adults, children, notes, table_number, payment_method, deposit_paid, send_amendment_email = true } = req.body;
+  const role = req.user.role;
+
+  // Concierge can ONLY toggle arrived ↔ confirmed
+  if (role === 'concierge') {
+    if (status !== 'arrived' && status !== 'confirmed') {
+      return res.status(403).json({ error: 'Concierge can only mark guests as arrived or revert to confirmed.' });
+    }
+    await pool.query(`UPDATE bookings SET status=$1, updated_at=NOW() WHERE id=$2`, [status, id]);
+    const b = (await pool.query('SELECT * FROM bookings WHERE id=$1', [id])).rows[0];
+    return res.json({ success: true, booking: { ...b, date_display: formatDateDisplay(b.date), time_display: formatTime(b.time) } });
+  }
 
   // If date or time changed, check availability (excluding this booking)
   if (date || time) {
@@ -1052,7 +1068,7 @@ app.get('/api/admin/users', authMiddleware, superadminOnly, async (req, res) => 
 app.post('/api/admin/users', authMiddleware, superadminOnly, [
   body('username').trim().isLength({ min:3, max:50 }).matches(/^[a-zA-Z0-9_]+$/),
   body('password').isLength({ min:8 }),
-  body('role').isIn(['superadmin','admin','staff']),
+  body('role').isIn(['superadmin','admin','staff','concierge']),
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
@@ -1065,7 +1081,7 @@ app.post('/api/admin/users', authMiddleware, superadminOnly, [
 });
 app.patch('/api/admin/users/:id', authMiddleware, superadminOnly, [
   body('active').optional().isBoolean(),
-  body('role').optional().isIn(['superadmin','admin','staff']),
+  body('role').optional().isIn(['superadmin','admin','staff','concierge']),
   body('password').optional().isLength({ min:8 }),
 ], async (req, res) => {
   const errors = validationResult(req);
