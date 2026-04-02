@@ -812,20 +812,22 @@ app.patch('/api/admin/bookings/:id', authMiddleware, adminOrAbove, [
   params.push(id);
   await pool.query(`UPDATE bookings SET ${updates.join(',')},updated_at=NOW() WHERE id=$${params.length}`, params);
 
+  // Fetch updated booking
+  const bRes = await pool.query('SELECT * FROM bookings WHERE id=$1', [id]);
+  const updatedBooking = bRes.rows[0];
+
   // Send cancellation email if cancelled
-  if (status === 'cancelled') {
-    const bRes = await pool.query('SELECT * FROM bookings WHERE id=$1', [id]);
-    if (bRes.rows.length) await sendCancellationEmail({ ...bRes.rows[0], cancelled_by: req.user.username });
+  if (status === 'cancelled' && updatedBooking) {
+    await sendCancellationEmail({ ...updatedBooking, cancelled_by: req.user.username });
   }
 
-  // Send amendment email if date/time/guests changed
-  if (isAmendment && status !== 'cancelled' && send_amendment_email) {
-    const bRes = await pool.query('SELECT * FROM bookings WHERE id=$1', [id]);
-    if (bRes.rows.length) await sendAmendmentEmail({ ...bRes.rows[0], amended_by: req.user.username }, bRes.rows[0].language || 'it');
+  // Send amendment email whenever send_amendment_email is true and not cancelled
+  if (send_amendment_email && status !== 'cancelled' && updatedBooking) {
+    console.log('Sending amendment email to:', updatedBooking.email);
+    await sendAmendmentEmail({ ...updatedBooking, amended_by: req.user.username }, updatedBooking.language || 'it');
   }
 
-  const updated = await pool.query('SELECT * FROM bookings WHERE id=$1', [id]);
-  const b = updated.rows[0];
+  const b = updatedBooking;
   res.json({ success:true, booking:{ ...b, date_display:formatDateDisplay(b.date), time_display:formatTime(b.time) } });
 });
 
