@@ -571,13 +571,16 @@ app.get('/api/availability', async (req, res) => {
 
     const minNoticeHours = parseInt(await getSetting('min_booking_notice_hours')) || 3;
     const now = new Date();
+    // Restaurant timezone: Europe/Rome (UTC+1 / UTC+2 DST)
+    // We compare slot time against current time both in Italy local time
+    const italyNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Rome' }));
 
     const slotsWithAvail = await Promise.all(slots.map(async time => {
-      // Check min notice against actual slot datetime, not midnight
+      // Build slot datetime in Italy local time
       const [sh, sm] = time.split(':').map(Number);
-      const slotDateTime = new Date(date + 'T00:00:00');
-      slotDateTime.setHours(sh, sm, 0, 0);
-      const hoursUntilSlot = (slotDateTime - now) / (1000*60*60);
+      const [yr, mo, dy] = date.split('-').map(Number);
+      const slotInItaly = new Date(yr, mo - 1, dy, sh, sm, 0, 0);
+      const hoursUntilSlot = (slotInItaly - italyNow) / (1000 * 60 * 60);
       if (hoursUntilSlot < minNoticeHours) {
         return { time, available: false, tablesLeft: 0, reason: 'too_soon' };
       }
@@ -636,12 +639,13 @@ app.post('/api/reservations', reservationLimiter, [
     const closure = await pool.query('SELECT 1 FROM special_closures WHERE date=$1', [date]);
     if (closure.rows.length) return res.status(409).json({ error: 'Restaurant closed on this date' });
 
-    // Check min notice against the actual slot time, not midnight
+    // Check min notice against the actual slot time in Italy local time (server runs UTC)
     const minNoticeHours = parseInt(await getSetting('min_booking_notice_hours')) || 3;
     const [sh, sm] = time.split(':').map(Number);
-    const slotDateTime = new Date(date + 'T00:00:00');
-    slotDateTime.setHours(sh, sm, 0, 0);
-    const hoursUntilSlot = (slotDateTime - new Date()) / (1000*60*60);
+    const [yr, mo, dy] = date.split('-').map(Number);
+    const italyNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Rome' }));
+    const slotInItaly = new Date(yr, mo - 1, dy, sh, sm, 0, 0);
+    const hoursUntilSlot = (slotInItaly - italyNow) / (1000 * 60 * 60);
     if (hoursUntilSlot < minNoticeHours) return res.status(400).json({ error: 'too_soon', minNoticeHours });
 
     const validSlots = await generateSlots(date);
