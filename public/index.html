@@ -1524,8 +1524,11 @@ function renderArrivalsTab(container) {
         <option value="arrived">Arrivati</option>
         <option value="cancelled">Cancellati</option>
       </select>
+      <input type="text" id="arr-search" placeholder="Cerca cliente... (es. Ale)" oninput="debounceArrivals()"
+        style="padding:.5rem .75rem;font-size:.85rem;border:1px solid var(--gray-lt);border-radius:var(--radius);background:var(--cream);color:var(--dark);min-width:180px;flex:1;max-width:280px">
       <button class="btn-secondary btn-sm" onclick="loadArrivals()" style="white-space:nowrap">↻ Aggiorna</button>
-      <span id="arr-summary" style="font-size:.8rem;color:var(--gray);margin-left:.25rem"></span>
+      <button class="btn-secondary btn-sm" onclick="clearArrivalsSearch()" style="white-space:nowrap" title="Pulisci ricerca">✕</button>
+      <span id="arr-summary" style="font-size:.8rem;color:var(--gray);width:100%"></span>
     </div>
     <div class="bookings-table-wrap">
       <table class="arrivals-table" id="arr-table">
@@ -1564,10 +1567,11 @@ function renderArrivalsTab(container) {
 }
 
 async function loadArrivals(silent = false) {
-  const date  = document.getElementById('arr-date')?.value || todayStr();
-  const shift = document.getElementById('arr-shift')?.value || '';
-  const status= document.getElementById('arr-status')?.value || '';
-  const tbody = document.getElementById('arr-tbody');
+  const date   = document.getElementById('arr-date')?.value || todayStr();
+  const shift  = document.getElementById('arr-shift')?.value || '';
+  const status = document.getElementById('arr-status')?.value || '';
+  const search = document.getElementById('arr-search')?.value.trim() || '';
+  const tbody  = document.getElementById('arr-tbody');
   const canEdit = ['superadmin','admin','concierge'].includes(currentUser.role);
 
   if(!tbody) return;
@@ -1576,6 +1580,8 @@ async function loadArrivals(silent = false) {
   let url = `/api/admin/bookings?date=${date}&limit=200`;
   if(shift)  url += `&shift=${shift}`;
   if(status) url += `&status=${status}`;
+  if(search) url += `&search=${encodeURIComponent(search)}`;
+  // Note: server uses ILIKE '%value%' on name, email and phone — supports substring matching
 
   try {
     const res = await adminFetch(url);
@@ -1609,6 +1615,12 @@ async function loadArrivals(silent = false) {
           : '<span class="shift-badge shift-evening">🌙 Cena</span>';
       })();
 
+      // Highlight matched substring in name
+      const highlightedName = search
+        ? b.name.replace(new RegExp(`(${search.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'),
+            '<mark style="background:rgba(201,168,76,.35);border-radius:2px;padding:0 2px">$1</mark>')
+        : b.name;
+
       const notesCell = b.notes
         ? `<div class="arrivals-notes">📝 ${b.notes}</div>`
         : '<span style="color:var(--gray-lt);font-size:.8rem">—</span>';
@@ -1627,7 +1639,7 @@ async function loadArrivals(silent = false) {
           <strong style="font-size:1rem">${fmtTime(b.time)}</strong><br>
           <span style="margin-top:.2rem;display:block">${shiftTag}</span>
         </td>
-        <td><strong style="font-size:.95rem">${b.name}</strong></td>
+        <td><strong style="font-size:.95rem">${highlightedName}</strong></td>
         <td style="font-size:.85rem">${b.phone||'—'}</td>
         <td style="font-size:.9rem;text-align:center">
           <strong>${b.adults+b.children}</strong><br>
@@ -1645,6 +1657,19 @@ async function loadArrivals(silent = false) {
   } catch(e) {
     if(tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:1rem;color:var(--red)">Errore nel caricamento</td></tr>`;
   }
+}
+
+// Debounce: wait 300ms after last keystroke before firing the search
+let _arrSearchTimer = null;
+function debounceArrivals() {
+  clearTimeout(_arrSearchTimer);
+  _arrSearchTimer = setTimeout(() => loadArrivals(), 300);
+}
+
+function clearArrivalsSearch() {
+  const el = document.getElementById('arr-search');
+  if(el) { el.value = ''; el.focus(); }
+  loadArrivals();
 }
 
 async function markArrived(bookingId, arrived) {
