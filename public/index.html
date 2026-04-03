@@ -274,8 +274,88 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
 @keyframes slideUp{from{opacity:0;transform:translate(-50%,1rem)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-8px)}}
-@media(max-width:768px){.nav-links{display:none}.mobile-menu-btn{display:block}.admin-stats{grid-template-columns:1fr 1fr}.admin-sidebar{width:200px}}
-@media(max-width:600px){.admin-sidebar{width:100%}}
+@media(max-width:768px){.nav-links{display:none}.mobile-menu-btn{display:block}}
+
+/* ── TABLET & MOBILE ADMIN ── */
+@media(max-width:768px){
+  /* Admin panel takes full screen */
+  #admin-panel.open{flex-direction:column}
+  #admin-panel-wrap{flex-direction:column!important}
+  /* Sidebar becomes a top navigation bar */
+  .admin-sidebar{
+    width:100%!important;
+    flex-direction:row;
+    align-items:center;
+    padding:0;
+    flex-shrink:0;
+    overflow-x:auto;
+    overflow-y:hidden;
+    height:auto;
+    border-bottom:1px solid rgba(255,255,255,.1);
+  }
+  .admin-sidebar.collapsed{width:100%!important;height:auto}
+  .admin-logo{
+    padding:.75rem 1rem;
+    border-bottom:none;
+    border-right:1px solid rgba(255,255,255,.1);
+    white-space:nowrap;
+    font-size:.9rem;
+    flex-shrink:0;
+  }
+  .admin-logo small{display:none}
+  .admin-nav{
+    display:flex;flex-direction:row;flex:1;
+    overflow-x:auto;padding:.25rem 0;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  .admin-nav::-webkit-scrollbar{display:none}
+  .admin-nav .nav-section{display:none}
+  .admin-nav li{flex-shrink:0}
+  .admin-nav li a{
+    padding:.65rem .9rem;border-left:none;
+    border-bottom:3px solid transparent;
+    font-size:.75rem;white-space:nowrap;
+  }
+  .admin-nav li a:hover,.admin-nav li a.active{
+    border-left-color:transparent;border-bottom-color:var(--gold);
+    background:rgba(201,168,76,.1);
+  }
+  .admin-logout{
+    padding:.5rem .75rem;border-top:none;
+    border-left:1px solid rgba(255,255,255,.1);flex-shrink:0;
+  }
+  .btn-logout{font-size:.75rem;padding:.4rem .65rem;white-space:nowrap}
+  #btn-sidebar-toggle{display:none}
+  .admin-main{flex:1;overflow-y:auto;min-height:0}
+  .admin-topbar{padding:.75rem 1rem;gap:.5rem}
+  .admin-topbar h3{font-size:.9rem}
+  .admin-user-badge{display:none}
+  .admin-content{padding:1rem}
+  .admin-stats{grid-template-columns:1fr 1fr;gap:.75rem}
+  .stat-value{font-size:1.5rem}
+  .admin-filter-bar{gap:.5rem}
+  .admin-filter-bar input,.admin-filter-bar select{font-size:.82rem;padding:.45rem .6rem}
+  .bookings-table th:nth-child(9),.bookings-table td:nth-child(9){display:none}
+}
+
+@media(max-width:480px){
+  .admin-stats{grid-template-columns:1fr 1fr;gap:.5rem}
+  .stat-card{padding:.9rem 1rem}
+  .admin-content{padding:.75rem}
+  .admin-nav li a .nav-label{display:none}
+  .admin-nav li a{font-size:1.1rem;padding:.6rem .75rem}
+  .arrivals-table th:nth-child(5),.arrivals-table td:nth-child(5){display:none}
+  .bookings-table th:nth-child(8),.bookings-table td:nth-child(8){display:none}
+  .bookings-table th:nth-child(5),.bookings-table td:nth-child(5){display:none}
+}
+
+/* Tablet landscape: slimmer sidebar */
+@media(min-width:769px) and (max-width:1024px){
+  .admin-sidebar{width:180px}
+  .admin-sidebar.collapsed{width:52px}
+  .admin-content{padding:1.25rem}
+  .admin-stats{grid-template-columns:repeat(2,1fr)}
+}
 .hidden{display:none!important}.mt1{margin-top:1rem}.mt2{margin-top:2rem}.text-center{text-align:center}.text-gold{color:var(--gold)}.text-gray{color:var(--gray)}.text-sm{font-size:.82rem}
 /* Policy modal prose */
 .policy-body h2{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;margin:1.5rem 0 .75rem;color:var(--dark)}
@@ -541,7 +621,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
 
 <!-- ADMIN PANEL -->
 <div id="admin-panel" role="dialog" aria-modal="true">
-  <div style="display:flex;flex:1;overflow:hidden">
+  <div style="display:flex;flex:1;overflow:hidden;flex-direction:row" id="admin-panel-wrap">
     <aside class="admin-sidebar" id="admin-sidebar">
       <div class="admin-logo" id="admin-logo">
         Antico Frantoio
