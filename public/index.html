@@ -144,9 +144,23 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 /* ADMIN */
 #admin-panel{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);animation:fadeIn .2s ease}
 #admin-panel.open{display:flex;align-items:stretch}
-.admin-sidebar{width:220px;background:var(--dark2);color:white;padding:0;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column}
+.admin-sidebar{width:220px;background:var(--dark2);color:white;padding:0;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;transition:width var(--transition)}
 .admin-logo{padding:1.5rem 1.5rem 1rem;font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold);border-bottom:1px solid rgba(255,255,255,.1)}
 .admin-logo small{display:block;font-family:'Jost',sans-serif;font-size:.6rem;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;margin-top:.2rem}
+/* Collapsed sidebar */
+.admin-sidebar.collapsed{width:52px}
+.admin-sidebar.collapsed .admin-logo{padding:1.1rem 0;text-align:center;font-size:0}
+.admin-sidebar.collapsed .admin-logo::before{content:'AF';font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold);display:block}
+.admin-sidebar.collapsed .admin-logo small{display:none}
+.admin-sidebar.collapsed .admin-nav .nav-section{display:none}
+.admin-sidebar.collapsed .admin-nav li a{padding:.75rem 0;text-align:center;font-size:1rem;letter-spacing:0;border-left:none;border-bottom:none;justify-content:center}
+.admin-sidebar.collapsed .admin-nav li a .nav-label{display:none}
+.admin-sidebar.collapsed .admin-logout{padding:.75rem 0;text-align:center}
+.admin-sidebar.collapsed .btn-logout{font-size:.9rem;padding:.5rem;width:100%}
+.admin-sidebar.collapsed .btn-logout .logout-label{display:none}
+/* Toggle button */
+.btn-sidebar-toggle{background:none;color:rgba(255,255,255,.5);font-size:1rem;padding:.4rem .5rem;border-radius:var(--radius);transition:all var(--transition);line-height:1;white-space:nowrap}
+.btn-sidebar-toggle:hover{color:white;background:rgba(255,255,255,.1)}
 .admin-nav{list-style:none;flex:1;padding:.5rem 0}
 .admin-nav li a{display:block;padding:.6rem 1.5rem;font-size:.78rem;letter-spacing:.06em;color:rgba(255,255,255,.6);transition:all var(--transition);border-left:2px solid transparent}
 .admin-nav li a:hover,.admin-nav li a.active{color:white;background:rgba(201,168,76,.15);border-left-color:var(--gold)}
@@ -528,8 +542,8 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
 <!-- ADMIN PANEL -->
 <div id="admin-panel" role="dialog" aria-modal="true">
   <div style="display:flex;flex:1;overflow:hidden">
-    <aside class="admin-sidebar">
-      <div class="admin-logo">
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="admin-logo" id="admin-logo">
         Antico Frantoio
         <small id="admin-role-label">—</small>
       </div>
@@ -537,12 +551,15 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
         <!-- Populated by role -->
       </ul>
       <div class="admin-logout">
-        <button class="btn-logout" onclick="logoutAdmin()">⏻ Esci</button>
+        <button class="btn-logout" onclick="logoutAdmin()">⏻ <span class="logout-label">Esci</span></button>
       </div>
     </aside>
     <div class="admin-main">
       <div class="admin-topbar">
-        <h3 class="serif" id="admin-tab-title">—</h3>
+        <div style="display:flex;align-items:center;gap:.75rem">
+          <button class="btn-sidebar-toggle" onclick="toggleSidebar()" id="btn-sidebar-toggle" title="Mostra/nascondi menu">☰</button>
+          <h3 class="serif" id="admin-tab-title">—</h3>
+        </div>
         <div style="display:flex;gap:.75rem;align-items:center">
           <span class="admin-user-badge" id="admin-user-label"></span>
           <button class="btn-export" onclick="refreshAdminPanel()" title="Aggiorna dati">↻</button>
@@ -1109,7 +1126,7 @@ function buildNav(role) {
   const items = ROLE_NAV[role] || ROLE_NAV.staff;
   return items.map(item => {
     if (item.section) return `<li class="nav-section">${item.section}</li>`;
-    return `<li><a href="#" onclick="switchAdminTab('${item.id}',this)">${item.icon} ${item.label}</a></li>`;
+    return `<li><a href="#" onclick="switchAdminTab('${item.id}',this)">${item.icon} <span class="nav-label">${item.label}</span></a></li>`;
   }).join('');
 }
 
@@ -1140,6 +1157,12 @@ function openAdmin(){
   document.getElementById('admin-role-label').textContent=currentUser.role.toUpperCase();
   document.getElementById('admin-user-label').textContent=`👤 ${currentUser.username}`;
   document.getElementById('admin-nav-list').innerHTML=buildNav(currentUser.role);
+  // Restore sidebar collapsed preference
+  try{
+    const sidebar=document.getElementById('admin-sidebar');
+    if(localStorage.getItem('sidebarCollapsed')==='1') sidebar.classList.add('collapsed');
+    else sidebar.classList.remove('collapsed');
+  }catch(e){}
   // Show export for admin and above only
   document.getElementById('btn-export').style.display=['superadmin','admin'].includes(currentUser.role)?'':'none';
   // Default tab per role
@@ -1169,6 +1192,14 @@ function refreshAdminPanel(){
     if(tab)switchAdminTab(tab,activeLink);
   }
   showToast('Dati aggiornati ✓');
+}
+
+// Show/hide sidebar
+function toggleSidebar(){
+  const sidebar=document.getElementById('admin-sidebar');
+  const collapsed=sidebar.classList.toggle('collapsed');
+  // Persist preference
+  try{localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');}catch(e){}
 }
 
 function switchAdminTab(tab,link){
