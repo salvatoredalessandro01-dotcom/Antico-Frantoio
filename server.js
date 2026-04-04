@@ -316,33 +316,34 @@ function formatTime(time) {
   return typeof time === 'string' ? time.substring(0,5) : String(time);
 }
 
-// ── EMAIL SERVICE ────────────────────────────────────────────────
+// ── EMAIL SERVICE (Resend) ────────────────────────────────────────
 async function sendEmail({ to, toName, subject, html, textContent }) {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
-    const fromEmail = process.env.BREVO_FROM || 'prenotazioni@anticofrantoiosorrento.it';
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    const fromField = process.env.RESEND_FROM || 'Antico Frantoio <prenotazioni@anticofrantoiosorrento.it>';
+    // Extract plain email from "Name <email>" format for reply_to
+    const fromEmail = fromField.match(/<(.+)>/)?.[1] || fromField;
+    const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       signal: controller.signal,
       headers: {
-        'accept': 'application/json',
-        'api-key': process.env.BREVO_API_KEY,
-        'content-type': 'application/json',
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'Antico Frantoio', email: fromEmail },
-        replyTo: { name: 'Antico Frantoio', email: fromEmail },
-        to: [{ email: to, name: toName || to }],
+        from: fromField,
+        reply_to: fromEmail,
+        to: toName ? [`${toName} <${to}>`] : [to],
         subject,
-        htmlContent: html,
-        textContent: textContent || subject,
+        html,
+        text: textContent || subject,
       }),
     });
     clearTimeout(timeout);
     const data = await response.json();
-    if (!response.ok) { console.error('Brevo error:', JSON.stringify(data)); return false; }
-    console.log('Email sent to:', to);
+    if (!response.ok) { console.error('Resend error:', JSON.stringify(data)); return false; }
+    console.log('Email sent via Resend to:', to);
     return true;
   } catch (err) {
     console.error('Email send error:', err.message);
