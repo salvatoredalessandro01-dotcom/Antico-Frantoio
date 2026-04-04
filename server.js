@@ -317,10 +317,11 @@ function formatTime(time) {
 }
 
 // ── EMAIL SERVICE ────────────────────────────────────────────────
-async function sendEmail({ to, toName, subject, html }) {
+async function sendEmail({ to, toName, subject, html, textContent }) {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
+    const fromEmail = process.env.BREVO_FROM || 'prenotazioni@anticofrantoiosorrento.it';
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       signal: controller.signal,
@@ -330,10 +331,12 @@ async function sendEmail({ to, toName, subject, html }) {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'Antico Frantoio', email: process.env.BREVO_FROM || 'salvatore.dalessandro01@gmail.com' },
+        sender: { name: 'Antico Frantoio', email: fromEmail },
+        replyTo: { name: 'Antico Frantoio', email: fromEmail },
         to: [{ email: to, name: toName || to }],
         subject,
         htmlContent: html,
+        textContent: textContent || subject,
       }),
     });
     clearTimeout(timeout);
@@ -404,6 +407,9 @@ async function sendConfirmationEmail(booking, lang = 'it') {
       ${buildBookingTable(booking, lang)}
       ${cancelBlock}
     `),
+    textContent: isIT
+      ? `Prenotazione confermata — Antico Frantoio\n\nGentile ${booking.name},\nla tua prenotazione è confermata.\n\nData: ${formatDateLong(booking.date,lang)}\nOrario: ${formatTime(booking.time)}\nOspiti: ${booking.adults} adulti, ${booking.children} bambini\n${booking.notes?'Note: '+booking.notes+'\n':''}\nPer cancellare: ${cancelUrl}\n\nAntico Frantoio · Via Casarlano 5, 80067 Sorrento (NA) · +39 081 807 22 00`
+      : `Reservation confirmed — Antico Frantoio\n\nDear ${booking.name},\nyour reservation is confirmed.\n\nDate: ${formatDateLong(booking.date,lang)}\nTime: ${formatTime(booking.time)}\nGuests: ${booking.adults} adults, ${booking.children} children\n${booking.notes?'Notes: '+booking.notes+'\n':''}\nTo cancel: ${cancelUrl}\n\nAntico Frantoio · Via Casarlano 5, 80067 Sorrento (NA) · +39 081 807 22 00`,
   });
 
   const restaurantEmail = await getSetting('restaurant_email');
