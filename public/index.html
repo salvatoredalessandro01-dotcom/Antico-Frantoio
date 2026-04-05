@@ -1508,15 +1508,27 @@ async function adminExportCSV(){
 // ═══════════════════════════════════════════════════════════════
 // ARRIVALS TAB
 // ═══════════════════════════════════════════════════════════════
-function renderArrivalsTab(container) {
+let _cachedShifts = [];
+
+async function renderArrivalsTab(container) {
   const canEdit = ['superadmin','admin','concierge'].includes(currentUser.role);
+  // Load shifts for filter dropdown
+  try {
+    const sr = await adminFetch('/api/admin/shifts');
+    const sd = await sr.json();
+    _cachedShifts = sd.shifts || [];
+  } catch(e) { _cachedShifts = []; }
+
+  const shiftOptions = _cachedShifts.map(s =>
+    `<option value="${s.id}">${s.name}</option>`
+  ).join('');
+
   container.innerHTML = `
     <div style="display:flex;gap:.75rem;margin-bottom:1.25rem;align-items:center;flex-wrap:wrap">
       <input type="date" id="arr-date" value="${todayStr()}" onchange="loadArrivals()" style="padding:.5rem .75rem;font-size:.85rem;border:1px solid var(--gray-lt);border-radius:var(--radius);background:var(--cream);color:var(--dark)">
       <select id="arr-shift" onchange="loadArrivals()" style="padding:.5rem .75rem;font-size:.85rem;border:1px solid var(--gray-lt);border-radius:var(--radius);background:var(--cream);color:var(--dark);appearance:none;padding-right:2rem;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22%3E%3Cpath d=%22M1 1l5 5 5-5%22 stroke=%22%23999%22 fill=%22none%22 stroke-width=%221.5%22 stroke-linecap=%22round%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right .75rem center">
         <option value="">Tutti i turni</option>
-        <option value="lunch">🌞 Pranzo</option>
-        <option value="evening">🌙 Cena</option>
+        ${shiftOptions}
       </select>
       <select id="arr-status" onchange="loadArrivals()" style="padding:.5rem .75rem;font-size:.85rem;border:1px solid var(--gray-lt);border-radius:var(--radius);background:var(--cream);color:var(--dark);appearance:none;padding-right:2rem;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22%3E%3Cpath d=%22M1 1l5 5 5-5%22 stroke=%22%23999%22 fill=%22none%22 stroke-width=%221.5%22 stroke-linecap=%22round%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right .75rem center">
         <option value="">Tutti gli stati</option>
@@ -1567,29 +1579,46 @@ function renderArrivalsTab(container) {
 }
 
 async function loadArrivals(silent = false) {
-  const date   = document.getElementById('arr-date')?.value || todayStr();
-  const shift  = document.getElementById('arr-shift')?.value || '';
-  const status = document.getElementById('arr-status')?.value || '';
-  const search = document.getElementById('arr-search')?.value.trim() || '';
-  const tbody  = document.getElementById('arr-tbody');
-  const canEdit = ['superadmin','admin','concierge'].includes(currentUser.role);
+  const date     = document.getElementById('arr-date')?.value || todayStr();
+  const shiftId  = document.getElementById('arr-shift')?.value || '';
+  const status   = document.getElementById('arr-status')?.value || '';
+  const search   = document.getElementById('arr-search')?.value.trim() || '';
+  const tbody    = document.getElementById('arr-tbody');
+  const canEdit  = ['superadmin','admin','concierge'].includes(currentUser.role);
 
   if(!tbody) return;
   if(!silent) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--gray)">⏳ Caricamento...</td></tr>`;
 
+  // Build URL — shift filter is done client-side using actual shift time ranges
   let url = `/api/admin/bookings?date=${date}&limit=200`;
-  if(shift)  url += `&shift=${shift}`;
   if(status) url += `&status=${status}`;
   if(search) url += `&search=${encodeURIComponent(search)}`;
-  // Note: server uses ILIKE '%value%' on name, email and phone — supports substring matching
+
+  // Helper: find which shift a booking time belongs to
+  function getBookingShift(timeStr) {
+    const [h, m] = timeStr.substring(0,5).split(':').map(Number);
+    const tMin = h * 60 + m;
+    return _cachedShifts.find(s => {
+      const [fh, fm] = s.first_slot.substring(0,5).split(':').map(Number);
+      const [lh, lm] = s.last_slot.substring(0,5).split(':').map(Number);
+      return tMin >= fh*60+fm && tMin <= lh*60+lm;
+    }) || null;
+  }
 
   try {
     const res = await adminFetch(url);
     const data = await res.json();
-    const bookings = (data.bookings || []).filter(b => b.status !== 'cancelled' || status === 'cancelled');
+    let bookings = (data.bookings || []).filter(b => b.status !== 'cancelled' || status === 'cancelled');
+
+    // Client-side shift filter using actual shift definitions
+    if(shiftId) {
+      bookings = bookings.filter(b => {
+        const s = getBookingShift(b.time||'');
+        return s && String(s.id) === String(shiftId);
+      });
+    }
 
     // Summary counts
-    const total   = bookings.filter(b => b.status !== 'cancelled').length;
     const arrived = bookings.filter(b => b.status === 'arrived').length;
     const waiting = bookings.filter(b => b.status === 'confirmed' || b.status === 'pending').length;
     const covers  = bookings.filter(b => b.status !== 'cancelled').reduce((s,b) => s+b.adults+b.children, 0);
@@ -1608,12 +1637,12 @@ async function loadArrivals(silent = false) {
       const isArrived   = b.status === 'arrived';
       const isCancelled = b.status === 'cancelled';
       const rowClass    = isArrived ? 'row-arrived' : isCancelled ? 'row-cancelled' : '';
-      const shiftTag    = (() => {
-        const [h] = (b.time||'').split(':').map(Number);
-        return h < 17
-          ? '<span class="shift-badge shift-lunch">🌞 Pranzo</span>'
-          : '<span class="shift-badge shift-evening">🌙 Cena</span>';
-      })();
+
+      // Shift badge using actual shift definitions
+      const bShift = getBookingShift(b.time||'');
+      const shiftTag = bShift
+        ? `<span class="shift-badge" style="background:#FFF3CD;color:#856404">${bShift.name}</span>`
+        : '<span class="shift-badge" style="background:#F5F5F5;color:#999">—</span>';
 
       // Highlight matched substring in name
       const highlightedName = search
@@ -1696,7 +1725,9 @@ function openAmendModal(id,dateFmt,timeFmt,name,dateDisplay,adults,children,stat
   document.getElementById('amend-id').value=id;
   document.getElementById('amend-booking-info').textContent=`${name} — ${dateFmt} ${timeFmt}`;
   document.getElementById('amend-date').value=dateRaw||'';
+  document.getElementById('amend-date').dataset.original=dateRaw||'';
   document.getElementById('amend-time').value=timeRaw||'';
+  document.getElementById('amend-time').dataset.original=timeRaw||'';
   document.getElementById('amend-adults').value=adults||2;
   document.getElementById('amend-children').value=children||0;
   document.getElementById('amend-status').value=status||'confirmed';
@@ -1714,9 +1745,15 @@ async function saveAmendment(){
   const spinner=document.getElementById('amend-spinner');
   spinner.style.display='block';
 
+  const newDate=document.getElementById('amend-date').value||undefined;
+  const newTime=document.getElementById('amend-time').value||undefined;
+  const origDate=document.getElementById('amend-date').dataset.original;
+  const origTime=document.getElementById('amend-time').dataset.original;
+
   const body={
-    date:document.getElementById('amend-date').value||undefined,
-    time:document.getElementById('amend-time').value||undefined,
+    // Only send date/time if they actually changed — avoids false availability conflict
+    date: newDate && newDate !== origDate ? newDate : undefined,
+    time: newTime && newTime !== origTime ? newTime : undefined,
     adults:parseInt(document.getElementById('amend-adults').value)||undefined,
     children:parseInt(document.getElementById('amend-children').value)||0,
     status:document.getElementById('amend-status').value,
@@ -1969,15 +2006,42 @@ async function renderSettingsTab(container){
       <h4>Capacità</h4>
       <div class="settings-row"><div class="settings-label">Tavoli massimi per slot</div><input type="number" id="max-tables" value="8" style="width:60px;padding:.4rem .6rem"></div>
       <div class="settings-row"><div><div class="settings-label">Totale tavoli (interno)</div><div class="settings-sub">Non mostrato ai clienti</div></div><input type="number" id="total-tables" value="15" style="width:60px;padding:.4rem .6rem"></div>
-      <div class="settings-row"><div class="settings-label">Durata slot (min)</div><select id="slot-dur" style="width:90px;padding:.4rem .6rem"><option value="30">30</option><option value="60" selected>60</option><option value="90">90</option></select></div>
+      <div class="settings-row"><div><div class="settings-label">Coperti massimi per slot</div><div class="settings-sub">Somma di adulti + bambini nelle prenotazioni attive</div></div><input type="number" id="max-covers" value="120" style="width:60px;padding:.4rem .6rem"></div>
       <div class="settings-row"><div class="settings-label">Preavviso minimo (ore)</div><input type="number" id="min-notice" value="3" style="width:60px;padding:.4rem .6rem"></div>
       <button class="btn-secondary btn-sm mt1" onclick="saveCapacity()">Salva</button>
+    </div>
+    <div class="admin-card">
+      <h4>Gestione Turni</h4>
+      <p class="text-sm text-gray" style="margin-bottom:1rem">Definisci i turni del ristorante (da 1 a 6). Ogni turno ha un nome, orario di primo e ultimo slot, e un tempo di turnover. I coperti vengono liberati dopo il turnover.</p>
+      <div id="shifts-list"></div>
+      <div class="admin-section-title" style="margin-top:1.5rem">Aggiungi Turno</div>
+      <div class="inline-form" style="flex-wrap:wrap;gap:.5rem">
+        <div class="form-group"><label>Nome turno</label><input type="text" id="sh-name" placeholder="es. Cena" style="width:120px"></div>
+        <div class="form-group"><label>Primo slot</label><input type="time" id="sh-first" style="width:110px"></div>
+        <div class="form-group"><label>Ultimo slot</label><input type="time" id="sh-last" style="width:110px"></div>
+        <div class="form-group">
+          <label>Turnover (min)</label>
+          <select id="sh-turnover" style="padding:.5rem .6rem;font-size:.85rem">
+            <option value="15">15 min</option>
+            <option value="30">30 min</option>
+            <option value="45">45 min</option>
+            <option value="60">60 min</option>
+            <option value="75">75 min</option>
+            <option value="90" selected>90 min</option>
+            <option value="105">105 min</option>
+            <option value="120">120 min</option>
+            <option value="150">150 min</option>
+            <option value="180">180 min</option>
+          </select>
+        </div>
+        <div class="form-group" style="justify-content:flex-end"><button class="btn-secondary" onclick="addShift()">+ Aggiungi</button></div>
+      </div>
     </div>
   `;
   // Load data
   try {
-    const[sr,oh,dd]=await Promise.all([adminFetch('/api/admin/settings'),adminFetch('/api/admin/opening-hours'),adminFetch('/api/admin/deposit-dates')]);
-    const s=await sr.json();const ohR=await oh.json();const ddR=await dd.json();
+    const[sr,oh,dd,shR]=await Promise.all([adminFetch('/api/admin/settings'),adminFetch('/api/admin/opening-hours'),adminFetch('/api/admin/deposit-dates'),adminFetch('/api/admin/shifts')]);
+    const s=await sr.json();const ohR=await oh.json();const ddR=await dd.json();const shiftsData=await shR.json();
     document.getElementById('setting-email').value=s.restaurant_email||'';
     const mode=s.deposit_required_never==='true'?'never':s.deposit_required_always==='true'?'always':'weekends';
     document.getElementById('deposit-mode').value=mode;
@@ -1986,7 +2050,7 @@ async function renderSettingsTab(container){
     toggleDepositShiftRow();
     document.getElementById('max-tables').value=s.max_tables_per_slot||'8';
     document.getElementById('total-tables').value=s.total_tables||'15';
-    document.getElementById('slot-dur').value=s.slot_duration_minutes||'60';
+    document.getElementById('max-covers').value=s.max_covers_per_slot||'120';
     document.getElementById('min-notice').value=s.min_booking_notice_hours||'3';
     // Opening hours editor
     ohData={};
@@ -1994,6 +2058,7 @@ async function renderSettingsTab(container){
     renderOHEditor();
     // Deposit dates
     renderDepositDatesList(ddR.depositDates||[]);
+    renderShiftsList(shiftsData.shifts||[]);
   } catch(e){}
 }
 
@@ -2117,11 +2182,77 @@ async function saveCapacity(){
   const body={
     max_tables_per_slot:document.getElementById('max-tables')?.value,
     total_tables:document.getElementById('total-tables')?.value,
-    slot_duration_minutes:document.getElementById('slot-dur')?.value,
+    max_covers_per_slot:document.getElementById('max-covers')?.value,
     min_booking_notice_hours:document.getElementById('min-notice')?.value,
   };
   const r=await adminFetch('/api/admin/settings',{method:'PATCH',body:JSON.stringify(body)});
-  showToast(r.ok?'Salvato ✓':'Errore',r.ok?'success':'error');
+  showToast(r.ok?'Capacità salvata ✓':'Errore',r.ok?'success':'error');
+}
+
+// ── SHIFTS MANAGEMENT ─────────────────────────────────────────────
+function renderShiftsList(shifts){
+  const list=document.getElementById('shifts-list');
+  if(!list)return;
+  if(!shifts.length){list.innerHTML='<p class="text-gray text-sm">Nessun turno definito.</p>';return;}
+  list.innerHTML=shifts.map(s=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--gray-lt);flex-wrap:wrap;gap:.5rem">
+      <div>
+        <strong style="font-size:.95rem">${s.name}</strong>
+        <span style="font-size:.8rem;color:var(--gray);margin-left:.75rem">
+          ${s.first_slot.substring(0,5)} – ${s.last_slot.substring(0,5)}
+        </span>
+        <span style="font-size:.78rem;color:var(--gold-dk);margin-left:.75rem">⏱ ${s.turnover_minutes} min turnover</span>
+      </div>
+      <div style="display:flex;gap:.5rem;align-items:center">
+        <button class="btn-secondary btn-sm" onclick="openEditShift(${s.id},'${s.name}','${s.first_slot.substring(0,5)}','${s.last_slot.substring(0,5)}',${s.turnover_minutes})">✏️</button>
+        <button class="btn-secondary btn-sm btn-danger" onclick="deleteShift(${s.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+async function addShift(){
+  const name=document.getElementById('sh-name')?.value.trim();
+  const first=document.getElementById('sh-first')?.value;
+  const last=document.getElementById('sh-last')?.value;
+  const turnover=parseInt(document.getElementById('sh-turnover')?.value)||90;
+  if(!name||!first||!last){showToast('Compila tutti i campi','error');return;}
+  if(first>=last){showToast('Il primo slot deve essere prima dell\'ultimo','error');return;}
+  // Count existing shifts to set sort_order
+  const existing=await(await adminFetch('/api/admin/shifts')).json();
+  if((existing.shifts||[]).length>=6){showToast('Massimo 6 turni consentiti','error');return;}
+  const sort_order=(existing.shifts||[]).length+1;
+  const res=await adminFetch('/api/admin/shifts',{method:'POST',body:JSON.stringify({name,first_slot:first,last_slot:last,turnover_minutes:turnover,sort_order})});
+  if(res.ok){
+    showToast('Turno aggiunto ✓');
+    document.getElementById('sh-name').value='';
+    document.getElementById('sh-first').value='';
+    document.getElementById('sh-last').value='';
+    document.getElementById('sh-turnover').value='90';
+    const d=await(await adminFetch('/api/admin/shifts')).json();
+    renderShiftsList(d.shifts||[]);
+  } else {const d=await res.json();showToast(d.error||d.errors?.[0]?.msg||'Errore','error');}
+}
+
+async function deleteShift(id){
+  if(!confirm('Eliminare questo turno?'))return;
+  const res=await adminFetch(`/api/admin/shifts/${id}`,{method:'DELETE'});
+  if(res.ok){showToast('Turno eliminato');const d=await(await adminFetch('/api/admin/shifts')).json();renderShiftsList(d.shifts||[]);}
+  else{const d=await res.json();showToast(d.error||'Errore','error');}
+}
+
+function openEditShift(id,name,first,last,turnover){
+  const newName=prompt('Nome turno:',name);if(newName===null)return;
+  const newFirst=prompt('Primo slot (HH:MM):',first);if(newFirst===null)return;
+  const newLast=prompt('Ultimo slot (HH:MM):',last);if(newLast===null)return;
+  const newTurnover=prompt('Turnover in minuti:',turnover);if(newTurnover===null)return;
+  if(!/^\d{2}:\d{2}$/.test(newFirst)||!/^\d{2}:\d{2}$/.test(newLast)){showToast('Formato orario non valido (HH:MM)','error');return;}
+  if(newFirst>=newLast){showToast('Il primo slot deve essere prima dell\'ultimo','error');return;}
+  adminFetch(`/api/admin/shifts/${id}`,{method:'PATCH',body:JSON.stringify({
+    name:newName.trim(),first_slot:newFirst,last_slot:newLast,turnover_minutes:parseInt(newTurnover)||90
+  })}).then(async r=>{
+    if(r.ok){showToast('Turno aggiornato ✓');const d=await(await adminFetch('/api/admin/shifts')).json();renderShiftsList(d.shifts||[]);}
+    else{const d=await r.json();showToast(d.error||'Errore','error');}
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2199,7 +2330,7 @@ const REG_OFFICE = 'Via degli Aranci 33, 80067 Sorrento (NA), Italia';
 const REA = 'NA-1105641';
 const RESTAURANT = 'Antico Frantoio';
 const RESTAURANT_ADDRESS = 'Via Casarlano 5, 80067 Sorrento (NA), Italia';
-const RESTAURANT_EMAIL = 'anticofrantoiosorrento@gmail.com';
+const RESTAURANT_EMAIL = 'prenotazioni@anticofrantoiosorrento.it';
 const RESTAURANT_PHONE = '+39 081 807 22 00';
 
 const POLICIES = {
