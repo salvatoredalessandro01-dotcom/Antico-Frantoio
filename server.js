@@ -47,6 +47,7 @@ async function initDB() {
       time TIME NOT NULL,
       adults INTEGER NOT NULL DEFAULT 1,
       children INTEGER NOT NULL DEFAULT 0,
+      infants INTEGER NOT NULL DEFAULT 0,
       notes TEXT,
       status VARCHAR(20) NOT NULL DEFAULT 'pending',
       deposit_required BOOLEAN DEFAULT false,
@@ -141,11 +142,26 @@ async function initDB() {
       ('slot_duration_minutes', '60'),
       ('min_booking_notice_hours', '3'),
       ('restaurant_email', ''),
-      ('restaurant_name', 'Antico Frantoio')
+      ('restaurant_name', 'Antico Frantoio'),
+      ('cat_adults_label', 'Adulti'),
+      ('cat_adults_min_age', '13'),
+      ('cat_children_label', 'Bambini'),
+      ('cat_children_min_age', '3'),
+      ('cat_infants_label', 'Neonati'),
+      ('cat_infants_min_age', '0')
     ON CONFLICT (key) DO NOTHING;
 
-    -- Migrate: add max_covers_per_slot if missing
+    -- Migrate: add settings if missing
     INSERT INTO settings (key, value) VALUES ('max_covers_per_slot', '120') ON CONFLICT (key) DO NOTHING;
+    INSERT INTO settings (key, value) VALUES ('cat_adults_label', 'Adulti') ON CONFLICT (key) DO NOTHING;
+    INSERT INTO settings (key, value) VALUES ('cat_adults_min_age', '13') ON CONFLICT (key) DO NOTHING;
+    INSERT INTO settings (key, value) VALUES ('cat_children_label', 'Bambini') ON CONFLICT (key) DO NOTHING;
+    INSERT INTO settings (key, value) VALUES ('cat_children_min_age', '3') ON CONFLICT (key) DO NOTHING;
+    INSERT INTO settings (key, value) VALUES ('cat_infants_label', 'Neonati') ON CONFLICT (key) DO NOTHING;
+    INSERT INTO settings (key, value) VALUES ('cat_infants_min_age', '0') ON CONFLICT (key) DO NOTHING;
+
+    -- Migrate: add infants column to bookings if missing
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS infants INTEGER NOT NULL DEFAULT 0;
 
     -- Default shifts: Pranzo + Cena (only inserted if shifts table is empty)
     INSERT INTO shifts (name, first_slot, last_slot, turnover_minutes, sort_order)
@@ -363,13 +379,11 @@ async function getSlotAvailability(date, time, excludeBookingId = null) {
   for (const row of result.rows) {
     const [bh, bm] = row.time.substring(0,5).split(':').map(Number);
     const bookingMin = bh * 60 + bm;
-    // Get turnover for the booking's own shift
     const bookingShift = await getShiftForTime(row.time.substring(0,5));
     const turnover = bookingShift ? bookingShift.turnover_minutes : defaultTurnover;
-    // Booking occupies from bookingMin to bookingMin + turnover
-    // Overlaps with our slot if: bookingMin <= slotMin < bookingMin + turnover
     if (bookingMin <= slotMin && slotMin < bookingMin + turnover) {
       tablesUsed++;
+      // Infants excluded from cover count — they don't occupy a seat
       guestsIn += (parseInt(row.adults) || 0) + (parseInt(row.children) || 0);
     }
   }
@@ -738,6 +752,7 @@ app.post('/api/reservations', reservationLimiter, [
   body('time').matches(/^\d{2}:\d{2}$/),
   body('adults').isInt({ min:1, max:20 }),
   body('children').isInt({ min:0, max:10 }),
+  body('infants').optional().isInt({ min:0, max:10 }),
   body('notes').optional().trim().isLength({ max:500 }).escape(),
   body('payDeposit').optional().isBoolean(),
   body('language').optional().isIn(['it','en']),
@@ -746,7 +761,7 @@ app.post('/api/reservations', reservationLimiter, [
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
-  const { name, email, phone, date, time, adults, children, notes, payDeposit, language = 'it' } = req.body;
+  const { name, email, phone, date, time, adults, children, infants = 0, notes, payDeposit, language = 'it' } = req.body;
   try {
     const closure = await pool.query('SELECT 1 FROM special_closures WHERE date=$1', [date]);
     if (closure.rows.length) return res.status(409).json({ error: 'Restaurant closed on this date' });
@@ -782,9 +797,9 @@ app.post('/api/reservations', reservationLimiter, [
     const status = (depositReq && payDeposit) ? 'pending' : 'confirmed';
 
     const result = await pool.query(`
-      INSERT INTO bookings (name,email,phone,date,time,adults,children,notes,status,deposit_required,language,source)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'online') RETURNING *
-    `, [name, email, phone, date, time, adults, children, notes, status, depositReq, language]);
+      INSERT INTO bookings (name,email,phone,date,time,adults,children,infants,notes,status,deposit_required,language,source)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'online') RETURNING *
+    `, [name, email, phone, date, time, adults, children, infants, notes, status, depositReq, language]);
 
     const booking = result.rows[0];
 
@@ -917,6 +932,7 @@ app.post('/api/admin/bookings', authMiddleware, adminOrAbove, [
   body('time').matches(/^\d{2}:\d{2}$/),
   body('adults').isInt({ min:1, max:20 }),
   body('children').isInt({ min:0, max:10 }),
+  body('infants').optional().isInt({ min:0, max:10 }),
   body('notes').optional().trim().isLength({ max:500 }),
   body('language').optional().isIn(['it','en']),
   body('table_number').optional({ nullable:true }),
@@ -926,13 +942,13 @@ app.post('/api/admin/bookings', authMiddleware, adminOrAbove, [
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
-  const { name, email, phone, date, time, adults, children, notes, language='it', table_number, payment_method, deposit_paid=false, send_email=true } = req.body;
+  const { name, email, phone, date, time, adults, children, infants = 0, notes, language='it', table_number, payment_method, deposit_paid=false, send_email=true } = req.body;
   try {
     const depositReq = await requiresDeposit(date, time);
     const result = await pool.query(`
-      INSERT INTO bookings (name,email,phone,date,time,adults,children,notes,status,deposit_required,deposit_paid,payment_method,table_number,language,source,created_by)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'confirmed',$9,$10,$11,$12,$13,'manual',$14) RETURNING *
-    `, [name,email,phone,date,time,adults,children,notes,depositReq,deposit_paid,payment_method||null,table_number||null,language,req.user.username]);
+      INSERT INTO bookings (name,email,phone,date,time,adults,children,infants,notes,status,deposit_required,deposit_paid,payment_method,table_number,language,source,created_by)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'confirmed',$10,$11,$12,$13,$14,'manual',$15) RETURNING *
+    `, [name,email,phone,date,time,adults,children,infants,notes,depositReq,deposit_paid,payment_method||null,table_number||null,language,req.user.username]);
     const booking = result.rows[0];
     if (send_email) await sendConfirmationEmail(booking, language);
     res.status(201).json({ booking: { ...booking, date_display:formatDateDisplay(booking.date), time_display:formatTime(booking.time) } });
@@ -947,6 +963,7 @@ app.patch('/api/admin/bookings/:id', authMiddleware, adminOrAboveOrConcierge, [
   body('time').optional().matches(/^\d{2}:\d{2}$/),
   body('adults').optional().isInt({ min:1, max:20 }),
   body('children').optional().isInt({ min:0, max:10 }),
+  body('infants').optional().isInt({ min:0, max:10 }),
   body('notes').optional().trim().isLength({ max:500 }),
   body('table_number').optional({ nullable:true }),
   body('payment_method').optional({ nullable:true }).isIn(['cash','card','bank_transfer','']),
@@ -957,7 +974,7 @@ app.patch('/api/admin/bookings/:id', authMiddleware, adminOrAboveOrConcierge, [
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
   const { id } = req.params;
-  const { status, date, time, adults, children, notes, table_number, payment_method, deposit_paid, send_amendment_email = true } = req.body;
+  const { status, date, time, adults, children, infants, notes, table_number, payment_method, deposit_paid, send_amendment_email = true } = req.body;
   const role = req.user.role;
 
   // Concierge can ONLY toggle arrived ↔ confirmed
@@ -982,13 +999,14 @@ app.patch('/api/admin/bookings/:id', authMiddleware, adminOrAboveOrConcierge, [
   }
 
   const updates = []; const params = [];
-  const isAmendment = date || time || adults !== undefined || children !== undefined;
+  const isAmendment = date || time || adults !== undefined || children !== undefined || infants !== undefined;
 
   if (status !== undefined) { params.push(status); updates.push(`status=$${params.length}`); }
   if (date !== undefined) { params.push(date); updates.push(`date=$${params.length}`); }
   if (time !== undefined) { params.push(time); updates.push(`time=$${params.length}`); }
   if (adults !== undefined) { params.push(adults); updates.push(`adults=$${params.length}`); }
   if (children !== undefined) { params.push(children); updates.push(`children=$${params.length}`); }
+  if (infants !== undefined) { params.push(infants); updates.push(`infants=$${params.length}`); }
   if (notes !== undefined) { params.push(notes); updates.push(`notes=$${params.length}`); }
   if (table_number !== undefined) { params.push(table_number||null); updates.push(`table_number=$${params.length}`); }
   if (payment_method !== undefined) { params.push(payment_method||null); updates.push(`payment_method=$${params.length}`); }
