@@ -86,7 +86,7 @@ input.error,select.error{border-color:var(--red)}
 textarea{resize:vertical;min-height:100px}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
 .phone-row{display:grid;grid-template-columns:6rem 1fr;gap:.5rem}
-.guest-split{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.guest-split{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem}
 .slots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(5rem,1fr));gap:.5rem;margin-top:.5rem}
 .slot-btn{padding:.5rem .25rem;border:1px solid var(--gray-lt);border-radius:var(--radius);background:var(--cream);color:var(--dark);font-size:.8rem;transition:all var(--transition);text-align:center}
 .slot-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
@@ -478,11 +478,18 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
               <div class="guest-split">
                 <div>
                   <input type="number" id="adults" min="1" max="20" value="2" onchange="updateSlots()">
-                  <div style="font-size:.7rem;color:var(--gray);margin-top:.25rem;text-align:center" data-i18n="field.adults">Adulti</div>
+                  <div style="font-size:.7rem;color:var(--gray);margin-top:.25rem;text-align:center" id="label-adults" data-i18n="field.adults">Adulti</div>
+                  <div style="font-size:.62rem;color:var(--gray);text-align:center" id="age-adults">13+ anni</div>
                 </div>
                 <div>
                   <input type="number" id="children" min="0" max="10" value="0">
-                  <div style="font-size:.7rem;color:var(--gray);margin-top:.25rem;text-align:center" data-i18n="field.children">Bambini</div>
+                  <div style="font-size:.7rem;color:var(--gray);margin-top:.25rem;text-align:center" id="label-children" data-i18n="field.children">Bambini</div>
+                  <div style="font-size:.62rem;color:var(--gray);text-align:center" id="age-children">3–12 anni</div>
+                </div>
+                <div>
+                  <input type="number" id="infants" min="0" max="10" value="0">
+                  <div style="font-size:.7rem;color:var(--gray);margin-top:.25rem;text-align:center" id="label-infants" data-i18n="field.infants">Neonati</div>
+                  <div style="font-size:.62rem;color:var(--gray);text-align:center" id="age-infants">0–2 anni</div>
                 </div>
               </div>
             </div>
@@ -678,6 +685,10 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
       <div class="form-group">
         <label>Bambini</label>
         <input type="number" id="amend-children" min="0" max="10">
+      </div>
+      <div class="form-group">
+        <label>Neonati</label>
+        <input type="number" id="amend-infants" min="0" max="10">
       </div>
     </div>
     <div class="form-row">
@@ -908,7 +919,7 @@ async function checkCancellationUrl() {
         <div class="summary-row"><span class="summary-label">${isIT?'Nome':'Name'}</span><span class="summary-value">${b.name}</span></div>
         <div class="summary-row"><span class="summary-label">${isIT?'Data':'Date'}</span><span class="summary-value">${b.date_display}</span></div>
         <div class="summary-row"><span class="summary-label">${isIT?'Orario':'Time'}</span><span class="summary-value">${b.time_display}</span></div>
-        <div class="summary-row"><span class="summary-label">${isIT?'Ospiti':'Guests'}</span><span class="summary-value">${b.adults} ${isIT?'adulti':'adults'}, ${b.children} ${isIT?'bambini':'children'}</span></div>
+        <div class="summary-row"><span class="summary-label">${isIT?'Ospiti':'Guests'}</span><span class="summary-value">${b.adults} ${isIT?'adulti':'adults'}, ${b.children} ${isIT?'bambini':'children'}${b.infants>0?`, ${b.infants} ${isIT?'neonati':'infants'}`:''}</span></div>
       </div>
       <p class="text-gray text-sm" style="margin-bottom:1.5rem;font-size:.78rem">
         ${isIT?'⚠️ Le cancellazioni devono essere effettuate almeno 24 ore prima.':'⚠️ Cancellations must be made at least 24 hours in advance.'}
@@ -1093,13 +1104,14 @@ document.getElementById('reservation-form').addEventListener('submit',async func
   btn.disabled=true;spinner.style.display='block';btn.querySelector('[data-i18n]').textContent=t('form.submitting');
   const adults=parseInt(document.getElementById('adults').value);
   const children=parseInt(document.getElementById('children').value);
+  const infants=parseInt(document.getElementById('infants').value)||0;
   const date=document.getElementById('res-date').value;
   const payDeposit=document.getElementById('pay-deposit').checked;
   const payload={
     name:document.getElementById('full-name').value.trim(),
     email:document.getElementById('email').value.trim(),
     phone:document.getElementById('phone-prefix').value+' '+document.getElementById('phone').value.trim(),
-    date,time:selectedTime,adults,children,
+    date,time:selectedTime,adults,children,infants,
     notes:document.getElementById('notes').value.trim(),
     payDeposit,language:lang,gdprConsent:'true',
   };
@@ -1107,12 +1119,12 @@ document.getElementById('reservation-form').addEventListener('submit',async func
     const res=await fetch(`${API_BASE}/api/reservations`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||'Server error');
-    currentBookingData={id:data.booking.id,date,time:selectedTime,name:payload.name,email:payload.email,phone:payload.phone,adults,children,notes:payload.notes,status:data.booking.status,deposit:depositRequired,depositPaid:false};
+    currentBookingData={id:data.booking.id,date,time:selectedTime,name:payload.name,email:payload.email,phone:payload.phone,adults,children,infants,notes:payload.notes,status:data.booking.status,deposit:depositRequired,depositPaid:false};
     btn.disabled=false;spinner.style.display='none';btn.querySelector('[data-i18n]').textContent=t('form.submit');
     if(data.requiresPayment&&data.stripeUrl)window.location.href=data.stripeUrl;
     else if(payDeposit)showPaymentRedirect();else showConfirmation();
   } catch(err) {
-    currentBookingData={id:'B'+Date.now().toString().slice(-4),date,time:selectedTime,name:payload.name,email:payload.email,phone:payload.phone,adults,children,notes:payload.notes,status:'confirmed',deposit:depositRequired,depositPaid:false};
+    currentBookingData={id:'B'+Date.now().toString().slice(-4),date,time:selectedTime,name:payload.name,email:payload.email,phone:payload.phone,adults,children,infants,notes:payload.notes,status:'confirmed',deposit:depositRequired,depositPaid:false};
     btn.disabled=false;spinner.style.display='none';btn.querySelector('[data-i18n]').textContent=t('form.submit');
     if(payDeposit)showPaymentRedirect();else showConfirmation();
   }
@@ -1169,6 +1181,29 @@ const dateInput=document.getElementById('res-date');
 dateInput.min=todayStr();
 const maxDate=new Date();maxDate.setMonth(maxDate.getMonth()+3);
 dateInput.max=maxDate.toISOString().split('T')[0];
+
+// Load guest category labels from settings and update public booking form
+(async function loadGuestCategories(){
+  try {
+    const res=await fetch(`${API_BASE}/api/admin/settings`);
+    if(!res.ok)return;
+    const s=await res.json();
+    const aLabel=s.cat_adults_label||'Adulti';
+    const cLabel=s.cat_children_label||'Bambini';
+    const iLabel=s.cat_infants_label||'Neonati';
+    const aAge=parseInt(s.cat_adults_min_age)||13;
+    const cAge=parseInt(s.cat_children_min_age)||3;
+    // Update labels and age hints in booking form
+    const elAL=document.getElementById('label-adults');if(elAL)elAL.textContent=aLabel;
+    const elCL=document.getElementById('label-children');if(elCL)elCL.textContent=cLabel;
+    const elIL=document.getElementById('label-infants');if(elIL)elIL.textContent=iLabel;
+    const elAA=document.getElementById('age-adults');if(elAA)elAA.textContent=`${aAge}+ anni`;
+    const elCA=document.getElementById('age-children');if(elCA)elCA.textContent=`${cAge}–${aAge-1} anni`;
+    const elIA=document.getElementById('age-infants');if(elIA)elIA.textContent=`0–${cAge-1} anni`;
+    // Store for use in summary
+    window._guestLabels={adults:aLabel,children:cLabel,infants:iLabel};
+  } catch(e){}
+})();
 
 // ═══════════════════════════════════════════════════════════════
 // ADMIN AUTH & ROLES
@@ -1448,7 +1483,7 @@ async function loadBookings() {
         <td>${paymentPill(b.payment_method)}</td>
         <td><span class="source-badge source-${b.source||'online'}">${b.source==='manual'?'📞 Tel':'🌐 Web'}</span></td>
         ${canAmend?`<td style="white-space:nowrap">
-          ${b.status!=='cancelled'?`<button class="btn-secondary btn-sm" onclick="openAmendModal('${b.id}','${fmtDate(b.date)}','${fmtTime(b.time)}','${b.name}','${b.date_display||fmtDate(b.date)}',${b.adults},${b.children},'${b.status}','${b.table_number||''}','${b.payment_method||''}',${b.deposit_paid},'${(b.notes||'').replace(/'/g,"\\'")}','${b.date}','${fmtTime(b.time)}')">✏️ Modifica</button>`:''}
+          ${b.status!=='cancelled'?`<button class="btn-secondary btn-sm" onclick="openAmendModal('${b.id}','${fmtDate(b.date)}','${fmtTime(b.time)}','${b.name}','${b.date_display||fmtDate(b.date)}',${b.adults},${b.children},${b.infants||0},'${b.status}','${b.table_number||''}','${b.payment_method||''}',${b.deposit_paid},'${(b.notes||'').replace(/'/g,"\\'")}','${b.date}','${fmtTime(b.time)}')">✏️ Modifica</button>`:''}
           ${currentUser.role==='superadmin'&&b.status==='cancelled'?`<button class="btn-secondary btn-sm btn-danger" onclick="permanentlyDeleteBooking('${b.id}')" title="Elimina definitivamente" style="margin-left:.25rem">🗑️ Elimina</button>`:''}
         </td>`:''}
       </tr>`).join('');
@@ -1621,12 +1656,15 @@ async function loadArrivals(silent = false) {
     // Summary counts
     const arrived = bookings.filter(b => b.status === 'arrived').length;
     const waiting = bookings.filter(b => b.status === 'confirmed' || b.status === 'pending').length;
-    const covers  = bookings.filter(b => b.status !== 'cancelled').reduce((s,b) => s+b.adults+b.children, 0);
+    const totalAdults   = bookings.filter(b=>b.status!=='cancelled').reduce((s,b)=>s+(parseInt(b.adults)||0),0);
+    const totalChildren = bookings.filter(b=>b.status!=='cancelled').reduce((s,b)=>s+(parseInt(b.children)||0),0);
+    const totalInfants  = bookings.filter(b=>b.status!=='cancelled').reduce((s,b)=>s+(parseInt(b.infants)||0),0);
+    const covers = totalAdults + totalChildren; // infants excluded from cover count
     const summaryEl = document.getElementById('arr-summary');
     if(summaryEl) summaryEl.innerHTML =
       `<span style="color:var(--green);font-weight:500">✓ ${arrived} arrivati</span> &nbsp;·&nbsp; ` +
       `<span style="color:var(--gold-dk)">⏳ ${waiting} in attesa</span> &nbsp;·&nbsp; ` +
-      `${covers} coperti totali`;
+      `${covers} coperti: <strong>${totalAdults}</strong> adulti · <strong>${totalChildren}</strong> bambini · <strong>${totalInfants}</strong> neonati`;
 
     if(!bookings.length) {
       tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2.5rem;color:var(--gray)">Nessuna prenotazione per questa selezione</td></tr>`;
@@ -1671,8 +1709,8 @@ async function loadArrivals(silent = false) {
         <td><strong style="font-size:.95rem">${highlightedName}</strong></td>
         <td style="font-size:.85rem">${b.phone||'—'}</td>
         <td style="font-size:.9rem;text-align:center">
-          <strong>${b.adults+b.children}</strong><br>
-          <span style="font-size:.72rem;color:var(--gray)">${b.adults}A · ${b.children}B</span>
+          <strong>${(parseInt(b.adults)||0)+(parseInt(b.children)||0)}</strong><br>
+          <span style="font-size:.68rem;color:var(--gray)">${b.adults}A · ${b.children}B${b.infants>0?` · ${b.infants}N`:''}</span>
         </td>
         <td style="text-align:center;font-size:.9rem">
           ${b.table_number ? `<strong>T${b.table_number}</strong>` : '<span style="color:var(--gray-lt)">—</span>'}
@@ -1721,7 +1759,7 @@ async function markArrived(bookingId, arrived) {
 // ═══════════════════════════════════════════════════════════════
 // AMEND BOOKING MODAL
 // ═══════════════════════════════════════════════════════════════
-function openAmendModal(id,dateFmt,timeFmt,name,dateDisplay,adults,children,status,tableNum,payMethod,depositPaid,notes,dateRaw,timeRaw){
+function openAmendModal(id,dateFmt,timeFmt,name,dateDisplay,adults,children,infants,status,tableNum,payMethod,depositPaid,notes,dateRaw,timeRaw){
   document.getElementById('amend-id').value=id;
   document.getElementById('amend-booking-info').textContent=`${name} — ${dateFmt} ${timeFmt}`;
   document.getElementById('amend-date').value=dateRaw||'';
@@ -1730,6 +1768,7 @@ function openAmendModal(id,dateFmt,timeFmt,name,dateDisplay,adults,children,stat
   document.getElementById('amend-time').dataset.original=timeRaw||'';
   document.getElementById('amend-adults').value=adults||2;
   document.getElementById('amend-children').value=children||0;
+  document.getElementById('amend-infants').value=infants||0;
   document.getElementById('amend-status').value=status||'confirmed';
   document.getElementById('amend-table').value=tableNum||'';
   document.getElementById('amend-payment').value=payMethod||'';
@@ -1751,11 +1790,11 @@ async function saveAmendment(){
   const origTime=document.getElementById('amend-time').dataset.original;
 
   const body={
-    // Only send date/time if they actually changed — avoids false availability conflict
     date: newDate && newDate !== origDate ? newDate : undefined,
     time: newTime && newTime !== origTime ? newTime : undefined,
     adults:parseInt(document.getElementById('amend-adults').value)||undefined,
     children:parseInt(document.getElementById('amend-children').value)||0,
+    infants:parseInt(document.getElementById('amend-infants').value)||0,
     status:document.getElementById('amend-status').value,
     table_number:document.getElementById('amend-table').value||null,
     payment_method:document.getElementById('amend-payment').value||null,
@@ -1804,6 +1843,7 @@ function renderNewBookingTab(container){
       <div class="form-row">
         <div class="form-group"><label>Adulti <span class="req">*</span></label><input type="number" id="mb-adults" min="1" max="20" value="2"></div>
         <div class="form-group"><label>Bambini</label><input type="number" id="mb-children" min="0" max="10" value="0"></div>
+        <div class="form-group"><label>Neonati</label><input type="number" id="mb-infants" min="0" max="10" value="0"></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Numero Tavolo</label><input type="number" id="mb-table" min="1" placeholder="Es. 5"></div>
@@ -1834,10 +1874,11 @@ async function createManualBooking(){
   const time=document.getElementById('mb-time').value;
   const adults=parseInt(document.getElementById('mb-adults').value);
   const children=parseInt(document.getElementById('mb-children').value)||0;
+  const infants=parseInt(document.getElementById('mb-infants').value)||0;
   if(!name||!email||!phone||!date||!time||!adults){showToast('Compila tutti i campi obbligatori','error');return;}
   const spinner=document.getElementById('mb-spinner');
   spinner.style.display='block';
-  const body={name,email,phone,date,time:time.substring(0,5),adults,children,
+  const body={name,email,phone,date,time:time.substring(0,5),adults,children,infants,
     notes:document.getElementById('mb-notes').value.trim(),
     language:document.getElementById('mb-lang').value,
     table_number:document.getElementById('mb-table').value||undefined,
@@ -2037,6 +2078,36 @@ async function renderSettingsTab(container){
         <div class="form-group" style="justify-content:flex-end"><button class="btn-secondary" onclick="addShift()">+ Aggiungi</button></div>
       </div>
     </div>
+    <div class="admin-card">
+      <h4>Categorie Ospiti</h4>
+      <p class="text-sm text-gray" style="margin-bottom:1rem">Definisci le fasce d'età per ogni categoria. I neonati non contano ai fini della capienza. Le etichette appaiono nel modulo di prenotazione online.</p>
+      <div class="settings-row">
+        <div><div class="settings-label">Adulti — etichetta</div><div class="settings-sub">Età minima per questa categoria</div></div>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <input type="text" id="cat-adults-label" value="Adulti" style="width:100px;padding:.4rem .6rem">
+          <span style="font-size:.8rem;color:var(--gray)">da</span>
+          <input type="number" id="cat-adults-age" value="13" min="1" max="30" style="width:55px;padding:.4rem .6rem">
+          <span style="font-size:.8rem;color:var(--gray)">anni</span>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-label">Bambini — etichetta</div><div class="settings-sub">Da questa età fino ad Adulti-1</div></div>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <input type="text" id="cat-children-label" value="Bambini" style="width:100px;padding:.4rem .6rem">
+          <span style="font-size:.8rem;color:var(--gray)">da</span>
+          <input type="number" id="cat-children-age" value="3" min="0" max="20" style="width:55px;padding:.4rem .6rem">
+          <span style="font-size:.8rem;color:var(--gray)">anni</span>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-label">Neonati — etichetta</div><div class="settings-sub">Sotto l'età Bambini — non contano come coperti</div></div>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <input type="text" id="cat-infants-label" value="Neonati" style="width:100px;padding:.4rem .6rem">
+          <span style="font-size:.8rem;color:var(--gray);font-style:italic">0 – (Bambini-1) anni</span>
+        </div>
+      </div>
+      <button class="btn-secondary btn-sm mt1" onclick="saveAgeCategories()">Salva</button>
+    </div>
   `;
   // Load data
   try {
@@ -2052,6 +2123,12 @@ async function renderSettingsTab(container){
     document.getElementById('total-tables').value=s.total_tables||'15';
     document.getElementById('max-covers').value=s.max_covers_per_slot||'120';
     document.getElementById('min-notice').value=s.min_booking_notice_hours||'3';
+    // Age categories
+    document.getElementById('cat-adults-label').value=s.cat_adults_label||'Adulti';
+    document.getElementById('cat-adults-age').value=s.cat_adults_min_age||'13';
+    document.getElementById('cat-children-label').value=s.cat_children_label||'Bambini';
+    document.getElementById('cat-children-age').value=s.cat_children_min_age||'3';
+    document.getElementById('cat-infants-label').value=s.cat_infants_label||'Neonati';
     // Opening hours editor
     ohData={};
     (ohR.openingHours||[]).forEach(r=>{ohData[r.day_of_week]={is_open:r.is_open,hours:Array.isArray(r.hours)?r.hours:JSON.parse(r.hours||'[]')};});
@@ -2187,6 +2264,22 @@ async function saveCapacity(){
   };
   const r=await adminFetch('/api/admin/settings',{method:'PATCH',body:JSON.stringify(body)});
   showToast(r.ok?'Capacità salvata ✓':'Errore',r.ok?'success':'error');
+}
+
+async function saveAgeCategories(){
+  const body={
+    cat_adults_label:document.getElementById('cat-adults-label')?.value.trim()||'Adulti',
+    cat_adults_min_age:document.getElementById('cat-adults-age')?.value||'13',
+    cat_children_label:document.getElementById('cat-children-label')?.value.trim()||'Bambini',
+    cat_children_min_age:document.getElementById('cat-children-age')?.value||'3',
+    cat_infants_label:document.getElementById('cat-infants-label')?.value.trim()||'Neonati',
+  };
+  // Validate: children_min_age must be less than adults_min_age
+  if(parseInt(body.cat_children_min_age)>=parseInt(body.cat_adults_min_age)){
+    showToast('L\'età minima Bambini deve essere inferiore all\'età minima Adulti','error');return;
+  }
+  const r=await adminFetch('/api/admin/settings',{method:'PATCH',body:JSON.stringify(body)});
+  showToast(r.ok?'Categorie ospiti salvate ✓':'Errore',r.ok?'success':'error');
 }
 
 // ── SHIFTS MANAGEMENT ─────────────────────────────────────────────
