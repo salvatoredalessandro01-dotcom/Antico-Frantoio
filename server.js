@@ -118,6 +118,16 @@ async function initDB() {
       updated_at TIMESTAMPTZ DEFAULT NOW()
     );
 
+    CREATE TABLE IF NOT EXISTS shifts (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(50) NOT NULL,
+      first_slot TIME NOT NULL,
+      last_slot TIME NOT NULL,
+      turnover_minutes INTEGER NOT NULL DEFAULT 90,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
     INSERT INTO settings (key, value) VALUES
       ('deposit_amount', '25'),
       ('deposit_required_weekends', 'true'),
@@ -126,12 +136,24 @@ async function initDB() {
       ('deposit_required_never', 'false'),
       ('max_tables_per_slot', '8'),
       ('total_tables', '15'),
+      ('max_covers_per_slot', '120'),
       ('max_guests_per_slot', '45'),
       ('slot_duration_minutes', '60'),
       ('min_booking_notice_hours', '3'),
       ('restaurant_email', ''),
       ('restaurant_name', 'Antico Frantoio')
     ON CONFLICT (key) DO NOTHING;
+
+    -- Migrate: add max_covers_per_slot if missing
+    INSERT INTO settings (key, value) VALUES ('max_covers_per_slot', '120') ON CONFLICT (key) DO NOTHING;
+
+    -- Default shifts: Pranzo + Cena (only inserted if shifts table is empty)
+    INSERT INTO shifts (name, first_slot, last_slot, turnover_minutes, sort_order)
+    SELECT 'Pranzo', '12:00', '14:30', 90, 1
+    WHERE NOT EXISTS (SELECT 1 FROM shifts);
+    INSERT INTO shifts (name, first_slot, last_slot, turnover_minutes, sort_order)
+    SELECT 'Cena', '18:30', '22:30', 90, 2
+    WHERE NOT EXISTS (SELECT 1 FROM shifts WHERE sort_order = 2);
 
     -- Migrate existing deposit_dates table: add shift column if missing
     ALTER TABLE deposit_dates ADD COLUMN IF NOT EXISTS shift VARCHAR(10) NOT NULL DEFAULT 'all';
@@ -189,22 +211,46 @@ async function getOpeningHours() {
 }
 function invalidateOHCache() { ohCache = null; }
 
-function generateSlotsFromHours(hours, slotDuration) {
+// ── SHIFTS CACHE ──────────────────────────────────────────────────
+let shiftsCache = null, shiftsCacheTime = 0;
+async function getShifts() {
+  if (shiftsCache && Date.now() - shiftsCacheTime < 60000) return shiftsCache;
+  const res = await pool.query('SELECT * FROM shifts ORDER BY sort_order, first_slot');
+  shiftsCache = res.rows;
+  shiftsCacheTime = Date.now();
+  return shiftsCache;
+}
+function invalidateShiftsCache() { shiftsCache = null; }
+
+// Returns the shift object a given time belongs to (null if none defined)
+async function getShiftForTime(timeStr) {
+  const shifts = await getShifts();
+  const [h, m] = timeStr.substring(0,5).split(':').map(Number);
+  const tMin = h * 60 + m;
+  return shifts.find(s => {
+    const [fh, fm] = s.first_slot.substring(0,5).split(':').map(Number);
+    const [lh, lm] = s.last_slot.substring(0,5).split(':').map(Number);
+    return tMin >= fh*60+fm && tMin <= lh*60+lm;
+  }) || null;
+}
+
+function generateSlotsFromHours(hours) {
+  // Always 15-minute spacing
   const slots = [];
   (hours || []).forEach(([open, close]) => {
     const [oh, om] = open.split(':').map(Number);
     const [ch, cm] = close.split(':').map(Number);
     let cur = oh * 60 + om;
     const end = ch * 60 + cm;
-    while (cur + slotDuration <= end) {
+    while (cur <= end) {
       slots.push(`${String(Math.floor(cur/60)).padStart(2,'0')}:${String(cur%60).padStart(2,'0')}`);
-      cur += 30;
+      cur += 15;
     }
   });
   return slots;
 }
 
-async function generateSlots(date, slotDuration = 60) {
+async function generateSlots(date) {
   const dayOfWeek = new Date(date + 'T00:00:00').getDay();
 
   const closure = await pool.query('SELECT 1 FROM special_closures WHERE date=$1', [date]);
@@ -221,8 +267,24 @@ async function generateSlots(date, slotDuration = 60) {
     if (!hours) return [];
   }
 
-  let slots = generateSlotsFromHours(hours, slotDuration);
+  // Generate all 15-min slots within opening hours
+  let slots = generateSlotsFromHours(hours);
 
+  // Filter to only slots that fall within a defined shift window
+  const shifts = await getShifts();
+  if (shifts.length > 0) {
+    slots = slots.filter(slot => {
+      const [sh, sm] = slot.split(':').map(Number);
+      const slotMin = sh * 60 + sm;
+      return shifts.some(s => {
+        const [fh, fm] = s.first_slot.substring(0,5).split(':').map(Number);
+        const [lh, lm] = s.last_slot.substring(0,5).split(':').map(Number);
+        return slotMin >= fh*60+fm && slotMin <= lh*60+lm;
+      });
+    });
+  }
+
+  // Remove partial closures
   const partials = await pool.query('SELECT block_from, block_until FROM partial_closures WHERE date=$1', [date]);
   if (partials.rows.length) {
     slots = slots.filter(slot => {
@@ -243,7 +305,7 @@ function isWeekend(date) {
   return d === 0 || d === 6;
 }
 
-// Returns true if a given time falls within a shift window
+// Returns true if a given time falls within a deposit shift window
 // shift: 'all' | 'lunch' (before 17:00) | 'evening' (17:00 onwards)
 function timeMatchesShift(time, shift) {
   if (!shift || shift === 'all') return true;
@@ -265,7 +327,6 @@ async function requiresDeposit(date, time = null) {
   for (const dd of depositDates.rows) {
     const dateMatch = (dd.is_recurring && dd.date_value === mmdd) || (!dd.is_recurring && dd.date_value === date);
     if (dateMatch) {
-      // If no time provided (e.g. just checking the date), return true if any shift matches
       if (!time) return true;
       if (timeMatchesShift(time, dd.shift)) return true;
     }
@@ -282,19 +343,44 @@ async function requiresDeposit(date, time = null) {
 
 async function getSlotAvailability(date, time, excludeBookingId = null) {
   const maxTables = parseInt(await getSetting('max_tables_per_slot')) || 8;
-  const maxGuests = parseInt(await getSetting('max_guests_per_slot')) || 45;
-  let query = `SELECT COUNT(*) as tables, COALESCE(SUM(adults + children), 0) as guests FROM bookings WHERE date=$1 AND time=$2 AND status != 'cancelled'`;
-  const params = [date, time];
+  const maxCovers = parseInt(await getSetting('max_covers_per_slot')) || 120;
+
+  // Get the shift for this slot to know its turnover duration
+  const slotShift = await getShiftForTime(time);
+  const defaultTurnover = 90;
+
+  // Convert slot time to minutes
+  const [sh, sm] = time.substring(0,5).split(':').map(Number);
+  const slotMin = sh * 60 + sm;
+
+  // Fetch all non-cancelled bookings for this date
+  let query = `SELECT time, adults, children FROM bookings WHERE date=$1 AND status != 'cancelled'`;
+  const params = [date];
   if (excludeBookingId) { params.push(excludeBookingId); query += ` AND id != $${params.length}`; }
   const result = await pool.query(query, params);
-  const tablesUsed = parseInt(result.rows[0].tables) || 0;
-  const guestsIn = parseInt(result.rows[0].guests) || 0;
+
+  let tablesUsed = 0, guestsIn = 0;
+  for (const row of result.rows) {
+    const [bh, bm] = row.time.substring(0,5).split(':').map(Number);
+    const bookingMin = bh * 60 + bm;
+    // Get turnover for the booking's own shift
+    const bookingShift = await getShiftForTime(row.time.substring(0,5));
+    const turnover = bookingShift ? bookingShift.turnover_minutes : defaultTurnover;
+    // Booking occupies from bookingMin to bookingMin + turnover
+    // Overlaps with our slot if: bookingMin <= slotMin < bookingMin + turnover
+    if (bookingMin <= slotMin && slotMin < bookingMin + turnover) {
+      tablesUsed++;
+      guestsIn += (parseInt(row.adults) || 0) + (parseInt(row.children) || 0);
+    }
+  }
+
   return {
     tablesUsed, tablesAvail: maxTables - tablesUsed,
-    guestsIn, guestsAvail: maxGuests - guestsIn,
-    available: tablesUsed < maxTables && guestsIn < maxGuests,
+    guestsIn, coversAvail: maxCovers - guestsIn,
+    available: tablesUsed < maxTables && guestsIn < maxCovers,
   };
 }
+
 
 // ── DATE HELPERS ─────────────────────────────────────────────────
 function formatDateDisplay(date) {
@@ -575,8 +661,7 @@ app.get('/api/availability', async (req, res) => {
     const closure = await pool.query('SELECT reason FROM special_closures WHERE date=$1', [date]);
     if (closure.rows.length) return res.json({ available: false, reason: 'closed', closureReason: closure.rows[0].reason });
 
-    const slotDuration = parseInt(await getSetting('slot_duration_minutes')) || 60;
-    const slots = await generateSlots(date, slotDuration);
+    const slots = await generateSlots(date);
     if (!slots.length) return res.json({ available: false, reason: 'closed' });
 
     const minNoticeHours = parseInt(await getSetting('min_booking_notice_hours')) || 3;
@@ -1065,6 +1150,67 @@ app.post('/api/admin/deposit-dates', authMiddleware, superadminOnly, [
 app.delete('/api/admin/deposit-dates/:id', authMiddleware, superadminOnly, async (req, res) => {
   await pool.query('DELETE FROM deposit_dates WHERE id=$1', [req.params.id]);
   res.json({ success:true });
+});
+
+// ── SHIFTS ────────────────────────────────────────────────────────
+app.get('/api/admin/shifts', authMiddleware, anyRole, async (req, res) => {
+  const result = await pool.query('SELECT * FROM shifts ORDER BY sort_order, first_slot');
+  res.json({ shifts: result.rows });
+});
+
+app.post('/api/admin/shifts', authMiddleware, superadminOnly, [
+  body('name').trim().isLength({ min:1, max:50 }),
+  body('first_slot').matches(/^\d{2}:\d{2}$/),
+  body('last_slot').matches(/^\d{2}:\d{2}$/),
+  body('turnover_minutes').isInt({ min:15, max:480 }),
+  body('sort_order').optional().isInt({ min:1, max:6 }),
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+  const { name, first_slot, last_slot, turnover_minutes, sort_order = 1 } = req.body;
+  const result = await pool.query(
+    'INSERT INTO shifts (name, first_slot, last_slot, turnover_minutes, sort_order) VALUES ($1,$2,$3,$4,$5) RETURNING *',
+    [name, first_slot, last_slot, turnover_minutes, sort_order]
+  );
+  invalidateShiftsCache();
+  res.status(201).json({ shift: result.rows[0] });
+});
+
+app.patch('/api/admin/shifts/:id', authMiddleware, superadminOnly, [
+  body('name').optional().trim().isLength({ min:1, max:50 }),
+  body('first_slot').optional().matches(/^\d{2}:\d{2}$/),
+  body('last_slot').optional().matches(/^\d{2}:\d{2}$/),
+  body('turnover_minutes').optional().isInt({ min:15, max:480 }),
+  body('sort_order').optional().isInt({ min:1, max:6 }),
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+  const { name, first_slot, last_slot, turnover_minutes, sort_order } = req.body;
+  const updates = []; const params = [];
+  if (name !== undefined) { params.push(name); updates.push(`name=$${params.length}`); }
+  if (first_slot !== undefined) { params.push(first_slot); updates.push(`first_slot=$${params.length}`); }
+  if (last_slot !== undefined) { params.push(last_slot); updates.push(`last_slot=$${params.length}`); }
+  if (turnover_minutes !== undefined) { params.push(turnover_minutes); updates.push(`turnover_minutes=$${params.length}`); }
+  if (sort_order !== undefined) { params.push(sort_order); updates.push(`sort_order=$${params.length}`); }
+  if (!updates.length) return res.status(400).json({ error: 'Nothing to update' });
+  params.push(req.params.id);
+  const result = await pool.query(`UPDATE shifts SET ${updates.join(',')} WHERE id=$${params.length} RETURNING *`, params);
+  invalidateShiftsCache();
+  res.json({ shift: result.rows[0] });
+});
+
+app.delete('/api/admin/shifts/:id', authMiddleware, superadminOnly, async (req, res) => {
+  const count = (await pool.query('SELECT COUNT(*) FROM shifts')).rows[0].count;
+  if (parseInt(count) <= 1) return res.status(400).json({ error: 'Il ristorante deve avere almeno un turno.' });
+  await pool.query('DELETE FROM shifts WHERE id=$1', [req.params.id]);
+  invalidateShiftsCache();
+  res.json({ success: true });
+});
+
+// Public: get shifts (used by frontend for shift display)
+app.get('/api/shifts', async (req, res) => {
+  const result = await pool.query('SELECT * FROM shifts ORDER BY sort_order, first_slot');
+  res.json({ shifts: result.rows });
 });
 
 // ── USER MANAGEMENT (superadmin only) ────────────────────────────
