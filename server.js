@@ -1326,11 +1326,26 @@ setInterval(async () => {
 
 // ── START ────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
-initDB().then(() => {
-  app.listen(PORT, () => console.log(`🍽️  Antico Frantoio API running on port ${PORT}`));
-}).catch(err => {
-  console.error('Failed to initialize DB:', err);
-  process.exit(1);
-});
+
+async function startWithRetry(maxRetries = 10, delayMs = 5000) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`[DB] Connection attempt ${attempt}/${maxRetries}...`);
+      await initDB();
+      app.listen(PORT, () => console.log(`🍽️  Antico Frantoio API running on port ${PORT}`));
+      return; // success — exit retry loop
+    } catch (err) {
+      console.error(`[DB] Attempt ${attempt} failed:`, err.message);
+      if (attempt === maxRetries) {
+        console.error('[DB] All retry attempts exhausted. Exiting.');
+        process.exit(1);
+      }
+      console.log(`[DB] Retrying in ${delayMs/1000}s...`);
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+}
+
+startWithRetry();
 
 module.exports = app;
