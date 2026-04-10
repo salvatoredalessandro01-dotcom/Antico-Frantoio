@@ -1301,8 +1301,28 @@ app.post('/api/reminders/send', async (req, res) => {
   res.json({ success:true, remindersSent:count });
 });
 
-// Health
-app.get('/health', (req, res) => res.json({ status:'ok', ts:new Date().toISOString() }));
+// Health — also pings DB to prevent Supabase free tier pausing
+app.get('/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ status:'ok', db:'connected', ts:new Date().toISOString() });
+  } catch(err) {
+    console.error('Health check DB error:', err.message);
+    res.status(500).json({ status:'error', db:'disconnected', ts:new Date().toISOString() });
+  }
+});
+
+// ── DB KEEP-ALIVE ─────────────────────────────────────────────
+// Pings the database every 4 days to prevent Supabase free tier pausing
+const KEEP_ALIVE_INTERVAL = 4 * 24 * 60 * 60 * 1000; // 4 days in ms
+setInterval(async () => {
+  try {
+    await pool.query('SELECT 1');
+    console.log('[keep-alive] DB pinged successfully:', new Date().toISOString());
+  } catch(err) {
+    console.error('[keep-alive] DB ping failed:', err.message);
+  }
+}, KEEP_ALIVE_INTERVAL);
 
 // ── START ────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
