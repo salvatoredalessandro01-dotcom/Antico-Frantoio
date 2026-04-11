@@ -356,6 +356,24 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
   .admin-content{padding:1.25rem}
   .admin-stats{grid-template-columns:repeat(2,1fr)}
 }
+
+/* iPad portrait — auto-scale arrivals table to fit screen */
+@media(max-width:820px) and (orientation:portrait){
+  .arrivals-table{font-size:.72rem}
+  .arrivals-table th,.arrivals-table td{padding:5px 4px}
+  .arrivals-table th:nth-child(3),.arrivals-table td:nth-child(3){display:none} /* hide phone */
+  .arrivals-table th:nth-child(6),.arrivals-table td:nth-child(6){display:none} /* hide notes */
+}
+
+/* Print styles */
+@media print {
+  .no-print,.admin-sidebar,.admin-topbar,.admin-filter-bar,button{display:none!important}
+  body{background:#fff!important;color:#000!important}
+  .admin-content{padding:0!important;margin:0!important}
+  .arrivals-table{font-size:10pt;width:100%}
+  .arrivals-table th{background:#1A1612!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .arrivals-table td{border-bottom:1px solid #ddd}
+}
 .hidden{display:none!important}.mt1{margin-top:1rem}.mt2{margin-top:2rem}.text-center{text-align:center}.text-gold{color:var(--gold)}.text-gray{color:var(--gray)}.text-sm{font-size:.82rem}
 /* Policy modal prose */
 .policy-body h2{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;margin:1.5rem 0 .75rem;color:var(--dark)}
@@ -470,7 +488,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
           <div class="form-row">
             <div class="form-group">
               <label><span data-i18n="field.date">Data</span> <span class="req">*</span></label>
-              <input type="date" id="res-date" required onchange="updateSlots()">
+              <input type="date" id="res-date" required onchange="updateSlots()" placeholder="gg/mm/aaaa">
               <span class="field-error" id="date-error"></span>
             </div>
             <div class="form-group">
@@ -1408,7 +1426,14 @@ function renderBookingsTab(container) {
   const canAmend = ['superadmin','admin'].includes(currentUser.role);
   container.innerHTML = `
     <div class="admin-filter-bar">
-      <input type="date" id="filter-date" onchange="applyBookingFilters()">
+      <div style="display:flex;align-items:center;gap:.4rem">
+        <label style="font-size:.8rem;color:var(--gray);white-space:nowrap">Dal</label>
+        <input type="date" id="filter-date-from" value="${todayStr()}" onchange="applyBookingFilters()">
+      </div>
+      <div style="display:flex;align-items:center;gap:.4rem">
+        <label style="font-size:.8rem;color:var(--gray);white-space:nowrap">Al</label>
+        <input type="date" id="filter-date-to" value="${todayStr()}" onchange="applyBookingFilters()">
+      </div>
       <select id="filter-status" onchange="applyBookingFilters()">
         <option value="">Tutti gli stati</option>
         <option value="confirmed">Confermati</option>
@@ -1440,13 +1465,15 @@ function renderBookingsTab(container) {
 }
 
 async function loadBookings() {
-  const date=document.getElementById('filter-date')?.value||'';
+  const dateFrom=document.getElementById('filter-date-from')?.value||'';
+  const dateTo=document.getElementById('filter-date-to')?.value||'';
   const status=document.getElementById('filter-status')?.value||'';
   const source=document.getElementById('filter-source')?.value||'';
   const search=document.getElementById('filter-search')?.value.trim()||'';
 
-  let url='/api/admin/bookings?limit=200';
-  if(date)url+=`&date=${date}`;
+  let url='/api/admin/bookings?limit=500';
+  if(dateFrom)url+=`&date_from=${dateFrom}`;
+  if(dateTo)url+=`&date_to=${dateTo}`;
   if(status)url+=`&status=${status}`;
   if(source)url+=`&source=${source}`;
   if(search)url+=`&search=${encodeURIComponent(search)}`;
@@ -1476,7 +1503,7 @@ async function loadBookings() {
           ${b.cancelled_by?`<br><span style="font-size:.68rem;color:var(--red)">❌ ${b.cancelled_by}</span>`:''}
           ${b.created_by?`<br><span style="font-size:.68rem;color:var(--green)">➕ ${b.created_by}</span>`:''}
         </td>
-        <td>${b.adults+b.children} (${b.adults}A+${b.children}B)</td>
+        <td>${(parseInt(b.adults)||0)+(parseInt(b.children)||0)} (${b.adults}A+${b.children}B${b.infants>0?' +'+b.infants+'N':''})</td>
         <td><input type="number" class="table-input" value="${b.table_number||''}" placeholder="—" min="1" onchange="saveTableInline('${b.id}',this.value)"></td>
         <td><span class="status-badge status-${b.status}">${statusLabel(b.status)}</span></td>
         <td>${b.deposit_paid?'<span style="color:var(--green)">✓ Pagata</span>':(b.deposit_required?'<span style="color:var(--gold-dk)">Richiesta</span>':'—')}</td>
@@ -1495,9 +1522,14 @@ async function loadBookings() {
 
 function applyBookingFilters(){loadBookings();}
 function clearBookingFilters(){
-  const ids=['filter-date','filter-status','filter-source','filter-search'];
-  ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const el=id=>document.getElementById(id);
+  if(el('filter-date-from'))el('filter-date-from').value=todayStr();
+  if(el('filter-date-to'))el('filter-date-to').value=todayStr();
+  if(el('filter-status'))el('filter-status').value='';
+  if(el('filter-source'))el('filter-source').value='';
+  if(el('filter-search'))el('filter-search').value='';
   loadBookings();
+}
 }
 
 async function saveTableInline(bookingId,value){
@@ -1575,10 +1607,11 @@ async function renderArrivalsTab(container) {
         style="padding:.5rem .75rem;font-size:.85rem;border:1px solid var(--gray-lt);border-radius:var(--radius);background:var(--cream);color:var(--dark);min-width:180px;flex:1;max-width:280px">
       <button class="btn-secondary btn-sm" onclick="loadArrivals()" style="white-space:nowrap">↻ Aggiorna</button>
       <button class="btn-secondary btn-sm" onclick="clearArrivalsSearch()" style="white-space:nowrap" title="Pulisci ricerca">✕</button>
+      <button class="btn-secondary btn-sm no-print" onclick="printArrivals()" style="white-space:nowrap">🖨️ Stampa</button>
       <span id="arr-summary" style="font-size:.8rem;color:var(--gray);width:100%"></span>
     </div>
-    <div class="bookings-table-wrap">
-      <table class="arrivals-table" id="arr-table">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%">
+      <table class="arrivals-table" id="arr-table" style="min-width:600px;width:100%">
         <thead>
           <tr>
             <th style="width:70px">Ora</th>
@@ -1737,6 +1770,39 @@ function clearArrivalsSearch() {
   const el = document.getElementById('arr-search');
   if(el) { el.value = ''; el.focus(); }
   loadArrivals();
+}
+
+function printArrivals() {
+  const date = document.getElementById('arr-date')?.value || '';
+  const summary = document.getElementById('arr-summary')?.innerText || '';
+  const table = document.getElementById('arr-table')?.outerHTML || '';
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Arrivi — Antico Frantoio — ${date}</title>
+      <style>
+        body { font-family: Georgia, serif; color: #1A1612; padding: 20px; font-size: 12px; }
+        h1 { font-size: 1.4rem; font-weight: 300; color: #C9A84C; margin: 0 0 4px; }
+        p { color: #6B6460; margin: 0 0 16px; font-size: .85rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #1A1612; color: #fff; padding: 6px 8px; text-align: left; font-size: .75rem; }
+        td { padding: 6px 8px; border-bottom: 1px solid #eee; font-size: .8rem; vertical-align: top; }
+        tr:nth-child(even) td { background: #FAF7F2; }
+        .no-print { display: none !important; }
+        @media print { button { display: none; } }
+      </style>
+    </head>
+    <body>
+      <h1>Antico Frantoio — Lista Arrivi</h1>
+      <p>${date ? 'Data: ' + date : ''} &nbsp;·&nbsp; ${summary}</p>
+      ${table}
+      <script>window.onload=()=>{window.print();window.close();}<\/script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
 }
 
 async function markArrived(bookingId, arrived) {
@@ -2366,6 +2432,15 @@ async function renderUsersTab(container){
       <button class="btn-secondary" onclick="createUser()">+ Crea Utente</button>
     </div>
     <div class="admin-card">
+      <h4>Reimposta La Mia Password</h4>
+      <p class="desc">Cambia la password del tuo account (${currentUser.username})</p>
+      <div class="form-row">
+        <div class="form-group"><label>Nuova Password <span class="req">*</span></label><input type="password" id="my-new-pass" placeholder="min. 8 caratteri" autocomplete="new-password"></div>
+        <div class="form-group"><label>Conferma Password <span class="req">*</span></label><input type="password" id="my-confirm-pass" placeholder="ripeti la password" autocomplete="new-password"></div>
+      </div>
+      <button class="btn-secondary" onclick="resetMyPassword()">🔑 Cambia Password</button>
+    </div>
+    <div class="admin-card">
       <h4>Utenti Attivi</h4>
       <div id="users-list">Caricamento...</div>
     </div>
@@ -2386,14 +2461,42 @@ async function loadUsers(){
         <td><span class="role-badge role-${u.role}">${u.role}</span></td>
         <td><span style="font-size:.75rem;color:${u.active?'var(--green)':'var(--red)'}">${u.active?'Attivo':'Disattivato'}</span></td>
         <td style="font-size:.75rem">${fmtDate(u.created_at)}</td>
-        <td style="white-space:nowrap">
+        <td style="white-space:nowrap;display:flex;gap:.4rem;flex-wrap:wrap">
+          <button class="btn-secondary btn-sm" onclick="resetUserPassword(${u.id},'${u.username}')">🔑 Reset</button>
           ${u.username!==currentUser.username?`
             <button class="btn-secondary btn-sm" onclick="toggleUser(${u.id},${!u.active})">${u.active?'Disattiva':'Riattiva'}</button>
-          `:'—'}
+          `:''}
         </td>
       </tr>`).join('')}</tbody>
     </table>`;
   }catch(e){const l=document.getElementById('users-list');if(l)l.innerHTML='<p class="text-gray text-sm" style="color:var(--red)">Errore</p>';}
+}
+
+async function resetMyPassword(){
+  const newPass=document.getElementById('my-new-pass')?.value;
+  const confirmPass=document.getElementById('my-confirm-pass')?.value;
+  if(!newPass||!confirmPass){showToast('Compila entrambi i campi','error');return;}
+  if(newPass.length<8){showToast('Password minimo 8 caratteri','error');return;}
+  if(newPass!==confirmPass){showToast('Le password non coincidono','error');return;}
+  // Find current user ID
+  const d=await(await adminFetch('/api/admin/users')).json();
+  const me=(d.users||[]).find(u=>u.username===currentUser.username);
+  if(!me){showToast('Utente non trovato','error');return;}
+  const res=await adminFetch(`/api/admin/users/${me.id}`,{method:'PATCH',body:JSON.stringify({password:newPass})});
+  if(res.ok){
+    showToast('Password aggiornata ✓');
+    document.getElementById('my-new-pass').value='';
+    document.getElementById('my-confirm-pass').value='';
+  } else {showToast('Errore nel cambio password','error');}
+}
+
+async function resetUserPassword(id, username){
+  const newPass=prompt(`Nuova password per ${username} (min. 8 caratteri):`);
+  if(newPass===null)return;
+  if(newPass.length<8){showToast('Password minimo 8 caratteri','error');return;}
+  const res=await adminFetch(`/api/admin/users/${id}`,{method:'PATCH',body:JSON.stringify({password:newPass})});
+  if(res.ok){showToast(`Password di ${username} aggiornata ✓`);}
+  else{showToast('Errore nel cambio password','error');}
 }
 
 async function createUser(){
