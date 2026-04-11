@@ -900,17 +900,19 @@ app.post('/api/admin/login', async (req, res) => {
 
 // All roles can read bookings (concierge included)
 app.get('/api/admin/bookings', authMiddleware, anyRole, async (req, res) => {
-  const { date, status, source, search, shift, page = 1, limit = 100 } = req.query;
+  const { date, date_from, date_to, status, source, search, shift, page = 1, limit = 500 } = req.query;
   let query = 'SELECT * FROM bookings WHERE 1=1';
   const params = [];
+  // Single date (legacy) or date range
   if (date) { params.push(date); query += ` AND date=$${params.length}`; }
+  if (date_from && !date) { params.push(date_from); query += ` AND date>=$${params.length}`; }
+  if (date_to && !date) { params.push(date_to); query += ` AND date<=$${params.length}`; }
   if (status) { params.push(status); query += ` AND status=$${params.length}`; }
   if (source) { params.push(source); query += ` AND source=$${params.length}`; }
   if (search) {
     params.push(`%${search}%`);
     query += ` AND (name ILIKE $${params.length} OR email ILIKE $${params.length} OR phone ILIKE $${params.length})`;
   }
-  // Shift filter: lunch = before 17:00, evening = 17:00 and after
   if (shift === 'lunch') { query += ` AND time < '17:00:00'`; }
   if (shift === 'evening') { query += ` AND time >= '17:00:00'`; }
   query += ` ORDER BY date ASC, time ASC LIMIT ${parseInt(limit)} OFFSET ${(parseInt(page)-1)*parseInt(limit)}`;
