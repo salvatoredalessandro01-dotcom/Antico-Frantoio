@@ -256,8 +256,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 footer{background:var(--dark);color:rgba(255,255,255,.5);padding:3rem 0;text-align:center;font-size:.8rem;line-height:2}
 footer .logo{margin-bottom:1rem;font-size:1.25rem}
 .footer-links{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
-.footer-links a{color:rgba(255,255,255,.4);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;transition:color var(--transition)}
+.footer-links a{color:rgba(255,255,255,.6);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;transition:color var(--transition)}
 .footer-links a:hover{color:var(--gold)}
+@media(prefers-color-scheme:dark){
+  footer{background:#0D0B09}
+  .footer-links a{color:rgba(255,255,255,.75)}
+  footer{color:rgba(255,255,255,.65)}
+}
 #cookie-banner{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:300;width:min(94vw,600px);background:var(--dark2);color:white;border-radius:var(--radius-lg);padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 8px 32px rgba(0,0,0,.3);animation:slideUp .4s ease both;flex-wrap:wrap}
 #cookie-banner p{font-size:.8rem;color:rgba(255,255,255,.7);line-height:1.5;flex:1;min-width:200px}
 .cookie-actions{display:flex;gap:.5rem;flex-shrink:0}
@@ -603,7 +608,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
       <a href="#" data-i18n="footer.menu">Menu</a>
       <a href="#" onclick="openAdminLogin()" data-i18n="footer.admin">Admin</a>
     </nav>
-    <p style="font-size:.72rem">© 2025 Antico Frantoio · Tree Legs and More S.r.l. · P.IVA 10428621212 · Via degli Aranci 33, 80067 Sorrento (NA)</p>
+    <p style="font-size:.72rem;color:rgba(255,255,255,.55)">© 2025 Antico Frantoio · Tree Legs and More S.r.l. · P.IVA 10428621212 · Via degli Aranci 33, 80067 Sorrento (NA)</p>
   </div>
 </footer>
 
