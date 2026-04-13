@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Galleria — Antico Frantoio, Sorrento</title>
+<meta name="description" content="Galleria fotografica dell'Antico Frantoio a Sorrento. Scopri il locale e i nostri piatti.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-lt:#E8D5A3;--gold-dk:#8A6820;
+  --cream:#FAF7F2;--cream2:#F3EDE3;--dark:#1A1612;--dark2:#2C2520;
+  --gray:#6B6460;--gray-lt:#D4CEC8;
+  --radius:2px;--radius-lg:4px;
+  --transition:.25s cubic-bezier(.4,0,.2,1);
+  font-family:'Jost',sans-serif;
+}
+@media(prefers-color-scheme:dark){
+  :root{--cream:#1A1612;--cream2:#221E1A;--dark:#FAF7F2;--dark2:#E8E0D5;--gray:#A09890;--gray-lt:#3C3530}
+}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--dark);min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;font-family:'Jost',sans-serif}
+
+/* ── HEADER ── */
+.site-header{position:sticky;top:0;z-index:100;background:rgba(26,22,18,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.2);padding:.75rem 0}
+.header-inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.header-logo{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:var(--gold);letter-spacing:.05em}
+.header-logo em{font-style:italic}
+.header-nav{display:flex;gap:1.5rem;align-items:center}
+.header-nav a{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);transition:color var(--transition)}
+.header-nav a:hover,.header-nav a.active{color:var(--gold)}
+
+/* ── HERO ── */
+.gallery-hero{background:var(--dark);padding:4rem 1.5rem 3rem;text-align:center;position:relative;overflow:hidden}
+.gallery-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(201,168,76,.12),transparent 70%);pointer-events:none}
+.hero-sub{font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;opacity:.8}
+.gallery-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,6vw,3.5rem);font-weight:300;color:#FAF7F2;letter-spacing:.04em;line-height:1.1}
+.gallery-hero h1 em{font-style:italic;color:var(--gold)}
+.hero-divider{width:48px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:1.5rem auto 0}
+
+/* ── CONTAINER ── */
+.gallery-container{max-width:1100px;margin:0 auto;padding:0 1.5rem 5rem}
+
+/* ── SECTION ── */
+.gallery-section{padding:3.5rem 0 1rem}
+.gallery-section+.gallery-section{border-top:1px solid var(--gray-lt)}
+.section-label{font-size:.68rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,2.4rem);font-weight:300;color:var(--dark);letter-spacing:.03em;line-height:1.1;margin-bottom:2rem}
+
+/* ── MASONRY GRID ── */
+.photo-grid{
+  columns:3;
+  column-gap:10px;
+}
+@media(max-width:768px){.photo-grid{columns:2}}
+@media(max-width:480px){.photo-grid{columns:1}}
+
+.photo-item{
+  break-inside:avoid;
+  margin-bottom:10px;
+  overflow:hidden;
+  border-radius:var(--radius);
+  cursor:pointer;
+  position:relative;
+}
+.photo-item img{
+  width:100%;
+  height:auto;
+  display:block;
+  transition:transform .5s cubic-bezier(.4,0,.2,1),filter .3s;
+  filter:brightness(.97);
+}
+.photo-item:hover img{
+  transform:scale(1.03);
+  filter:brightness(1.05);
+}
+.photo-item::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:rgba(201,168,76,0);
+  transition:background var(--transition);
+  pointer-events:none;
+}
+.photo-item:hover::after{
+  background:rgba(201,168,76,.08);
+}
+
+/* ── LIGHTBOX ── */
+.lightbox{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  background:rgba(0,0,0,.92);
+  backdrop-filter:blur(8px);
+  align-items:center;
+  justify-content:center;
+  padding:1rem;
+}
+.lightbox.open{display:flex}
+.lightbox-inner{
+  position:relative;
+  max-width:min(90vw,1200px);
+  max-height:90vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.lightbox img{
+  max-width:100%;
+  max-height:90vh;
+  object-fit:contain;
+  border-radius:var(--radius);
+  box-shadow:0 32px 80px rgba(0,0,0,.6);
+}
+.lightbox-close{
+  position:fixed;
+  top:1.25rem;
+  right:1.25rem;
+  width:42px;height:42px;
+  background:rgba(255,255,255,.12);
+  border-radius:50%;
+  color:#fff;
+  font-size:1.3rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:background var(--transition);
+  z-index:1001;
+}
+.lightbox-close:hover{background:rgba(255,255,255,.25)}
+.lightbox-prev,.lightbox-next{
+  position:fixed;
+  top:50%;transform:translateY(-50%);
+  width:48px;height:48px;
+  background:rgba(255,255,255,.12);
+  border-radius:50%;
+  color:#fff;
+  font-size:1.3rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:background var(--transition);
+  z-index:1001;
+}
+.lightbox-prev{left:1rem}
+.lightbox-next{right:1rem}
+.lightbox-prev:hover,.lightbox-next:hover{background:rgba(255,255,255,.25)}
+.lightbox-counter{
+  position:fixed;
+  bottom:1.5rem;
+  left:50%;transform:translateX(-50%);
+  font-size:.75rem;
+  color:rgba(255,255,255,.5);
+  letter-spacing:.1em;
+}
+
+/* ── CTA ── */
+.gallery-cta{text-align:center;padding:3rem 1.5rem;background:var(--dark);margin-top:3rem}
+.gallery-cta h2{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:#FAF7F2;margin-bottom:.75rem}
+.gallery-cta p{font-size:.85rem;color:rgba(255,255,255,.5);margin-bottom:1.5rem}
+.btn-reserve{display:inline-block;background:var(--gold);color:var(--dark);padding:.85rem 2.5rem;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;font-weight:500;border-radius:var(--radius);transition:all var(--transition)}
+.btn-reserve:hover{background:var(--gold-lt);transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.3)}
+
+/* ── FOOTER ── */
+footer{background:var(--dark);color:rgba(255,255,255,.5);padding:2rem 0;text-align:center;font-size:.78rem;line-height:2;border-top:1px solid rgba(201,168,76,.15)}
+.footer-links{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:.75rem}
+.footer-links a{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6);transition:color var(--transition)}
+.footer-links a:hover{color:var(--gold)}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="header-logo">Antico <em>Frantoio</em></a>
+    <nav class="header-nav">
+      <a href="/">Prenota</a>
+      <a href="/menu.html">Menu</a>
+      <a href="/gallery.html" class="active">Galleria</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="gallery-hero">
+  <p class="hero-sub">Via Casarlano 5 · Sorrento</p>
+  <h1>La Nostra <em>Galleria</em></h1>
+  <div class="hero-divider"></div>
+</div>
+
+<!-- GALLERY -->
+<div class="gallery-container">
+
+  <!-- IL LOCALE -->
+  <section class="gallery-section" id="locale">
+    <p class="section-label">Atmosfera</p>
+    <h2 class="section-title">Il Locale</h2>
+    <div class="photo-grid" id="grid-locale">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+  <!-- I PIATTI -->
+  <section class="gallery-section" id="piatti">
+    <p class="section-label">Cucina</p>
+    <h2 class="section-title">I Piatti</h2>
+    <div class="photo-grid" id="grid-piatti">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightboxOutside(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-prev" onclick="navigateLightbox(-1)">‹</button>
+  <div class="lightbox-inner">
+    <img id="lightbox-img" src="" alt="">
+  </div>
+  <button class="lightbox-next" onclick="navigateLightbox(1)">›</button>
+  <div class="lightbox-counter" id="lightbox-counter"></div>
+</div>
+
+<!-- CTA -->
+<div class="gallery-cta">
+  <h2>Prenota il Tuo Tavolo</h2>
+  <p>Via Casarlano 5, 80067 Sorrento · +39 081 807 22 00</p>
+  <a href="/" class="btn-reserve">Prenota Ora</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div style="max-width:1100px;margin:0 auto;padding:0 1.5rem">
+    <nav class="footer-links">
+      <a href="/">Prenota</a>
+      <a href="/menu.html">Menu</a>
+      <a href="/gallery.html">Galleria</a>
+      <a href="tel:+390818072200">+39 081 807 22 00</a>
+      <a href="mailto:prenotazioni@anticofrantoiosorrento.it">prenotazioni@anticofrantoiosorrento.it</a>
+    </nav>
+    <p style="font-size:.7rem;color:rgba(255,255,255,.4)">© 2025 Antico Frantoio · Tree Legs and More S.r.l. · P.IVA 10428621212 · Via degli Aranci 33, 80067 Sorrento (NA)</p>
+  </div>
+</footer>
+
+<script>
+// ── PHOTO LISTS ──────────────────────────────────────────────────
+const locale = Array.from({length:8},(_,i)=>`/img/gallery/locale-${String(i+1).padStart(2,'0')}.jpg`);
+const piatti = Array.from({length:23},(_,i)=>`/img/gallery/piatti-${String(i+1).padStart(2,'0')}.jpg`);
+
+// ── BUILD GRIDS ──────────────────────────────────────────────────
+function buildGrid(photos, containerId) {
+  const grid = document.getElementById(containerId);
+  photos.forEach((src, i) => {
+    const item = document.createElement('div');
+    item.className = 'photo-item';
+    item.innerHTML = `<img src="${src}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'">`;
+    item.addEventListener('click', () => openLightbox(photos, i));
+    grid.appendChild(item);
+  });
+}
+
+buildGrid(locale, 'grid-locale');
+buildGrid(piatti, 'grid-piatti');
+
+// ── LIGHTBOX ─────────────────────────────────────────────────────
+let _photos = [], _idx = 0;
+
+function openLightbox(photos, idx) {
+  _photos = photos;
+  _idx = idx;
+  showLightboxPhoto();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function showLightboxPhoto() {
+  document.getElementById('lightbox-img').src = _photos[_idx];
+  document.getElementById('lightbox-counter').textContent = `${_idx + 1} / ${_photos.length}`;
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('lightbox-img').src = '';
+}
+
+function closeLightboxOutside(e) {
+  if (e.target === document.getElementById('lightbox')) closeLightbox();
+}
+
+function navigateLightbox(dir) {
+  _idx = (_idx + dir + _photos.length) % _photos.length;
+  showLightboxPhoto();
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  const lb = document.getElementById('lightbox');
+  if (!lb.classList.contains('open')) return;
+  if (e.key === 'ArrowRight') navigateLightbox(1);
+  if (e.key === 'ArrowLeft') navigateLightbox(-1);
+  if (e.key === 'Escape') closeLightbox();
+});
+
+// Active nav on scroll
+const sections = document.querySelectorAll('.gallery-section');
+const navLinks = document.querySelectorAll('.header-nav a');
+</script>
+</body>
+</html>
