@@ -35,6 +35,19 @@ button{cursor:pointer;border:none;font-family:'Jost',sans-serif}
 .header-nav{display:flex;gap:1.5rem;align-items:center}
 .header-nav a{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);transition:color var(--transition)}
 .header-nav a:hover,.header-nav a.active{color:var(--gold)}
+.mobile-menu-btn{display:none;background:none;color:rgba(255,255,255,.8);font-size:1.5rem;cursor:pointer;border:none;padding:.25rem}
+@media(max-width:768px){.mobile-menu-btn{display:block}.header-nav .header-nav-links{display:none}}
+/* Mobile drawer */
+.mobile-drawer{display:none;position:fixed;inset:0;z-index:490;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+.mobile-drawer.open{display:block}
+.mobile-drawer-inner{position:absolute;top:0;right:0;width:min(80vw,300px);height:100%;background:#2C2520;padding:2rem 1.5rem;display:flex;flex-direction:column;gap:.25rem;animation:slideInRight .25s ease}
+@keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.mobile-drawer-close{align-self:flex-end;background:none;color:rgba(255,255,255,.6);font-size:1.5rem;margin-bottom:1rem;padding:.25rem;cursor:pointer;border:none}
+.mobile-drawer a{display:block;padding:.85rem 0;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.08);transition:color .25s;text-decoration:none}
+.mobile-drawer a:hover{color:#C9A84C}
+.mobile-drawer a.drawer-prenota{color:#C9A84C;font-weight:500}
+@media(min-width:769px){.mobile-menu-btn{display:none!important}}
+
 .lang-toggle{display:flex;gap:.25rem;background:rgba(255,255,255,.15);border-radius:var(--radius-lg);padding:3px;border:1px solid rgba(255,255,255,.2)}
 .lang-btn{font-size:.7rem;letter-spacing:.08em;padding:.3rem .7rem;border-radius:var(--radius);color:rgba(255,255,255,.85);transition:all var(--transition);font-family:'Jost',sans-serif;font-weight:500}
 .lang-btn.active{background:var(--gold);color:var(--dark);font-weight:500}
@@ -143,13 +156,28 @@ footer a:hover{color:var(--gold)}
   <div class="header-inner">
     <a href="/" class="header-logo">Antico <em>Frantoio</em></a>
     <nav class="header-nav">
-      <a href="/" class="nav-it">Prenota</a>
-      <a href="/" class="nav-en">Book a Table</a>
-      <a href="/menu-en.html" style="font-size:.72rem;letter-spacing:.1em;padding:.35rem .9rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:2px;color:#FAF7F2;font-weight:500;font-family:'Jost',sans-serif">🇬🇧 EN</a>
+      <a href="/">Home</a>
+      <a href="/menu.html">Menu</a>
+      <a href="/gallery.html">Galleria</a>
+      <a href="/">Prenota</a>
     </nav>
+    <button class="mobile-menu-btn" onclick="openMobileDrawer()" aria-label="Menu">☰</button>
   </div>
 </header>
 
+
+<!-- MOBILE DRAWER -->
+<div class="mobile-drawer" id="mobile-drawer" onclick="closeMobileDrawerOutside(event)">
+  <div class="mobile-drawer-inner">
+    <button class="mobile-drawer-close" onclick="closeMobileDrawer()">✕</button>
+    <a href="/">Home</a>
+    <a href="/" class="drawer-prenota">Prenota</a>
+    <a href="/menu.html">Menu</a>
+    <a href="/gallery.html">Galleria</a>
+    <a href="#">Eventi</a>
+    <a href="#">Contatti</a>
+  </div>
+</div>
 <!-- HERO -->
 <div class="menu-hero">
   <p class="menu-hero-sub ">Via Casarlano 5 · Sorrento</p>
@@ -775,6 +803,12 @@ const observer = new IntersectionObserver(entries => {
   });
 }, { rootMargin: '-40% 0px -55% 0px' });
 sections.forEach(s => observer.observe(s));
+</script>
+
+<script>
+function openMobileDrawer(){document.getElementById('mobile-drawer').classList.add('open');document.body.style.overflow='hidden';}
+function closeMobileDrawer(){document.getElementById('mobile-drawer').classList.remove('open');document.body.style.overflow='';}
+function closeMobileDrawerOutside(e){if(e.target===document.getElementById('mobile-drawer'))closeMobileDrawer();}
 </script>
 </body>
 </html>
