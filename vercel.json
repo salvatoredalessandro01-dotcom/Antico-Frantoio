@@ -1,9 +1,8 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "public/index.html", "use": "@vercel/static" }
-  ],
   "routes": [
-    { "src": "/(.*)", "dest": "/public/index.html" }
+    { "src": "/gallery", "dest": "/gallery.html" },
+    { "src": "/menu", "dest": "/menu.html" },
+    { "src": "/menu-en", "dest": "/menu-en.html" },
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }
