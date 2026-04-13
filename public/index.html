@@ -47,7 +47,15 @@ h2{font-size:clamp(2rem,4vw,3.5rem)}
 .lang-btn.active{background:var(--gold);color:var(--dark)}
 .header-right{display:flex;align-items:center;gap:1.5rem}
 .mobile-menu-btn{display:none;background:none;color:white;font-size:1.5rem}
-/* HERO */
+/* Mobile drawer */
+.mobile-drawer{display:none;position:fixed;inset:0;z-index:490;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+.mobile-drawer.open{display:block}
+.mobile-drawer-inner{position:absolute;top:0;right:0;width:min(80vw,300px);height:100%;background:var(--dark2);padding:2rem 1.5rem;display:flex;flex-direction:column;gap:.25rem;animation:slideInRight .25s ease}
+@keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.mobile-drawer-close{align-self:flex-end;background:none;color:rgba(255,255,255,.6);font-size:1.5rem;margin-bottom:1rem;padding:.25rem}
+.mobile-drawer a{display:block;padding:.85rem 0;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.08);transition:color var(--transition)}
+.mobile-drawer a:hover{color:var(--gold)}
+.mobile-drawer a.drawer-prenota{color:var(--gold);font-weight:500}
 #hero{position:relative;height:100vh;min-height:600px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .hero-bg{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.3) 0%,rgba(0,0,0,.55) 100%),url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800&q=80') center/cover no-repeat}
 .hero-content{position:relative;text-align:center;color:white;padding:0 1rem;animation:fadeUp .9s ease both}
@@ -404,8 +412,9 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
     <div class="logo">Antico <span>Frantoio</span></div>
     <nav aria-label="Main navigation">
       <ul class="nav-links">
+        <li><a href="/" data-i18n="nav.home">Home</a></li>
         <li><a href="/menu.html" data-i18n="nav.menu">Menu</a></li>
-        <li><a href="/gallery.html">Galleria</a></li>
+        <li><a href="/gallery.html" data-i18n="nav.gallery">Galleria</a></li>
         <li><a href="#reservation" data-i18n="nav.reserve">Prenota</a></li>
         <li><a href="#" data-i18n="nav.events">Eventi</a></li>
         <li><a href="#" data-i18n="nav.contact">Contatti</a></li>
@@ -416,10 +425,23 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
         <button class="lang-btn active" data-lang="it" onclick="setLanguage('it')">IT</button>
         <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
       </div>
-      <button class="mobile-menu-btn">☰</button>
+      <button class="mobile-menu-btn" onclick="openMobileDrawer()" aria-label="Menu">☰</button>
     </div>
   </div>
 </header>
+
+<!-- MOBILE DRAWER -->
+<div class="mobile-drawer" id="mobile-drawer" onclick="closeMobileDrawerOutside(event)">
+  <div class="mobile-drawer-inner">
+    <button class="mobile-drawer-close" onclick="closeMobileDrawer()">✕</button>
+    <a href="/" onclick="closeMobileDrawer()" data-i18n="nav.home">Home</a>
+    <a href="#reservation" onclick="closeMobileDrawer()" class="drawer-prenota" data-i18n="nav.reserve">Prenota</a>
+    <a href="/menu.html" onclick="closeMobileDrawer()" data-i18n="nav.menu">Menu</a>
+    <a href="/gallery.html" onclick="closeMobileDrawer()" data-i18n="nav.gallery">Galleria</a>
+    <a href="#" onclick="closeMobileDrawer()">Eventi</a>
+    <a href="#" onclick="closeMobileDrawer()">Contatti</a>
+  </div>
+</div>
 
 <!-- HERO -->
 <section id="hero" role="banner">
@@ -777,7 +799,7 @@ let currentUser = { username:'', role:'' };
 // ═══════════════════════════════════════════════════════════════
 const translations = {
   it: {
-    'nav.menu':'Menu','nav.reserve':'Prenota','nav.events':'Eventi','nav.contact':'Contatti',
+    'nav.menu':'Menu','nav.reserve':'Prenota','nav.events':'Eventi','nav.contact':'Contatti','nav.home':'Home','nav.gallery':'Galleria',
     'hero.eyebrow':'Sorrento','hero.tagline':'Un\'esperienza che va oltre il pasto',
     'hero.cta':'Prenota un Tavolo','hero.scroll':'Scopri',
     'res.eyebrow':'Prenotazioni','res.heading':'Riserva il Tuo\nMomento',
@@ -813,7 +835,7 @@ const translations = {
     'paid':'Pagata','unpaid':'—',
   },
   en: {
-    'nav.menu':'Menu','nav.reserve':'Reserve','nav.events':'Events','nav.contact':'Contact',
+    'nav.menu':'Menu','nav.reserve':'Reserve','nav.events':'Events','nav.contact':'Contact','nav.home':'Home','nav.gallery':'Gallery',
     'hero.eyebrow':'Sorrento','hero.tagline':'An experience beyond the meal',
     'hero.cta':'Book a Table','hero.scroll':'Discover',
     'res.eyebrow':'Reservations','res.heading':'Reserve Your\nMoment',
@@ -1270,7 +1292,9 @@ function buildNav(role) {
   }).join('');
 }
 
-function openAdminLogin(){document.getElementById('admin-login-modal').classList.add('open');document.getElementById('admin-user').focus();}
+function openMobileDrawer(){document.getElementById('mobile-drawer').classList.add('open');document.body.style.overflow='hidden';}
+function closeMobileDrawer(){document.getElementById('mobile-drawer').classList.remove('open');document.body.style.overflow='';}
+function closeMobileDrawerOutside(e){if(e.target===document.getElementById('mobile-drawer'))closeMobileDrawer();}
 function closeAdminLogin(){document.getElementById('admin-login-modal').classList.remove('open');document.getElementById('login-error').classList.remove('visible');}
 
 async function tryAdminLogin(){
