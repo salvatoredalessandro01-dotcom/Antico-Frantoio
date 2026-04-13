@@ -1,8 +1,4 @@
 {
-  "routes": [
-    { "src": "/gallery", "dest": "/gallery.html" },
-    { "src": "/menu", "dest": "/menu.html" },
-    { "src": "/menu-en", "dest": "/menu-en.html" },
-    { "src": "/(.*)", "dest": "/$1" }
-  ]
+  "cleanUrls": true,
+  "trailingSlash": false
 }
