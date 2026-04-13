@@ -300,4 +300,10 @@ function navigateLightbox(dir) {
 document.addEventListener('keydown', e => {
   const lb = document.getElementById('lightbox');
   if (!lb.classList.contains('open')) return;
-  if (e.key === 'ArrowRight') navigateLightb
+  if (e.key === 'ArrowRight') navigateLightbox(1);
+  if (e.key === 'ArrowLeft') navigateLightbox(-1);
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>
