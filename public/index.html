@@ -48,14 +48,15 @@ h2{font-size:clamp(2rem,4vw,3.5rem)}
 .header-right{display:flex;align-items:center;gap:1.5rem}
 .mobile-menu-btn{display:none;background:none;color:white;font-size:1.5rem}
 /* Mobile drawer */
-.mobile-drawer{display:none;position:fixed;inset:0;z-index:490;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+.mobile-drawer{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.65)}
 .mobile-drawer.open{display:block}
-.mobile-drawer-inner{position:absolute;top:0;right:0;width:min(80vw,300px);height:100%;background:var(--dark2);padding:2rem 1.5rem;display:flex;flex-direction:column;gap:.25rem;animation:slideInRight .25s ease}
+.mobile-drawer-inner{position:absolute;top:0;right:0;bottom:0;width:min(75vw,280px);background:#1A1612;border-left:1px solid rgba(201,168,76,.25);padding:1.5rem;display:flex;flex-direction:column;gap:0;animation:slideInRight .22s ease}
 @keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
-.mobile-drawer-close{align-self:flex-end;background:none;color:rgba(255,255,255,.6);font-size:1.5rem;margin-bottom:1rem;padding:.25rem}
-.mobile-drawer a{display:block;padding:.85rem 0;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.08);transition:color var(--transition)}
+.mobile-drawer-close{align-self:flex-end;background:none;color:rgba(255,255,255,.7);font-size:1.4rem;margin-bottom:1.5rem;padding:.25rem;cursor:pointer;border:none}
+.mobile-drawer a{display:block;padding:.9rem 0;font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.8);border-bottom:1px solid rgba(255,255,255,.1);text-decoration:none;transition:color .2s}
+.mobile-drawer a:last-child{border-bottom:none}
 .mobile-drawer a:hover{color:var(--gold)}
-.mobile-drawer a.drawer-prenota{color:var(--gold);font-weight:500}
+.mobile-drawer a.drawer-prenota{color:var(--gold)!important;font-weight:500}
 #hero{position:relative;height:100vh;min-height:600px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .hero-bg{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.3) 0%,rgba(0,0,0,.55) 100%),url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800&q=80') center/cover no-repeat}
 .hero-content{position:relative;text-align:center;color:white;padding:0 1rem;animation:fadeUp .9s ease both}
@@ -431,7 +432,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
 </header>
 
 <!-- MOBILE DRAWER -->
-<div class="mobile-drawer" id="mobile-drawer" onclick="closeMobileDrawerOutside(event)">
+<div class="mobile-drawer" id="mobile-drawer" onclick="if(event.target===this)closeMobileDrawer()">
   <div class="mobile-drawer-inner">
     <button class="mobile-drawer-close" onclick="closeMobileDrawer()">✕</button>
     <a href="/" onclick="closeMobileDrawer()" data-i18n="nav.home">Home</a>
@@ -630,7 +631,7 @@ footer .logo{margin-bottom:1rem;font-size:1.25rem}
       <a href="#" onclick="openModal('terms');return false;">Termini e Condizioni</a>
       <a href="/menu.html" data-i18n="footer.menu">Menu</a>
       <a href="/gallery.html">Galleria</a>
-      <a href="#" onclick="openAdminLogin()" data-i18n="footer.admin">Admin</a>
+      <a href="#" onclick="openAdminLogin();return false;" data-i18n="footer.admin">Admin</a>
     </nav>
     <p style="font-size:.72rem;color:rgba(255,255,255,.55)">© 2025 Antico Frantoio · Tree Legs and More S.r.l. · P.IVA 10428621212 · Via degli Aranci 33, 80067 Sorrento (NA)</p>
   </div>
