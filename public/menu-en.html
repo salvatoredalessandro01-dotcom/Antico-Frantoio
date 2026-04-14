@@ -4,39 +4,93 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Menu — Antico Frantoio, Sorrento, Italy</title>
-<meta name="description" content="Il menu dell'Antico Frantoio a Sorrento. Antipasti, primi, secondi, pizze, dolci, vini e bevande.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --gold:#C9A84C;--gold-lt:#E8D5A3;--gold-dk:#8A6820;
+  --gold:#C9A84C;--gold-lt:#E8D5A3;--gold-dk:#9A7828;
   --cream:#FAF7F2;--cream2:#F3EDE3;--dark:#1A1612;--dark2:#2C2520;
   --gray:#6B6460;--gray-lt:#D4CEC8;
   --radius:2px;--radius-lg:4px;
-  --shadow:0 4px 24px rgba(0,0,0,.12);
   --transition:.25s cubic-bezier(.4,0,.2,1);
   font-family:'Jost',sans-serif;
 }
 
+/* DARK MODE - no variable flipping, explicit colors only */
+@media(prefers-color-scheme:dark){
+  body{background:#1A1612!important;color:#FAF7F2!important}
+  .menu-hero{background:#0D0B09!important}
+  .menu-hero-sub{color:#C9A84C!important;opacity:1!important}
+  .menu-hero h1{color:#FAF7F2!important}
+  .menu-hero-info span{color:rgba(255,255,255,.55)!important}
+  .menu-hero-info span strong{color:rgba(255,255,255,.85)!important}
+  .menu-nav{background:#0D0B09!important;border-bottom-color:rgba(255,255,255,.08)!important}
+  .menu-nav a{color:rgba(255,255,255,.55)!important}
+  .menu-nav a:hover,.menu-nav a.active{color:#C9A84C!important}
+  .menu-section{border-top-color:#3C3530!important}
+  .section-title-it{color:#FAF7F2!important}
+  .section-header{color:#FAF7F2!important}
+  .fixed-menu-card{background:#111!important}
+  .fixed-menu-name{color:#FAF7F2!important}
+  .fixed-menu-desc{color:rgba(255,255,255,.7)!important}
+  .fixed-menu-price{color:#C9A84C!important}
+  .fixed-menu-price span{color:rgba(255,255,255,.5)!important}
+  .fixed-menu-item{color:rgba(255,255,255,.75)!important}
+  .dish{border-bottom-color:#3C3530!important}
+  .dish-name-it{color:#FAF7F2!important}
+  .dish-name-en{color:#A09890!important}
+  .dish-desc{color:#A09890!important}
+  .dish-note{color:#A09890!important}
+  .dish-price{color:#C9A84C!important}
+  .wine-category-title{color:#C9A84C!important;border-bottom-color:#3C3530!important}
+  .coperto-bar{background:#221E1A!important;border-color:#3C3530!important}
+  .coperto-label{color:#A09890!important}
+  .coperto-price{color:#FAF7F2!important}
+  .allergen-legend{background:#221E1A!important;border-color:#3C3530!important}
+  .allergen-badge{background:#111!important;border-color:#3C3530!important;color:#FAF7F2!important}
+  .allergen-item{color:#A09890!important}
+  .menu-cta{background:#0D0B09!important}
+  .menu-cta h2{color:#FAF7F2!important}
+  .menu-cta p{color:rgba(255,255,255,.6)!important}
+  .btn-reserve{background:#C9A84C!important;color:#1A1612!important}
+  footer{background:#0D0B09!important}
+  .footer-links a{color:rgba(255,255,255,.75)!important}
+  footer p{color:rgba(255,255,255,.45)!important}
 }
 
-.mobile-drawer{display:none;position:fixed;inset:0;z-index:490;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--dark);min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;font-family:'Jost',sans-serif}
+input,select,textarea{font-family:'Jost',sans-serif}
+
+/* HEADER */
+.site-header{position:sticky;top:0;z-index:100;background:rgba(26,22,18,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.2);padding:.75rem 0}
+.header-inner{max-width:900px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.header-logo{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:var(--gold);letter-spacing:.05em}
+.header-logo em{font-style:italic}
+.header-nav{display:flex;gap:1.5rem;align-items:center}
+.header-nav a{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.65);transition:color var(--transition)}
+.header-nav a:hover{color:var(--gold)}
+@media(max-width:768px){.header-nav{display:none}}
+
+/* MOBILE MENU */
+.mobile-menu-btn{display:none;background:none;color:#FAF7F2;font-size:1.6rem;cursor:pointer;border:none;padding:.2rem .4rem;line-height:1}
+@media(max-width:768px){.mobile-menu-btn{display:block}}
+.mobile-drawer{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6)}
 .mobile-drawer.open{display:block}
-.mobile-drawer-inner{position:absolute;top:0;right:0;width:min(80vw,300px);height:100%;background:#2C2520;padding:2rem 1.5rem;display:flex;flex-direction:column;gap:.25rem;animation:slideInRight .25s ease}
-to{transform:translateX(0)}}
-.mobile-drawer-close{align-self:flex-end;background:none;color:rgba(255,255,255,.6);font-size:1.5rem;margin-bottom:1rem;padding:.25rem;cursor:pointer;border:none}
-.mobile-drawer a{display:block;padding:.85rem 0;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.08);transition:color .25s;text-decoration:none}
-.mobile-drawer a:hover{color:#C9A84C}
-.mobile-drawer a.drawer-prenota{color:#C9A84C;font-weight:500}
+.mobile-drawer-panel{position:absolute;top:0;right:0;bottom:0;width:min(75vw,280px);background:#1A1612;border-left:1px solid rgba(201,168,76,.25);display:flex;flex-direction:column;padding:1.5rem;animation:drawerIn .22s ease}
+@keyframes drawerIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.drawer-close{align-self:flex-end;background:none;border:none;color:rgba(255,255,255,.7);font-size:1.4rem;cursor:pointer;margin-bottom:1.5rem;padding:.25rem}
+.mobile-drawer-panel a{display:block;padding:.9rem 0;font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.8);border-bottom:1px solid rgba(255,255,255,.1);text-decoration:none;transition:color .2s}
+.mobile-drawer-panel a:last-child{border-bottom:none}
+.mobile-drawer-panel a:hover{color:#C9A84C}
+.drawer-cta{color:#C9A84C!important;font-weight:500}
 
-.lang-toggle{display:flex;gap:.25rem;background:rgba(255,255,255,.15);border-radius:var(--radius-lg);padding:3px;border:1px solid rgba(255,255,255,.2)}
-.lang-btn{font-size:.7rem;letter-spacing:.08em;padding:.3rem .7rem;border-radius:var(--radius);color:rgba(255,255,255,.85);transition:all var(--transition);font-family:'Jost',sans-serif;font-weight:500}
-.lang-btn.active{background:var(--gold);color:var(--dark);font-weight:500}
-
-/* ── HERO ── */
-.menu-hero{background:var(--dark);padding:4rem 1.5rem 3rem;text-align:center;position:relative;overflow:hidden}
-.menu-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(201,168,76,.12) 0%,transparent 70%);pointer-events:none}
+/* HERO */
+.menu-hero{background:#1A1612;padding:4rem 1.5rem 3rem;text-align:center;position:relative;overflow:hidden}
+.menu-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(201,168,76,.12),transparent 70%);pointer-events:none}
 .menu-hero-sub{font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;opacity:.8}
 .menu-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,6vw,3.5rem);font-weight:300;color:#FAF7F2;letter-spacing:.04em;line-height:1.1}
 .menu-hero h1 em{font-style:italic;color:var(--gold)}
@@ -45,43 +99,39 @@ to{transform:translateX(0)}}
 .menu-hero-info span strong{color:rgba(255,255,255,.7);font-weight:400}
 .hero-divider{width:48px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:1.5rem auto 0}
 
-/* ── NAVIGATION ── */
+/* SECTION NAV */
 .menu-nav{background:var(--cream2);border-bottom:1px solid var(--gray-lt);position:sticky;top:57px;z-index:90;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .menu-nav::-webkit-scrollbar{display:none}
 .menu-nav-inner{display:flex;gap:0;min-width:max-content;margin:0 auto;padding:0 1rem}
-.menu-nav a{display:block;padding:.75rem 1.1rem;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);border-bottom:2px solid transparent;transition:all var(--transition);white-space:nowrap}
+.menu-nav a{display:block;padding:.75rem 1.1rem;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);border-bottom:2px solid transparent;transition:all var(--transition);white-space:nowrap;text-decoration:none}
 .menu-nav a:hover{color:var(--dark)}
 .menu-nav a.active{color:var(--gold-dk);border-bottom-color:var(--gold)}
 
-/* ── CONTAINER ── */
+/* CONTAINER */
 .menu-container{max-width:900px;margin:0 auto;padding:0 1.5rem 4rem}
 
-/* ── SECTION ── */
-.menu-section{padding:3rem 0 1rem;border-top:1px solid var(--gray-lt);animation:fadeIn .5s ease both}
+/* SECTIONS */
+.menu-section{padding:3rem 0 1rem;border-top:1px solid var(--gray-lt)}
 .menu-section:first-of-type{border-top:none}
-@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .section-header{margin-bottom:2rem}
-.section-title-it{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,2.4rem);font-weight:300;color:var(--dark);letter-spacing:.03em;line-height:1.1}
-.section-title-en{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-top:.3rem;display:block}
-.section-desc{font-size:.82rem;color:var(--gray);margin-top:.6rem;line-height:1.6;max-width:520px}
+.section-title-it{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,2.4rem);font-weight:300;color:#1A1612;letter-spacing:.03em;line-height:1.1}
 
-/* ── DISH GRID ── */
+/* DISHES */
 .dishes{display:grid;grid-template-columns:1fr;gap:0}
 @media(min-width:640px){.dishes.two-col{grid-template-columns:1fr 1fr;gap:0 2rem}}
-
-.dish{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:.9rem 0;border-bottom:1px solid var(--gray-lt);transition:background var(--transition)}
+.dish{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:.9rem 0;border-bottom:1px solid var(--gray-lt)}
 .dish:last-child{border-bottom:none}
 .dish-left{flex:1;min-width:0}
-.dish-name-it{font-size:1.05rem;font-weight:400;color:var(--dark);line-height:1.3}
+.dish-name-it{font-size:1.05rem;font-weight:400;color:#1A1612;line-height:1.3}
 .dish-name-en{font-size:.85rem;color:var(--gray);font-style:italic;margin-top:.15rem;line-height:1.4;display:block}
 .dish-desc{font-size:.75rem;color:var(--gray);margin-top:.2rem;line-height:1.5}
 .dish-allergens{display:flex;gap:3px;flex-wrap:wrap;margin-top:.35rem}
-.allergen{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--cream2);border:1px solid var(--gray-lt);font-size:.6rem;color:var(--gray);font-weight:500;title:attr(data-allergen)}
+.allergen{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--cream2);border:1px solid var(--gray-lt);font-size:.6rem;color:var(--gray);font-weight:500}
 .dish-price{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:400;color:#9A7828;white-space:nowrap;flex-shrink:0}
 .dish-note{font-size:.72rem;color:var(--gray);font-style:italic;margin-top:.2rem;display:block}
 
-/* ── FIXED MENU CARD ── */
-.fixed-menu-card{background:linear-gradient(135deg,var(--dark) 0%,var(--dark2) 100%);border:1px solid rgba(201,168,76,.3);border-radius:var(--radius-lg);padding:2rem;margin-bottom:2rem;position:relative;overflow:hidden}
+/* FIXED MENU CARD */
+.fixed-menu-card{background:#1A1612;border:1px solid rgba(201,168,76,.3);border-radius:var(--radius-lg);padding:2rem;margin-bottom:2rem;position:relative;overflow:hidden}
 .fixed-menu-card::before{content:'';position:absolute;top:0;right:0;width:120px;height:120px;background:radial-gradient(circle,rgba(201,168,76,.15),transparent 70%)}
 .fixed-menu-label{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem}
 .fixed-menu-name{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;color:#FAF7F2;margin-bottom:.25rem}
@@ -90,165 +140,59 @@ to{transform:translateX(0)}}
 .fixed-menu-price span{font-size:.8rem;font-family:'Jost',sans-serif;color:rgba(255,255,255,.4);margin-left:.25rem}
 .fixed-menu-items{display:flex;flex-direction:column;gap:.4rem;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(201,168,76,.2)}
 .fixed-menu-item{font-size:.82rem;color:rgba(255,255,255,.6);display:flex;gap:.5rem;align-items:flex-start}
-.fixed-menu-item::before{content:'·';color:var(--gold);flex-shrink:0;margin-top:.05rem}
+.fixed-menu-item::before{content:'·';color:var(--gold);flex-shrink:0}
 
-/* ── COPERTO ── */
+/* COPERTO */
 .coperto-bar{background:var(--cream2);border:1px solid var(--gray-lt);border-radius:var(--radius-lg);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;margin:2rem 0;flex-wrap:wrap;gap:.5rem}
 .coperto-label{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gray)}
-.coperto-price{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--dark)}
+.coperto-price{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#1A1612}
 
-/* ── ALLERGEN LEGEND ── */
+/* ALLERGEN LEGEND */
 .allergen-legend{background:var(--cream2);border:1px solid var(--gray-lt);border-radius:var(--radius-lg);padding:1.5rem;margin-top:3rem}
 .allergen-legend-title{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-dk);margin-bottom:1rem;font-weight:500}
 .allergen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem}
 .allergen-item{display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:var(--gray);line-height:1.3}
-.allergen-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--cream);border:1px solid var(--gray-lt);font-size:.65rem;color:var(--dark);font-weight:600;flex-shrink:0}
+.allergen-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--cream);border:1px solid var(--gray-lt);font-size:.65rem;color:#1A1612;font-weight:600;flex-shrink:0}
 
-/* ── CTA ── */
-.menu-cta{text-align:center;padding:3rem 1.5rem;background:var(--dark);margin-top:3rem}
-.menu-cta h2{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:#FAF7F2;margin-bottom:.75rem}
-.menu-cta p{font-size:.85rem;color:rgba(255,255,255,.5);margin-bottom:1.5rem}
-.btn-reserve{display:inline-block;background:var(--gold);color:var(--dark);padding:.85rem 2.5rem;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;font-weight:500;border-radius:var(--radius);transition:all var(--transition);font-family:'Jost',sans-serif}
-.btn-reserve:hover{background:var(--gold-lt);transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.3)}
-
-/* ── FOOTER ── */
-footer{background:var(--dark);color:rgba(255,255,255,.5);padding:2rem 0;text-align:center;font-size:.78rem;line-height:2;border-top:1px solid rgba(201,168,76,.15)}
-footer a{color:rgba(255,255,255,.55);transition:color var(--transition)}
-footer a:hover{color:var(--gold)}
-.footer-links{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:.75rem}
-.footer-links a{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
-
-/* ── WINE SECTION ── */
+/* WINE COLUMNS */
 .wine-cols{display:grid;gap:2rem}
 @media(min-width:640px){.wine-cols{grid-template-columns:1fr 1fr}}
 .wine-category{margin-bottom:1.5rem}
 .wine-category-title{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-dk);padding-bottom:.5rem;border-bottom:1px solid var(--gray-lt);margin-bottom:.75rem}
 
-/* ── LANG VISIBILITY ── */
-.lang-it .{display:none}
-.lang-en .it-only{display:none}
-.lang-en .nav-it{display:none}
-.lang-it .nav-en{display:none}
+/* CTA */
+.menu-cta{text-align:center;padding:3rem 1.5rem;background:#1A1612;margin-top:3rem}
+.menu-cta h2{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:#FAF7F2;margin-bottom:.75rem}
+.menu-cta p{font-size:.85rem;color:rgba(255,255,255,.5);margin-bottom:1.5rem}
+.btn-reserve{display:inline-block;background:var(--gold);color:#1A1612;padding:.85rem 2.5rem;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;font-weight:500;border-radius:var(--radius);transition:all var(--transition)}
+.btn-reserve:hover{background:var(--gold-lt);transform:translateY(-1px)}
 
-.mobile-drawer{display:none;position:fixed;inset:0;z-index:490;background:rgba(0,0,0,.65);backdrop-filter:blur(4px)}
-.mobile-drawer.open{display:block}
-.mobile-drawer-inner{
-  position:absolute;top:0;right:0;
-  width:min(75vw,280px);height:100%;
-  background:#1A1612;
-  padding:2rem 1.5rem;
-  display:flex;flex-direction:column;gap:0;
-  animation:slideInRight .25s ease;
-  border-left:1px solid rgba(201,168,76,.2);
-}
-to{transform:translateX(0)}}
-.mobile-drawer-close{
-  align-self:flex-end;background:none;
-  color:rgba(255,255,255,.7);font-size:1.4rem;
-  margin-bottom:1.5rem;padding:.25rem;cursor:pointer;border:none;
-}
-.mobile-drawer a{
-  display:block;padding:.9rem 0;
-  font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;
-  color:rgba(255,255,255,.8);
-  border-bottom:1px solid rgba(255,255,255,.1);
-  text-decoration:none;
-  transition:color .2s;
-}
-.mobile-drawer a:last-child{border-bottom:none}
-.mobile-drawer a:hover{color:#C9A84C}
-.mobile-drawer-prenota{color:#C9A84C!important;font-weight:500}
-
-/* MOBILE MENU */
-.mobile-menu-btn{display:none;background:none;color:#FAF7F2;font-size:1.6rem;cursor:pointer;border:none;padding:.2rem .5rem;line-height:1;flex-shrink:0}
-
-.mobile-drawer{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.65)}
-.mobile-drawer.open{display:block}
-.mobile-drawer-panel{
-  position:absolute;top:0;right:0;bottom:0;
-  width:min(75vw,280px);
-  background:#1A1612;
-  border-left:1px solid rgba(201,168,76,.25);
-  display:flex;flex-direction:column;
-  padding:1.5rem;
-  animation:drawerIn .22s ease;
-}
-@keyframes drawerIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
-.drawer-close{
-  align-self:flex-end;background:none;border:none;
-  color:rgba(255,255,255,.7);font-size:1.4rem;
-  cursor:pointer;margin-bottom:1.5rem;padding:.25rem;
-}
-.mobile-drawer-panel a{
-  display:block;padding:.9rem 0;
-  font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;
-  color:rgba(255,255,255,.8);text-decoration:none;
-  border-bottom:1px solid rgba(255,255,255,.1);
-}
-.mobile-drawer-panel a:last-child{border-bottom:none}
-.mobile-drawer-panel a:hover{color:#C9A84C}
-.drawer-cta{color:#C9A84C!important;font-weight:500}
-
-@media(prefers-color-scheme:dark){
-  body{background:#1A1612;color:#FAF7F2}
-  .menu-hero,.gallery-hero{background:#0D0B09!important}
-  .menu-hero-sub,.hero-sub{color:#C9A84C!important;opacity:1!important}
-  .menu-hero h1,.gallery-hero h1{color:#FAF7F2!important}
-  .menu-hero-info span{color:rgba(255,255,255,.55)!important}
-  .menu-hero-info span strong{color:rgba(255,255,255,.85)!important}
-  .menu-nav{background:#111!important;border-bottom-color:rgba(255,255,255,.08)!important}
-  .menu-nav a{color:rgba(255,255,255,.55)!important}
-  .menu-nav a:hover,.menu-nav a.active{color:#C9A84C!important}
-  .section-title-it{color:#FAF7F2!important}
-  .fixed-menu-card{background:#0D0B09!important}
-  .fixed-menu-name{color:#FAF7F2!important}
-  .fixed-menu-desc{color:rgba(255,255,255,.7)!important}
-  .fixed-menu-price{color:#C9A84C!important}
-  .fixed-menu-price span{color:rgba(255,255,255,.5)!important}
-  .fixed-menu-item{color:rgba(255,255,255,.75)!important}
-  .dish-name-it{color:#FAF7F2!important}
-  .dish-name-en{color:#A09890!important}
-  .dish-desc{color:#A09890!important}
-  .dish-note{color:#A09890!important}
-  .section-desc{color:#A09890!important}
-  .wine-category-title{color:#C9A84C!important;border-bottom-color:#3C3530!important}
-  .dishes{border-color:#3C3530!important}
-  .dish{border-bottom-color:#3C3530!important}
-  .dish-price{color:#C9A84C!important}
-  .coperto-bar{background:#221E1A!important;border-color:#3C3530!important}
-  .coperto-label{color:#A09890!important}
-  .coperto-price{color:#FAF7F2!important}
-  .allergen-legend{background:#221E1A!important;border-color:#3C3530!important}
-  .allergen-badge{background:#111!important;border-color:#3C3530!important;color:#FAF7F2!important}
-  .allergen-item{color:#A09890!important}
-  .menu-cta,.gallery-cta{background:#0D0B09!important}
-  .menu-cta h2,.gallery-cta h2{color:#FAF7F2!important}
-  .menu-cta p,.gallery-cta p{color:rgba(255,255,255,.6)!important}
-  .btn-reserve{background:#C9A84C!important;color:#1A1612!important}
-  footer{background:#0D0B09!important}
-  .footer-links a{color:rgba(255,255,255,.75)!important}
-  footer p{color:rgba(255,255,255,.45)!important}
-}
+/* FOOTER */
+footer{background:#1A1612;color:rgba(255,255,255,.5);padding:2rem 0;text-align:center;font-size:.78rem;line-height:2;border-top:1px solid rgba(201,168,76,.15)}
+.footer-links{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:.75rem}
+.footer-links a{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65);transition:color var(--transition)}
+.footer-links a:hover{color:var(--gold)}
 
 </style>
 </head>
-<body class="lang-en">
+<body>
 
-<!-- HEADER -->
 <header class="site-header">
   <div class="header-inner">
     <a href="/" class="header-logo">Antico <em>Frantoio</em></a>
     <nav class="header-nav">
       <a href="/">Home</a>
-      <a href="/menu.html">Menu</a>
+      <a href="/menu.html" class="active">Menu</a>
       <a href="/gallery.html">Photogallery</a>
       <a href="/">Book</a>
     </nav>
-    <button class="mobile-menu-btn" onclick="openMobileDrawer()">&#9776;</button>
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <a href="/menu.html" style="font-size:.72rem;letter-spacing:.1em;padding:.35rem .9rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:2px;color:#FAF7F2;font-weight:500;font-family:'Jost',sans-serif;">&#127470;&#127481; IT</a>
+      <button class="mobile-menu-btn" onclick="openMobileDrawer()">&#9776;</button>
+    </div>
   </div>
 </header>
 
-<!-- MOBILE DRAWER -->
 <div class="mobile-drawer" id="mobile-drawer" onclick="if(event.target===this)closeMobileDrawer()">
   <div class="mobile-drawer-panel">
     <button class="drawer-close" onclick="closeMobileDrawer()">&#x2715;</button>
@@ -261,53 +205,24 @@ to{transform:translateX(0)}}
   </div>
 </div>
 
-<!-- HERO -->
 <div class="menu-hero">
-  
-  <p class="menu-hero-sub ">Via Casarlano 5 · Sorrento, Italy</p>
-  <h1 class="it-only">Il Nostro <em>Menu</em></h1>
+  <p class="menu-hero-sub">Via Casarlano 5 &middot; Sorrento, Italy</p>
   <h1>Our <em>Menu</em></h1>
   <div class="menu-hero-info">
-    
-    <span><strong>Cover charge</strong> €3.00</span>
-    
-    <span><strong>Hours</strong> Tue–Sat 12:00–15:00 · 18:30–23:00</span>
+    <span><strong>Cover charge</strong> &euro;3.00</span>
     <span><strong>Tel</strong> +39 081 807 22 00</span>
   </div>
   <div class="hero-divider"></div>
 </div>
 
-<!-- SECTION NAV -->
 <nav class="menu-nav">
   <div class="menu-nav-inner">
-    
-    <a href="#menu-fisso">Set Menu</a>
-    
-    <a href="#antipasti">Starters</a>
-    
-    <a href="#primi">First Courses</a>
-    
-    <a href="#secondi">Second Courses</a>
-    
-    <a href="#pizze">Pizzas</a>
-    
-    <a href="#contorni">Sides</a>
-    
-    <a href="#dolci">Desserts</a>
-    
-    <a href="#vini">Wines</a>
-    
-    <a href="#bevande">Drinks</a>
-    
-    <a href="#caffe">Coffee</a>
+    <a href="#menu-fisso">Set Menu</a><a href="#antipasti">Starters</a><a href="#primi">First Courses</a><a href="#secondi">Second Courses</a><a href="#pizze">Pizzas</a><a href="#contorni">Sides</a><a href="#dolci">Desserts</a><a href="#vini">Wines</a><a href="#bevande">Drinks</a><a href="#caffe">Coffee</a>
   </div>
 </nav>
 
-<!-- MENU CONTENT -->
 <div class="menu-container">
-
-  <!-- MENU FISSO -->
-  <section class="menu-section" id="menu-fisso">
+<section class="menu-section" id="menu-fisso">
     <div class="section-header">
       
       <h2 class="section-title-it ">Set Menu</h2>
@@ -816,8 +731,7 @@ to{transform:translateX(0)}}
     </div>
   </section>
 
-  <!-- COPERTO -->
-  <div class="coperto-bar">
+<div class="coperto-bar">
     
     <span class="coperto-label ">Cover Charge</span>
     <span class="coperto-price">€3,00 <span style="font-size:.75rem;color:var(--gray)">per person</span></span>
@@ -845,46 +759,41 @@ to{transform:translateX(0)}}
     
     <p style="font-size:.72rem;color:var(--gray);margin-top:1rem;line-height:1.6">Allergens present in dishes are indicated with the codes above. For further information on allergens, please inform our staff before ordering.</p>
   </div>
-
 </div>
 
-<!-- CTA -->
 <div class="menu-cta">
-  
   <h2>Reserve Your Table</h2>
-  
-  <p>Via Casarlano 5, 80067 Sorrento, Italy · +39 081 807 22 00</p>
-  
-  <a href="/" class="btn-reserve ">Book Now</a>
+  <p>Via Casarlano 5, 80067 Sorrento, Italy &middot; +39 081 807 22 00</p>
+  <a href="/" class="btn-reserve">Book Now</a>
 </div>
 
-<!-- FOOTER -->
 <footer>
   <div style="max-width:900px;margin:0 auto;padding:0 1.5rem">
-    <nav class="footer-links">
-      <a href="/">🍽️ <span>Book</span></a>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/">Book</a>
+      <a href="/menu.html">Menu</a>
+      <a href="/gallery.html">Photogallery</a>
       <a href="tel:+390818072200">+39 081 807 22 00</a>
-      <a href="/cdn-cgi/l/email-protection#b6c6c4d3d8d9c2d7ccdfd9d8dff6d7d8c2dfd5d9d0c4d7d8c2d9dfd9c5d9c4c4d3d8c2d998dfc2"><span class="__cf_email__" data-cfemail="6d1d1f080302190c17040203042d0c0319040e020b1f0c03190204021e021f1f08031902430419">[email&#160;protected]</span></a>
-    </nav>
-    <p style="font-size:.7rem;color:rgba(255,255,255,.4)">© 2025 Antico Frantoio · Tree Legs and More S.r.l. · P.IVA 10428621212 · Via degli Aranci 33, 80067 Sorrento (NA)</p>
+    </div>
+    <p style="font-size:.7rem;color:rgba(255,255,255,.4)">&copy; 2025 Antico Frantoio &middot; Tree Legs and More S.r.l. &middot; P.IVA 10428621212 &middot; Via degli Aranci 33, 80067 Sorrento (NA)</p>
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// Active nav link on scroll
-const sections = document.querySelectorAll('.menu-section');
-const navLinks = document.querySelectorAll('.menu-nav a');
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      navLinks.forEach(a => {
-        a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id);
-      });
+<script>
+function openMobileDrawer(){document.getElementById('mobile-drawer').classList.add('open');document.body.style.overflow='hidden';}
+function closeMobileDrawer(){document.getElementById('mobile-drawer').classList.remove('open');document.body.style.overflow='';}
+// Active nav on scroll
+const sections=document.querySelectorAll('.menu-section');
+const navLinks=document.querySelectorAll('.menu-nav a');
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      navLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+entry.target.id);});
     }
   });
-}, { rootMargin: '-40% 0px -55% 0px' });
-sections.forEach(s => observer.observe(s));
+},{rootMargin:'-40% 0px -55% 0px'});
+sections.forEach(s=>observer.observe(s));
 </script>
-
-<script>
-function openMobile
+</body>
+</html>
