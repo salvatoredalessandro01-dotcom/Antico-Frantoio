@@ -18,30 +18,14 @@
   --transition:.25s cubic-bezier(.4,0,.2,1);
   font-family:'Jost',sans-serif;
 }
-@media(prefers-color-scheme:dark){
-  :root{--cream:#1A1612;--cream2:#221E1A;--dark:#FAF7F2;--dark2:#E8E0D5;--gray:#A09890;--gray-lt:#3C3530}
-  .dish-price{color:#D4A840}
-}
-html{scroll-behavior:smooth}
-body{background:var(--cream);color:var(--dark);min-height:100vh;overflow-x:hidden}
-a{color:inherit;text-decoration:none}
-button{cursor:pointer;border:none;font-family:'Jost',sans-serif}
 
-/* ── HEADER ── */
-.site-header{position:sticky;top:0;z-index:100;background:rgba(26,22,18,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.2);padding:.75rem 0;transition:all var(--transition)}
-.header-inner{max-width:900px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
-.header-logo{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:var(--gold);letter-spacing:.05em;white-space:nowrap}
-.header-logo span{font-style:italic}
-.header-nav{display:flex;gap:1.5rem;align-items:center}
-.header-nav a{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);transition:color var(--transition)}
-.header-nav a:hover,.header-nav a.active{color:var(--gold)}
-.mobile-menu-btn{display:none;background:none;color:rgba(255,255,255,.8);font-size:1.5rem;cursor:pointer;border:none;padding:.25rem}
+
 @media(max-width:768px){.mobile-menu-btn{display:block}.header-nav .header-nav-links{display:none}}
-/* Mobile drawer */
+
 .mobile-drawer{display:none;position:fixed;inset:0;z-index:490;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
 .mobile-drawer.open{display:block}
 .mobile-drawer-inner{position:absolute;top:0;right:0;width:min(80vw,300px);height:100%;background:#2C2520;padding:2rem 1.5rem;display:flex;flex-direction:column;gap:.25rem;animation:slideInRight .25s ease}
-@keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
+to{transform:translateX(0)}}
 .mobile-drawer-close{align-self:flex-end;background:none;color:rgba(255,255,255,.6);font-size:1.5rem;margin-bottom:1rem;padding:.25rem;cursor:pointer;border:none}
 .mobile-drawer a{display:block;padding:.85rem 0;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.08);transition:color .25s;text-decoration:none}
 .mobile-drawer a:hover{color:#C9A84C}
@@ -147,6 +131,115 @@ footer a:hover{color:var(--gold)}
 .lang-en .{display:none}
 .lang-en .nav-it{display:none}
 .lang-it .nav-en{display:none}
+
+
+.mobile-menu-btn{display:none;background:none;color:rgba(255,255,255,.9);font-size:1.5rem;cursor:pointer;border:none;padding:.25rem .5rem;line-height:1}
+@media(max-width:768px){
+  .mobile-menu-btn{display:block}
+  .header-nav{display:none}
+}
+
+
+.mobile-drawer{display:none;position:fixed;inset:0;z-index:490;background:rgba(0,0,0,.65);backdrop-filter:blur(4px)}
+.mobile-drawer.open{display:block}
+.mobile-drawer-inner{
+  position:absolute;top:0;right:0;
+  width:min(75vw,280px);height:100%;
+  background:#1A1612;
+  padding:2rem 1.5rem;
+  display:flex;flex-direction:column;gap:0;
+  animation:slideInRight .25s ease;
+  border-left:1px solid rgba(201,168,76,.2);
+}
+to{transform:translateX(0)}}
+.mobile-drawer-close{
+  align-self:flex-end;background:none;
+  color:rgba(255,255,255,.7);font-size:1.4rem;
+  margin-bottom:1.5rem;padding:.25rem;cursor:pointer;border:none;
+}
+.mobile-drawer a{
+  display:block;padding:.9rem 0;
+  font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;
+  color:rgba(255,255,255,.8);
+  border-bottom:1px solid rgba(255,255,255,.1);
+  text-decoration:none;
+  transition:color .2s;
+}
+.mobile-drawer a:last-child{border-bottom:none}
+.mobile-drawer a:hover{color:#C9A84C}
+.mobile-drawer-prenota{color:#C9A84C!important;font-weight:500}
+
+
+/* MOBILE MENU */
+.mobile-menu-btn{display:none;background:none;color:#FAF7F2;font-size:1.6rem;cursor:pointer;border:none;padding:.2rem .5rem;line-height:1;flex-shrink:0}
+@media(max-width:768px){
+  .header-nav{display:none}
+  .mobile-menu-btn{display:block}
+}
+.mobile-drawer{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.65)}
+.mobile-drawer.open{display:block}
+.mobile-drawer-panel{
+  position:absolute;top:0;right:0;bottom:0;
+  width:min(75vw,280px);
+  background:#1A1612;
+  border-left:1px solid rgba(201,168,76,.25);
+  display:flex;flex-direction:column;
+  padding:1.5rem;
+  animation:drawerIn .22s ease;
+}
+@keyframes drawerIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.drawer-close{
+  align-self:flex-end;background:none;border:none;
+  color:rgba(255,255,255,.7);font-size:1.4rem;
+  cursor:pointer;margin-bottom:1.5rem;padding:.25rem;
+}
+.mobile-drawer-panel a{
+  display:block;padding:.9rem 0;
+  font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;
+  color:rgba(255,255,255,.8);text-decoration:none;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+.mobile-drawer-panel a:last-child{border-bottom:none}
+.mobile-drawer-panel a:hover{color:#C9A84C}
+.drawer-cta{color:#C9A84C!important;font-weight:500}
+
+@media(prefers-color-scheme:dark){
+  :root{
+    --cream:#1A1612;--cream2:#221E1A;--dark:#FAF7F2;
+    --dark2:#E8E0D5;--gray:#A09890;--gray-lt:#3C3530
+  }
+  .menu-hero,.gallery-hero{background:#0D0B09!important}
+  .menu-hero-sub,.hero-sub{color:#C9A84C!important;opacity:1!important}
+  .menu-hero h1,.gallery-hero h1{color:#FAF7F2!important}
+  .menu-hero-info span{color:rgba(255,255,255,.55)!important}
+  .menu-hero-info span strong{color:rgba(255,255,255,.85)!important}
+  .menu-nav{background:#111!important;border-bottom-color:rgba(255,255,255,.08)!important}
+  .menu-nav a{color:rgba(255,255,255,.55)!important}
+  .menu-nav a:hover,.menu-nav a.active{color:#C9A84C!important}
+  .section-title-it{color:#FAF7F2!important}
+  .fixed-menu-card{background:#0D0B09!important}
+  .fixed-menu-name{color:#FAF7F2!important}
+  .fixed-menu-desc{color:rgba(255,255,255,.7)!important}
+  .fixed-menu-price{color:#C9A84C!important}
+  .fixed-menu-price span{color:rgba(255,255,255,.5)!important}
+  .fixed-menu-item{color:rgba(255,255,255,.75)!important}
+  .dish-name-it{color:#FAF7F2!important}
+  .dish-price{color:#C9A84C!important}
+  .coperto-bar{background:#221E1A!important;border-color:#3C3530!important}
+  .coperto-label{color:#A09890!important}
+  .coperto-price{color:#FAF7F2!important}
+  .allergen-legend{background:#221E1A!important;border-color:#3C3530!important}
+  .allergen-badge{background:#111!important;border-color:#3C3530!important;color:#FAF7F2!important}
+  .allergen-item{color:#A09890!important}
+  .menu-cta,.gallery-cta{background:#0D0B09!important}
+  .menu-cta h2,.gallery-cta h2{color:#FAF7F2!important}
+  .menu-cta p,.gallery-cta p{color:rgba(255,255,255,.6)!important}
+  .btn-reserve{background:#C9A84C!important;color:#1A1612!important}
+  footer{background:#0D0B09!important}
+  .footer-links a{color:rgba(255,255,255,.75)!important}
+  footer p{color:rgba(255,255,255,.45)!important}
+}
+
 </style>
 </head>
 <body class="lang-it">
@@ -161,23 +254,27 @@ footer a:hover{color:var(--gold)}
       <a href="/gallery.html">Galleria</a>
       <a href="/">Prenota</a>
     </nav>
-    <button class="mobile-menu-btn" onclick="openMobileDrawer()" aria-label="Menu">☰</button>
   </div>
 </header>
 
-
 <!-- MOBILE DRAWER -->
-<div class="mobile-drawer" id="mobile-drawer" onclick="closeMobileDrawerOutside(event)">
-  <div class="mobile-drawer-inner">
-    <button class="mobile-drawer-close" onclick="closeMobileDrawer()">✕</button>
+<div class="mobile-drawer" id="mobile-drawer" onclick="if(event.target===this)closeMobileDrawer()">
+  <div class="mobile-drawer-panel">
+    <button class="drawer-close" onclick="closeMobileDrawer()">&#x2715;</button>
     <a href="/">Home</a>
-    <a href="/" class="drawer-prenota">Prenota</a>
+    <a href="/" class="drawer-cta">Prenota</a>
     <a href="/menu.html">Menu</a>
     <a href="/gallery.html">Galleria</a>
     <a href="#">Eventi</a>
     <a href="#">Contatti</a>
   </div>
 </div>
+
+
+
+
+
+
 <!-- HERO -->
 <div class="menu-hero">
   <p class="menu-hero-sub ">Via Casarlano 5 · Sorrento</p>
@@ -788,8 +885,6 @@ footer a:hover{color:var(--gold)}
 </footer>
 
 <script>
-}
-
 // Active nav link on scroll
 const sections = document.querySelectorAll('.menu-section');
 const navLinks = document.querySelectorAll('.menu-nav a');
@@ -805,10 +900,17 @@ const observer = new IntersectionObserver(entries => {
 sections.forEach(s => observer.observe(s));
 </script>
 
+
+
 <script>
-function openMobileDrawer(){document.getElementById('mobile-drawer').classList.add('open');document.body.style.overflow='hidden';}
-function closeMobileDrawer(){document.getElementById('mobile-drawer').classList.remove('open');document.body.style.overflow='';}
-function closeMobileDrawerOutside(e){if(e.target===document.getElementById('mobile-drawer'))closeMobileDrawer();}
+function openMobileDrawer(){
+  document.getElementById('mobile-drawer').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeMobileDrawer(){
+  document.getElementById('mobile-drawer').classList.remove('open');
+  document.body.style.overflow='';
+}
 </script>
 </body>
 </html>
