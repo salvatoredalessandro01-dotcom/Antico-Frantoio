@@ -1296,6 +1296,7 @@ function buildNav(role) {
 function openMobileDrawer(){document.getElementById('mobile-drawer').classList.add('open');document.body.style.overflow='hidden';}
 function closeMobileDrawer(){document.getElementById('mobile-drawer').classList.remove('open');document.body.style.overflow='';}
 function closeMobileDrawerOutside(e){if(e.target===document.getElementById('mobile-drawer'))closeMobileDrawer();}
+function openAdminLogin(){document.getElementById('admin-login-modal').classList.add('open');setTimeout(()=>{const u=document.getElementById('admin-user');if(u)u.focus();},100);}
 function closeAdminLogin(){document.getElementById('admin-login-modal').classList.remove('open');document.getElementById('login-error').classList.remove('visible');}
 
 async function tryAdminLogin(){
