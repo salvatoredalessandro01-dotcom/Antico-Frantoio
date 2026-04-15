@@ -181,6 +181,40 @@ section{padding:clamp(4rem,8vw,8rem) 0}
 
 /* ── RESERVATION SECTION ── */
 #reservation{background:#FAFAF8}
+
+/* ── ABOUT SECTION ── */
+#about{background:var(--white);padding:clamp(4rem,8vw,8rem) 0}
+.about-intro{text-align:center;max-width:680px;margin:0 auto 5rem}
+.about-intro h2{margin-bottom:0}
+.about-intro .section-rule{margin:1.25rem auto 1.5rem}
+.about-intro p{font-size:1.1rem;color:#1C1410;line-height:1.9;font-weight:300}
+.about-pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-bottom:5rem}
+@media(max-width:768px){.about-pillars{grid-template-columns:1fr;gap:1.5rem}}
+.pillar{text-align:center;padding:2.5rem 1.75rem;border:1px solid var(--gray-xlt);border-radius:var(--radius-lg);transition:box-shadow var(--transition),transform var(--transition)}
+.pillar:hover{box-shadow:0 8px 32px rgba(92,122,46,.1);transform:translateY(-3px)}
+.pillar-icon{font-size:2.2rem;margin-bottom:1.1rem;display:block;line-height:1}
+.pillar h3{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:400;color:#1C1410;margin-bottom:.75rem}
+.pillar p{font-size:.92rem;color:#5A5040;line-height:1.8;font-weight:300}
+.about-split{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;margin-bottom:5rem}
+@media(max-width:768px){.about-split{grid-template-columns:1fr;gap:2.5rem}}
+.about-split.reverse{direction:rtl}
+.about-split.reverse > *{direction:ltr}
+.about-text .section-tag{margin-bottom:.5rem}
+.about-text h2{margin-bottom:0;line-height:1.1}
+.about-text .section-rule{margin:1.25rem 0 1.5rem}
+.about-text p{font-size:1rem;color:#1C1410;line-height:1.9;font-weight:300;margin-bottom:1.25rem}
+.about-text p:last-child{margin-bottom:0}
+.about-img{border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.12)}
+.about-img img{width:100%;height:100%;object-fit:cover;display:block;min-height:380px}
+.about-events{background:#FAFAF8;border-radius:var(--radius-lg);padding:3.5rem;text-align:center;border:1px solid var(--gray-xlt)}
+.about-events .section-tag{margin-bottom:.5rem}
+.about-events h2{margin-bottom:0}
+.about-events .section-rule{margin:1.25rem auto 1.5rem}
+.about-events p{font-size:1rem;color:#1C1410;line-height:1.9;font-weight:300;max-width:680px;margin:0 auto 1.5rem}
+.about-events-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:2.5rem}
+@media(max-width:640px){.about-events-grid{grid-template-columns:1fr}}
+.event-tag{padding:1.1rem 1.5rem;background:var(--white);border:1px solid var(--gray-xlt);border-radius:var(--radius);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:#1C1410;transition:all var(--transition)}
+.event-tag:hover{border-color:var(--olive);color:var(--olive);background:rgba(92,122,46,.05)}
 .reservation-wrap{
   display:grid;
   grid-template-columns:1fr 1.75fr;
@@ -663,6 +697,67 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
   </div>
 </section>
 
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+
+    <!-- Intro -->
+    <div class="about-intro">
+      <span class="section-tag" data-i18n="about.tag">Il Ristorante</span>
+      <h2 data-i18n="about.heading">Un luogo dove il tempo<br><em>si ferma</em></h2>
+      <div class="section-rule center"></div>
+      <p data-i18n="about.intro">Antico Frantoio offre un'atmosfera piacevole e accogliente, con una vista mozzafiato e un ambiente curato nei minimi dettagli. Ideale per una cena rilassante, il locale si distingue per il suo stile rustico e raffinato, incorniciato da un incantevole panorama sul mare.</p>
+    </div>
+
+    <!-- Three pillars -->
+    <div class="about-pillars">
+      <div class="pillar">
+        <span class="pillar-icon">🌿</span>
+        <h3 data-i18n="pillar1.title">Ingredienti del Territorio</h3>
+        <p data-i18n="pillar1.text">Selezioniamo i migliori prodotti locali, freschi e di stagione, per portare in tavola sapori autentici della tradizione campana.</p>
+      </div>
+      <div class="pillar">
+        <span class="pillar-icon">🍕</span>
+        <h3 data-i18n="pillar2.title">La Nostra Pizza</h3>
+        <p data-i18n="pillar2.text">Realizzata da mani esperte con le migliori materie prime, la nostra pizza è un omaggio alla tradizione napoletana con un tocco creativo.</p>
+      </div>
+      <div class="pillar">
+        <span class="pillar-icon">🌊</span>
+        <h3 data-i18n="pillar3.title">Vista sul Mare</h3>
+        <p data-i18n="pillar3.text">Affacciato sul golfo di Sorrento, il nostro ristorante offre una cornice unica per ogni occasione, dal pranzo romantico alla serata in famiglia.</p>
+      </div>
+    </div>
+
+    <!-- Philosophy split -->
+    <div class="about-split">
+      <div class="about-text">
+        <span class="section-tag" data-i18n="philosophy.tag">La Nostra Filosofia</span>
+        <h2 data-i18n="philosophy.heading">Tradizione con un<br><em>tocco creativo</em></h2>
+        <div class="section-rule"></div>
+        <p data-i18n="philosophy.p1">La nostra cucina nasce dall'amore per i piatti della tradizione locale, reinterpretati con un tocco innovativo e una ricerca costante della qualità. Ogni piatto racconta una storia di territorio, memoria e passione.</p>
+        <p data-i18n="philosophy.p2">Utilizziamo esclusivamente prodotti di alta qualità, selezionati da fornitori locali di fiducia. Dalla pasta fresca ai prodotti del mare, ogni ingrediente è scelto per esaltare i sapori autentici della Campania.</p>
+      </div>
+      <div class="about-img">
+        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80" alt="La cucina dell'Antico Frantoio" loading="lazy">
+      </div>
+    </div>
+
+    <!-- Events block -->
+    <div class="about-events">
+      <span class="section-tag" data-i18n="events.tag">Eventi &amp; Occasioni Speciali</span>
+      <h2 data-i18n="events.heading">Il tuo momento<br><em>speciale</em></h2>
+      <div class="section-rule center"></div>
+      <p data-i18n="events.text">Grazie alla nostra posizione privilegiata e alla sala capiente, siamo la scelta ideale per eventi privati, cene aziendali e grandi comitive. Che si tratti di un matrimonio, di un anniversario o di una cena di gala, il nostro team si occupa di ogni dettaglio per rendere la tua serata indimenticabile.</p>
+      <div class="about-events-grid">
+        <div class="event-tag" data-i18n="event1">🥂 Matrimoni</div>
+        <div class="event-tag" data-i18n="event2">🎉 Compleanni &amp; Anniversari</div>
+        <div class="event-tag" data-i18n="event3">🍽️ Cene di Gala</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
 <!-- RESERVATION -->
 <section id="reservation">
   <div class="container">
@@ -1005,6 +1100,17 @@ const translations = {
     'nav.menu':'Menu','nav.reserve':'Prenota','nav.events':'Eventi','nav.contact':'Contatti','nav.home':'Home','nav.gallery':'Galleria',
     'hero.eyebrow':'Sorrento','hero.tagline':'Un\'esperienza che va oltre il pasto',
     'hero.cta':'Prenota un Tavolo','hero.scroll':'Scopri',
+    'about.tag':'Il Ristorante','about.heading':'Un luogo dove il tempo\nsi ferma',
+    'about.intro':'Antico Frantoio offre un\'atmosfera piacevole e accogliente, con una vista mozzafiato e un ambiente curato nei minimi dettagli. Ideale per una cena rilassante, il locale si distingue per il suo stile rustico e raffinato, incorniciato da un incantevole panorama sul mare.',
+    'pillar1.title':'Ingredienti del Territorio','pillar1.text':'Selezioniamo i migliori prodotti locali, freschi e di stagione, per portare in tavola sapori autentici della tradizione campana.',
+    'pillar2.title':'La Nostra Pizza','pillar2.text':'Realizzata da mani esperte con le migliori materie prime, la nostra pizza è un omaggio alla tradizione napoletana con un tocco creativo.',
+    'pillar3.title':'Vista sul Mare','pillar3.text':'Affacciato sul golfo di Sorrento, il nostro ristorante offre una cornice unica per ogni occasione, dal pranzo romantico alla serata in famiglia.',
+    'philosophy.tag':'La Nostra Filosofia','philosophy.heading':'Tradizione con un\ntocco creativo',
+    'philosophy.p1':'La nostra cucina nasce dall\'amore per i piatti della tradizione locale, reinterpretati con un tocco innovativo e una ricerca costante della qualità. Ogni piatto racconta una storia di territorio, memoria e passione.',
+    'philosophy.p2':'Utilizziamo esclusivamente prodotti di alta qualità, selezionati da fornitori locali di fiducia. Dalla pasta fresca ai prodotti del mare, ogni ingrediente è scelto per esaltare i sapori autentici della Campania.',
+    'events.tag':'Eventi &amp; Occasioni Speciali','events.heading':'Il tuo momento\nspeciale',
+    'events.text':'Grazie alla nostra posizione privilegiata e alla sala capiente, siamo la scelta ideale per eventi privati, cene aziendali e grandi comitive. Che si tratti di un matrimonio, di un anniversario o di una cena di gala, il nostro team si occupa di ogni dettaglio per rendere la tua serata indimenticabile.',
+    'event1':'🥂 Matrimoni','event2':'🎉 Compleanni &amp; Anniversari','event3':'🍽️ Cene di Gala',
     'res.eyebrow':'Prenotazioni','res.heading':'Riserva il Tuo\nMomento',
     'res.intro':'Ogni tavolo da noi è una storia. Lasciati avvolgere da un\'atmosfera unica, tra sapori autentici e un servizio impeccabile.',
     'info.hours':'Orari','info.hours.val':'Martedì – Sabato\n12:00 – 15:00 · 18:30 – 23:00\nDomenica: 12:00 – 15:30 · 18:30 – 23:00',
@@ -1041,6 +1147,17 @@ const translations = {
     'nav.menu':'Menu','nav.reserve':'Reserve','nav.events':'Events','nav.contact':'Contact','nav.home':'Home','nav.gallery':'Gallery',
     'hero.eyebrow':'Sorrento','hero.tagline':'An experience beyond the meal',
     'hero.cta':'Book a Table','hero.scroll':'Discover',
+    'about.tag':'The Restaurant','about.heading':'A place where time\nstands still',
+    'about.intro':'Antico Frantoio offers a pleasant and welcoming atmosphere, with breathtaking views and a beautifully designed setting. Ideal for a relaxed dinner, the restaurant features a rustic yet refined style, framed by an enchanting view of the sea.',
+    'pillar1.title':'Local Ingredients','pillar1.text':'We select the finest local produce, fresh and seasonal, to bring authentic flavours of the Campanian tradition to your table.',
+    'pillar2.title':'Our Pizza','pillar2.text':'Crafted by expert hands using the best raw ingredients, our pizza is a tribute to Neapolitan tradition with a creative touch.',
+    'pillar3.title':'Sea View','pillar3.text':'Overlooking the Gulf of Sorrento, our restaurant offers a unique setting for every occasion, from a romantic lunch to a family evening.',
+    'philosophy.tag':'Our Philosophy','philosophy.heading':'Tradition with a\ncreative touch',
+    'philosophy.p1':'Our cuisine is born from a love of local traditional dishes, reinterpreted with an innovative touch and a constant pursuit of quality. Every dish tells a story of land, memory and passion.',
+    'philosophy.p2':'We use only the highest quality ingredients, sourced from trusted local suppliers. From fresh pasta to the finest seafood, every ingredient is chosen to celebrate the authentic flavours of Campania.',
+    'events.tag':'Events &amp; Special Occasions','events.heading':'Your special\nmoment',
+    'events.text':'Thanks to our privileged location and spacious dining room, we are the ideal choice for private events, corporate dinners and large groups. Whether it\'s a wedding, anniversary or gala dinner, our team takes care of every detail to make your evening unforgettable.',
+    'event1':'🥂 Weddings','event2':'🎉 Birthdays &amp; Anniversaries','event3':'🍽️ Gala Dinners',
     'res.eyebrow':'Reservations','res.heading':'Reserve Your\nMoment',
     'res.intro':'Every table here tells a story. Let yourself be enveloped by a unique atmosphere, authentic flavors, and impeccable service.',
     'info.hours':'Hours','info.hours.val':'Tuesday – Saturday\n12:00 – 3:00 PM · 6:30 – 11:00 PM\nSunday: 12:00 – 3:30 PM · 6:30 – 11:00 PM',
