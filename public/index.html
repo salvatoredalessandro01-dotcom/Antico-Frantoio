@@ -659,7 +659,7 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
         <li><a href="/menu.html" data-i18n="nav.menu">Menu</a></li>
         <li><a href="#reservation" data-i18n="nav.reserve">Prenota Ora</a></li>
         <li><a href="#" data-i18n="nav.events">Eventi</a></li>
-        <li><a href="#" data-i18n="nav.contact">Contatti</a></li>
+        <li><a href="#" onclick="openContactSidebar();return false;" data-i18n="nav.contact">Contatti</a></li>
       </ul>
     </nav>
     <div class="header-right">
@@ -681,7 +681,7 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
     <a href="#reservation" onclick="closeMobileDrawer()" class="drawer-prenota" data-i18n="nav.reserve">Prenota Ora</a>
     <a href="/menu.html" onclick="closeMobileDrawer()" data-i18n="nav.menu">Menu</a>
     <a href="#" onclick="closeMobileDrawer()">Eventi</a>
-    <a href="#" onclick="closeMobileDrawer()">Contatti</a>
+    <a href="#" onclick="closeMobileDrawer();openContactSidebar();return false;">Contatti</a>
   </div>
 </div>
 
@@ -946,6 +946,54 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
   </div>
 </div>
 
+
+<!-- CONTACT SIDEBAR -->
+<div class="contact-sidebar-overlay" id="contact-overlay" onclick="closeContactSidebar()"></div>
+<div class="contact-sidebar" id="contact-sidebar">
+  <button class="contact-sidebar-close" onclick="closeContactSidebar()">&#x2715;</button>
+  <h2 class="contact-sidebar-title" data-i18n="contact.title">Contatti</h2>
+  <div class="contact-sidebar-rule"></div>
+
+  <div class="contact-item">
+    <div class="contact-item-icon">&#x1F4CD;</div>
+    <div class="contact-item-body">
+      <span class="contact-item-label" data-i18n="contact.address.label">Indirizzo</span>
+      <div class="contact-item-value">
+        Via Casarlano 5<br>80067 Sorrento (NA)<br>Italia
+      </div>
+    </div>
+  </div>
+
+  <div class="contact-item">
+    <div class="contact-item-icon">&#x1F4DE;</div>
+    <div class="contact-item-body">
+      <span class="contact-item-label" data-i18n="contact.phone.label">Telefono</span>
+      <div class="contact-item-value">
+        <a href="tel:+390818072200">+39 081 807 22 00</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="contact-item">
+    <div class="contact-item-icon">&#x1F4E7;</div>
+    <div class="contact-item-body">
+      <span class="contact-item-label" data-i18n="contact.social.label">Social</span>
+      <div class="contact-item-value">
+        <div class="contact-social">
+          <!-- Facebook -->
+          <a href="https://www.facebook.com/p/Antico-Frantoio-Sorrento-61557624544311/" target="_blank" rel="noopener" class="social-btn" title="Facebook">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.234 2.686.234v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
+          </a>
+          <!-- Instagram -->
+          <a href="https://www.instagram.com/anticofrantoio.sorrento/" target="_blank" rel="noopener" class="social-btn" title="Instagram">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- POLICY MODALS -->
 <div id="policy-modal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto" onclick="if(event.target===this)closeModal()">
   <div style="background:var(--white);border-radius:var(--radius-lg);width:min(94vw,760px);max-width:760px;padding:2.5rem;position:relative;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
@@ -1100,7 +1148,7 @@ let currentUser = { username:'', role:'' };
 // ═══════════════════════════════════════════════════════════════
 const translations = {
   it: {
-    'nav.menu':'Menu','nav.reserve':'Prenota Ora','nav.events':'Eventi','nav.contact':'Contatti','nav.home':'Home','nav.gallery':'Galleria',
+    'nav.menu':'Menu','nav.reserve':'Prenota Ora','nav.events':'Eventi','nav.contact':'Contatti','contact.title':'Contatti','contact.address.label':'Indirizzo','contact.phone.label':'Telefono','contact.social.label':'Seguici','nav.home':'Home','nav.gallery':'Galleria',
     'hero.eyebrow':'Sorrento','hero.tagline':'Un\'esperienza che va oltre il pasto',
     'hero.cta':'Prenota un Tavolo','hero.scroll':'Scopri',
     'about.tag':'Il Ristorante','about.heading':'Un luogo dove il tempo\nsi ferma',
@@ -1147,7 +1195,7 @@ const translations = {
     'paid':'Pagata','unpaid':'—',
   },
   en: {
-    'nav.menu':'Menu','nav.reserve':'Book Now','nav.events':'Events','nav.contact':'Contact','nav.home':'Home','nav.gallery':'Gallery',
+    'nav.menu':'Menu','nav.reserve':'Book Now','nav.events':'Events','nav.contact':'Contact','contact.title':'Contact Us','contact.address.label':'Address','contact.phone.label':'Phone','contact.social.label':'Follow Us','nav.home':'Home','nav.gallery':'Gallery',
     'hero.eyebrow':'Sorrento','hero.tagline':'An experience beyond the meal',
     'hero.cta':'Book a Table','hero.scroll':'Discover',
     'about.tag':'The Restaurant','about.heading':'A place where time\nstands still',
@@ -1615,6 +1663,16 @@ function buildNav(role) {
   }).join('');
 }
 
+function openContactSidebar(){
+  document.getElementById('contact-sidebar').classList.add('open');
+  document.getElementById('contact-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeContactSidebar(){
+  document.getElementById('contact-sidebar').classList.remove('open');
+  document.getElementById('contact-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
 function openMobileDrawer(){document.getElementById('mobile-drawer').classList.add('open');document.body.style.overflow='hidden';}
 function closeMobileDrawer(){document.getElementById('mobile-drawer').classList.remove('open');document.body.style.overflow='';}
 function closeMobileDrawerOutside(e){if(e.target===document.getElementById('mobile-drawer'))closeMobileDrawer();}
