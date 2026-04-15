@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Photogallery — Antico Frantoio, Sorrento</title>
+<meta name="description" content="Photo gallery of Antico Frantoio in Sorrento, Italy. Discover our restaurant and our dishes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --olive:#5C7A2E;--olive-lt:#8FAF54;--olive-dk:#3B5218;
+  --cream:#FDFAF6;--cream2:#F5EFE6;--cream3:#EDE3D5;
+  --dark:#1C1410;--dark2:#2E2018;
+  --gray:#5A5040;--gray-lt:#D8CCBC;--gray-xlt:#EDE8E0;
+  --white:#FFFFFF;
+  --radius:6px;--radius-lg:12px;
+  --transition:.25s cubic-bezier(.4,0,.2,1);
+  font-family:'Lato',sans-serif;
+  font-size:17px;
+}
+@media(prefers-color-scheme:dark){
+  body{background:#1E2318!important;color:#EDE8E0!important}
+  .site-header{background:rgba(18,22,14,.97)!important;border-bottom-color:rgba(143,175,84,.2)!important}
+  .header-logo{color:#8FAF54!important}
+  .header-nav a{color:rgba(255,255,255,.6)!important}
+  .header-nav a:hover{color:#8FAF54!important}
+  .mobile-menu-btn{color:#EDE8E0!important}
+  .mobile-drawer-panel{background:#161C10!important;border-left-color:rgba(143,175,84,.3)!important}
+  .mobile-drawer-panel a{color:rgba(255,255,255,.8)!important;border-bottom-color:rgba(255,255,255,.08)!important}
+  .mobile-drawer-panel a:hover,.drawer-cta{color:#8FAF54!important}
+  .gallery-section+.gallery-section{border-top-color:rgba(255,255,255,.08)!important}
+  .section-title{color:#EDE8E0!important}
+  .section-tag{color:#8FAF54!important}
+  .gallery-cta{background:linear-gradient(160deg,#1E2318 0%,#2C3520 100%)!important}
+  .gallery-cta h2{color:#FDFAF6!important}
+  .gallery-cta p{color:rgba(253,250,246,.55)!important}
+  .btn-reserve{background:var(--olive)!important;color:#fff!important}
+  footer{background:#0E1209!important}
+  .footer-links a{color:rgba(255,255,255,.65)!important}
+  footer p{color:rgba(255,255,255,.35)!important}
+}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--dark);min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;font-family:'Lato',sans-serif}
+.site-header{position:sticky;top:0;z-index:100;background:rgba(30,35,24,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(143,175,84,.2);padding:.75rem 0}
+.header-inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.header-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:400;color:#8FAF54;letter-spacing:.05em}
+.header-logo em{font-style:italic}
+.header-nav{display:flex;gap:1.5rem;align-items:center}
+.header-nav a{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.6);transition:color var(--transition)}
+.header-nav a:hover,.header-nav a.active{color:#8FAF54}
+@media(max-width:768px){.header-nav{display:none}}
+.mobile-menu-btn{display:none;background:none;color:#EDE8E0;font-size:1.6rem;cursor:pointer;border:none;padding:.2rem .4rem;line-height:1}
+@media(max-width:768px){.mobile-menu-btn{display:block}}
+.mobile-drawer{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6)}
+.mobile-drawer.open{display:block}
+.mobile-drawer-panel{position:absolute;top:0;right:0;bottom:0;width:min(75vw,280px);background:#161C10;border-left:1px solid rgba(143,175,84,.3);display:flex;flex-direction:column;padding:1.5rem;animation:drawerIn .22s ease}
+@keyframes drawerIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.drawer-close{align-self:flex-end;background:none;border:none;color:rgba(255,255,255,.65);font-size:1.4rem;cursor:pointer;margin-bottom:1.5rem;padding:.25rem}
+.mobile-drawer-panel a{display:block;padding:.9rem 0;font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.75);border-bottom:1px solid rgba(255,255,255,.1);text-decoration:none;transition:color .2s}
+.mobile-drawer-panel a:last-child{border-bottom:none}
+.mobile-drawer-panel a:hover{color:#8FAF54}
+.drawer-cta{color:#8FAF54!important;font-weight:700}
+.gallery-hero{background:linear-gradient(160deg,#1E2318 0%,#2C3520 100%);padding:4.5rem 1.5rem 3.5rem;text-align:center;position:relative;overflow:hidden}
+.gallery-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(143,175,84,.18),transparent 70%);pointer-events:none}
+.hero-sub{font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;color:#8FAF54;margin-bottom:1.1rem;font-weight:700;display:block}
+.gallery-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.4rem,6vw,3.8rem);font-weight:400;color:#FDFAF6;letter-spacing:.02em;line-height:1.05}
+.gallery-hero h1 em{font-style:italic;color:#8FAF54}
+.hero-divider{width:40px;height:2px;background:linear-gradient(90deg,transparent,#8FAF54,transparent);margin:1.5rem auto 0;border-radius:2px}
+.gallery-container{max-width:1200px;margin:0 auto;padding:0 1.5rem 5rem}
+.gallery-section{padding:3.5rem 0 1rem}
+.gallery-section+.gallery-section{border-top:1px solid var(--gray-xlt)}
+.section-tag{font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--olive);font-weight:700;margin-bottom:.5rem;display:block}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(2.1rem,4.5vw,2.9rem);font-weight:400;color:var(--dark);letter-spacing:.02em;line-height:1.1;margin-bottom:.6rem}
+.section-rule{width:2rem;height:2px;background:var(--olive);border-radius:2px;margin-bottom:2rem}
+.photo-grid{columns:3;column-gap:12px}
+@media(max-width:900px){.photo-grid{columns:2}}
+@media(max-width:480px){.photo-grid{columns:1}}
+.photo-item{break-inside:avoid;margin-bottom:12px;overflow:hidden;border-radius:var(--radius-lg);cursor:pointer;position:relative}
+.photo-item img{width:100%;height:auto;display:block;transition:transform .5s cubic-bezier(.4,0,.2,1),filter .3s;filter:brightness(.96)}
+.photo-item:hover img{transform:scale(1.04);filter:brightness(1.04)}
+.photo-item::after{content:'';position:absolute;inset:0;background:rgba(92,122,46,0);transition:background var(--transition);pointer-events:none;border-radius:var(--radius-lg)}
+.photo-item:hover::after{background:rgba(92,122,46,.06)}
+.lightbox{display:none;position:fixed;inset:0;z-index:1000;background:rgba(14,18,9,.95);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:1rem}
+.lightbox.open{display:flex}
+.lightbox-inner{max-width:min(90vw,1200px);max-height:90vh;display:flex;align-items:center;justify-content:center}
+.lightbox img{max-width:100%;max-height:90vh;object-fit:contain;border-radius:var(--radius-lg);box-shadow:0 32px 80px rgba(0,0,0,.7)}
+.lightbox-close{position:fixed;top:1.25rem;right:1.25rem;width:44px;height:44px;background:rgba(255,255,255,.12);border-radius:50%;color:#fff;font-size:1.3rem;display:flex;align-items:center;justify-content:center;z-index:1001;border:none;cursor:pointer;transition:background var(--transition)}
+.lightbox-close:hover{background:rgba(255,255,255,.25)}
+.lightbox-prev,.lightbox-next{position:fixed;top:50%;transform:translateY(-50%);width:48px;height:48px;background:rgba(255,255,255,.12);border-radius:50%;color:#fff;font-size:1.5rem;display:flex;align-items:center;justify-content:center;z-index:1001;border:none;cursor:pointer;transition:background var(--transition)}
+.lightbox-prev:hover,.lightbox-next:hover{background:rgba(255,255,255,.25)}
+.lightbox-prev{left:1rem}
+.lightbox-next{right:1rem}
+.lightbox-counter{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);font-size:.75rem;color:rgba(255,255,255,.45);letter-spacing:.12em;font-weight:700}
+.gallery-cta{text-align:center;padding:4rem 1.5rem;background:linear-gradient(160deg,#1E2318 0%,#2C3520 100%);margin-top:3rem}
+.gallery-cta h2{font-family:'Playfair Display',serif;font-size:2rem;font-weight:400;color:#FDFAF6;margin-bottom:.75rem}
+.gallery-cta p{font-size:.9rem;color:rgba(253,250,246,.55);margin-bottom:1.75rem;font-weight:300}
+.btn-reserve{display:inline-block;background:var(--olive);color:#fff;padding:.9rem 2.75rem;font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;border-radius:var(--radius);transition:all var(--transition);box-shadow:0 4px 16px rgba(92,122,46,.4)}
+.btn-reserve:hover{background:var(--olive-dk);transform:translateY(-2px);box-shadow:0 8px 24px rgba(92,122,46,.5)}
+.lang-link{font-size:.7rem;letter-spacing:.1em;padding:.3rem .85rem;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:4px;color:#EDE8E0;font-weight:700;font-family:'Lato',sans-serif;transition:all var(--transition)}
+.lang-link:hover{background:rgba(143,175,84,.25);border-color:rgba(143,175,84,.5);color:#8FAF54}
+footer{background:#0E1209;color:rgba(255,255,255,.5);padding:3rem 0;text-align:center;font-size:.82rem;line-height:2.2}
+.footer-links{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:.75rem}
+.footer-links a{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.55);transition:color var(--transition)}
+.footer-links a:hover{color:#8FAF54}
+footer p{font-size:.7rem;color:rgba(255,255,255,.3)}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="header-logo">Antico <em>Frantoio</em></a>
+    <nav class="header-nav">
+      <a href="/">Home</a>
+      <a href="/menu-en.html">Menu</a>
+      <a href="/gallery-en.html" class="active">Photogallery</a>
+      <a href="/#reservation">Book Now</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <a href="/gallery.html" class="lang-link">&#127470;&#127481; IT</a>
+      <button class="mobile-menu-btn" onclick="openMobileDrawer()">&#9776;</button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-drawer" id="mobile-drawer" onclick="if(event.target===this)closeMobileDrawer()">
+  <div class="mobile-drawer-panel">
+    <button class="drawer-close" onclick="closeMobileDrawer()">&#x2715;</button>
+    <a href="/">Home</a>
+    <a href="/#reservation" class="drawer-cta">Book Now</a>
+    <a href="/menu-en.html">Menu</a>
+    <a href="/gallery-en.html">Photogallery</a>
+    <a href="#">Events</a>
+    <a href="#">Contact</a>
+  </div>
+</div>
+
+<div class="gallery-hero">
+  <span class="hero-sub">Via Casarlano 5 &middot; Sorrento, Italy</span>
+  <h1>Our <em>Gallery</em></h1>
+  <div class="hero-divider"></div>
+</div>
+
+<div class="gallery-container">
+  <section class="gallery-section" id="locale">
+    <span class="section-tag">Atmosphere</span>
+    <h2 class="section-title">The Restaurant</h2>
+    <div class="section-rule"></div>
+    <div class="photo-grid" id="grid-locale"></div>
+  </section>
+  <section class="gallery-section" id="piatti">
+    <span class="section-tag">Cuisine</span>
+    <h2 class="section-title">Our Dishes</h2>
+    <div class="section-rule"></div>
+    <div class="photo-grid" id="grid-piatti"></div>
+  </section>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="if(event.target===this)closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
+  <button class="lightbox-prev" onclick="navigateLightbox(-1)">&#8249;</button>
+  <div class="lightbox-inner"><img id="lightbox-img" src="" alt=""></div>
+  <button class="lightbox-next" onclick="navigateLightbox(1)">&#8250;</button>
+  <div class="lightbox-counter" id="lightbox-counter"></div>
+</div>
+
+<div class="gallery-cta">
+  <h2>Reserve Your Table</h2>
+  <p>Via Casarlano 5, 80067 Sorrento, Italy &middot; +39 081 807 22 00</p>
+  <a href="/#reservation" class="btn-reserve">Book Now</a>
+</div>
+
+<footer>
+  <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem">
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/#reservation">Book Now</a>
+      <a href="/menu-en.html">Menu</a>
+      <a href="/gallery-en.html">Photogallery</a>
+      <a href="tel:+390818072200">+39 081 807 22 00</a>
+    </div>
+    <p>&copy; 2025 Antico Frantoio &middot; Tree Legs and More S.r.l. &middot; P.IVA 10428621212 &middot; Via degli Aranci 33, 80067 Sorrento (NA)</p>
+  </div>
+</footer>
+
+<script>
+const locale = Array.from({length:8},(_,i)=>'/public/img/gallery/locale-'+String(i+1).padStart(2,'0')+'.jpg');
+const piatti = Array.from({length:23},(_,i)=>'/public/img/gallery/piatti-'+String(i+1).padStart(2,'0')+'.jpg');
+function buildGrid(photos, id) {
+  const grid = document.getElementById(id);
+  photos.forEach((src, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'photo-item';
+    const img = document.createElement('img');
+    img.src = src; img.alt = ''; img.loading = 'lazy';
+    img.onerror = function(){ this.parentElement.style.display='none'; };
+    wrap.appendChild(img);
+    wrap.addEventListener('click', () => openLightbox(photos, i));
+    grid.appendChild(wrap);
+  });
+}
+buildGrid(locale, 'grid-locale');
+buildGrid(piatti, 'grid-piatti');
+let _photos=[], _idx=0;
+function openLightbox(p,i){_photos=p;_idx=i;showPhoto();document.getElementById('lightbox').classList.add('open');document.body.style.overflow='hidden';}
+function showPhoto(){document.getElementById('lightbox-img').src=_photos[_idx];document.getElementById('lightbox-counter').textContent=(_idx+1)+' / '+_photos.length;}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');document.body.style.overflow='';document.getElementById('lightbox-img').src='';}
+function navigateLightbox(d){_idx=(_idx+d+_photos.length)%_photos.length;showPhoto();}
+document.addEventListener('keydown',function(e){
+  if(!document.getElementById('lightbox').classList.contains('open'))return;
+  if(e.key==='ArrowRight')navigateLightbox(1);
+  if(e.key==='ArrowLeft')navigateLightbox(-1);
+  if(e.key==='Escape')closeLightbox();
+});
+function openMobileDrawer(){document.getElementById('mobile-drawer').classList.add('open');document.body.style.overflow='hidden';}
+function closeMobileDrawer(){document.getElementById('mobile-drawer').classList.remove('open');document.body.style.overflow='';}
+</script>
+</body>
+</html>
