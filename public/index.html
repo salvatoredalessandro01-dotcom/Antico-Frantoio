@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Antico Frantoio — Prenotazioni</title>
+<title>Antico Frantoio — Home</title>
 <meta name="description" content="Prenota il tuo tavolo all'Antico Frantoio a Sorrento. Reserve your table at Antico Frantoio in Sorrento.">
 <meta property="og:title" content="Antico Frantoio">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -657,8 +657,7 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
       <ul class="nav-links">
         <li><a href="/" data-i18n="nav.home">Home</a></li>
         <li><a href="/menu.html" data-i18n="nav.menu">Menu</a></li>
-        <li><a href="/gallery.html" data-i18n="nav.gallery">Galleria</a></li>
-        <li><a href="#reservation" data-i18n="nav.reserve">Prenota</a></li>
+        <li><a href="#reservation" data-i18n="nav.reserve">Prenota Ora</a></li>
         <li><a href="#" data-i18n="nav.events">Eventi</a></li>
         <li><a href="#" data-i18n="nav.contact">Contatti</a></li>
       </ul>
@@ -679,9 +678,8 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
     <button class="mobile-drawer-close" onclick="closeMobileDrawer()">&#x2715;</button>
     <div class="mobile-drawer-logo">Antico <em>Frantoio</em></div>
     <a href="/" onclick="closeMobileDrawer()" data-i18n="nav.home">Home</a>
-    <a href="#reservation" onclick="closeMobileDrawer()" class="drawer-prenota" data-i18n="nav.reserve">Prenota</a>
+    <a href="#reservation" onclick="closeMobileDrawer()" class="drawer-prenota" data-i18n="nav.reserve">Prenota Ora</a>
     <a href="/menu.html" onclick="closeMobileDrawer()" data-i18n="nav.menu">Menu</a>
-    <a href="/gallery.html" onclick="closeMobileDrawer()" data-i18n="nav.gallery">Galleria</a>
     <a href="#" onclick="closeMobileDrawer()">Eventi</a>
     <a href="#" onclick="closeMobileDrawer()">Contatti</a>
   </div>
@@ -1102,7 +1100,7 @@ let currentUser = { username:'', role:'' };
 // ═══════════════════════════════════════════════════════════════
 const translations = {
   it: {
-    'nav.menu':'Menu','nav.reserve':'Prenota','nav.events':'Eventi','nav.contact':'Contatti','nav.home':'Home','nav.gallery':'Galleria',
+    'nav.menu':'Menu','nav.reserve':'Prenota Ora','nav.events':'Eventi','nav.contact':'Contatti','nav.home':'Home','nav.gallery':'Galleria',
     'hero.eyebrow':'Sorrento','hero.tagline':'Un\'esperienza che va oltre il pasto',
     'hero.cta':'Prenota un Tavolo','hero.scroll':'Scopri',
     'about.tag':'Il Ristorante','about.heading':'Un luogo dove il tempo\nsi ferma',
@@ -1149,7 +1147,7 @@ const translations = {
     'paid':'Pagata','unpaid':'—',
   },
   en: {
-    'nav.menu':'Menu','nav.reserve':'Reserve','nav.events':'Events','nav.contact':'Contact','nav.home':'Home','nav.gallery':'Gallery',
+    'nav.menu':'Menu','nav.reserve':'Book Now','nav.events':'Events','nav.contact':'Contact','nav.home':'Home','nav.gallery':'Gallery',
     'hero.eyebrow':'Sorrento','hero.tagline':'An experience beyond the meal',
     'hero.cta':'Book a Table','hero.scroll':'Discover',
     'about.tag':'The Restaurant','about.heading':'A place where time\nstands still',
