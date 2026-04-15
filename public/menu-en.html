@@ -4,209 +4,337 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Menu — Antico Frantoio, Sorrento, Italy</title>
+<meta name="description" content="The menu of Antico Frantoio restaurant in Sorrento, Italy.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --gold:#C9A84C;--gold-lt:#E8D5A3;--gold-dk:#9A7828;
-  --cream:#FAF7F2;--cream2:#F3EDE3;--dark:#1A1612;--dark2:#2C2520;
-  --gray:#6B6460;--gray-lt:#D4CEC8;
-  --radius:2px;--radius-lg:4px;
+  --olive:#5C7A2E;--olive-lt:#8FAF54;--olive-dk:#3B5218;
+  --cream:#FDFAF6;--cream2:#F5EFE6;--cream3:#EDE3D5;
+  --dark:#1C1410;--dark2:#2E2018;
+  --gray:#5A5040;--gray-lt:#D8CCBC;--gray-xlt:#EDE8E0;
+  --white:#FFFFFF;--red:#B03030;
+  --radius:6px;--radius-lg:12px;
   --transition:.25s cubic-bezier(.4,0,.2,1);
-  font-family:'Jost',sans-serif;
+  font-family:'Lato',sans-serif;
+  font-size:17px;
 }
 
-/* DARK MODE - no variable flipping, explicit colors only */
+/* ── DARK MODE ──
+   Hero/header stay dark (they already are).
+   Page background: deep forest green-brown — not black, warm & readable.
+   All text explicit: never relies on variable flipping.
+*/
 @media(prefers-color-scheme:dark){
-  body{background:#1A1612!important;color:#FAF7F2!important}
-  .menu-hero{background:#0D0B09!important}
-  .menu-hero-sub{color:#C9A84C!important;opacity:1!important}
-  .menu-hero h1{color:#FAF7F2!important}
-  .menu-hero-info span{color:rgba(255,255,255,.55)!important}
-  .menu-hero-info span strong{color:rgba(255,255,255,.85)!important}
-  .menu-nav{background:#0D0B09!important;border-bottom-color:rgba(255,255,255,.08)!important}
-  .menu-nav a{color:rgba(255,255,255,.55)!important}
-  .menu-nav a:hover,.menu-nav a.active{color:#C9A84C!important}
-  .menu-section{border-top-color:#3C3530!important}
-  .section-title-it{color:#FAF7F2!important}
-  .section-header{color:#FAF7F2!important}
-  .fixed-menu-card{background:#111!important}
-  .fixed-menu-name{color:#FAF7F2!important}
-  .fixed-menu-desc{color:rgba(255,255,255,.7)!important}
-  .fixed-menu-price{color:#C9A84C!important}
-  .fixed-menu-price span{color:rgba(255,255,255,.5)!important}
-  .fixed-menu-item{color:rgba(255,255,255,.75)!important}
-  .dish{border-bottom-color:#3C3530!important}
-  .dish-name-it{color:#FAF7F2!important}
-  .dish-name-en{color:#A09890!important}
-  .dish-desc{color:#A09890!important}
-  .dish-note{color:#A09890!important}
-  .dish-price{color:#C9A84C!important}
-  .wine-category-title{color:#C9A84C!important;border-bottom-color:#3C3530!important}
-  .coperto-bar{background:#221E1A!important;border-color:#3C3530!important}
-  .coperto-label{color:#A09890!important}
-  .coperto-price{color:#FAF7F2!important}
-  .allergen-legend{background:#221E1A!important;border-color:#3C3530!important}
-  .allergen-badge{background:#111!important;border-color:#3C3530!important;color:#FAF7F2!important}
-  .allergen-item{color:#A09890!important}
-  .menu-cta{background:#0D0B09!important}
-  .menu-cta h2{color:#FAF7F2!important}
-  .menu-cta p{color:rgba(255,255,255,.6)!important}
-  .btn-reserve{background:#C9A84C!important;color:#1A1612!important}
-  footer{background:#0D0B09!important}
-  .footer-links a{color:rgba(255,255,255,.75)!important}
-  footer p{color:rgba(255,255,255,.45)!important}
+  body{background:#1E2318!important;color:#EDE8E0!important}
+  .site-header{background:rgba(18,22,14,.97)!important;border-bottom-color:rgba(143,175,84,.2)!important}
+  .header-logo{color:#8FAF54!important}
+  .header-nav a{color:rgba(255,255,255,.6)!important}
+  .header-nav a:hover{color:#8FAF54!important}
+  .mobile-menu-btn{color:#EDE8E0!important}
+  .mobile-drawer-panel{background:#161C10!important;border-left-color:rgba(143,175,84,.3)!important}
+  .mobile-drawer-panel a{color:rgba(255,255,255,.8)!important;border-bottom-color:rgba(255,255,255,.08)!important}
+  .mobile-drawer-panel a:hover{color:#8FAF54!important}
+  .drawer-cta{color:#8FAF54!important}
+  .menu-nav{background:#161C10!important;border-bottom-color:rgba(255,255,255,.08)!important}
+  .menu-nav a{color:rgba(255,255,255,.5)!important}
+  .menu-nav a:hover,.menu-nav a.active{color:#8FAF54!important;border-bottom-color:#8FAF54!important}
+  .menu-container{background:#1E2318!important}
+  .menu-section{border-top-color:rgba(255,255,255,.08)!important}
+  .section-title-it{color:#EDE8E0!important}
+  .section-tag{color:#8FAF54!important}
+  .fixed-menu-card{background:#161C10!important;border-color:rgba(143,175,84,.3)!important}
+  .fixed-menu-name{color:#EDE8E0!important}
+  .fixed-menu-desc{color:rgba(237,232,224,.65)!important}
+  .fixed-menu-price{color:#8FAF54!important}
+  .fixed-menu-price span{color:rgba(255,255,255,.45)!important}
+  .fixed-menu-item{color:rgba(237,232,224,.75)!important}
+  .fixed-menu-items{border-top-color:rgba(143,175,84,.2)!important}
+  .dish{border-bottom-color:rgba(255,255,255,.07)!important}
+  .dish-name-it{color:#EDE8E0!important;font-family:'Playfair Display',serif!important}
+  .dish-desc{color:rgba(237,232,224,.6)!important}
+  .dish-price{color:#8FAF54!important}
+  .wine-category-title{color:#8FAF54!important;border-bottom-color:rgba(255,255,255,.08)!important}
+  .coperto-bar{background:#161C10!important;border-color:rgba(143,175,84,.25)!important}
+  .coperto-label{color:rgba(237,232,224,.6)!important}
+  .coperto-price{color:#EDE8E0!important}
+  .allergen-legend{background:#161C10!important;border-color:rgba(143,175,84,.2)!important}
+  .allergen-legend-title{color:#8FAF54!important}
+  .allergen-badge{background:#1E2318!important;border-color:rgba(255,255,255,.15)!important;color:#EDE8E0!important}
+  .allergen-item{color:rgba(237,232,224,.65)!important}
+  .allergen-item span{color:rgba(237,232,224,.65)!important}
+  footer{background:#0E1209!important}
+  .footer-links a{color:rgba(255,255,255,.65)!important}
+  footer p{color:rgba(255,255,255,.35)!important}
 }
 
 html{scroll-behavior:smooth}
-body{background:var(--cream);color:var(--dark);min-height:100vh;overflow-x:hidden}
+body{background:var(--white);color:var(--dark);min-height:100vh;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-button{cursor:pointer;border:none;font-family:'Jost',sans-serif}
-input,select,textarea{font-family:'Jost',sans-serif}
+button{cursor:pointer;border:none;font-family:'Lato',sans-serif}
 
-/* HEADER */
-.site-header{position:sticky;top:0;z-index:100;background:rgba(26,22,18,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.2);padding:.75rem 0}
-.header-inner{max-width:900px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
-.header-logo{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:var(--gold);letter-spacing:.05em}
+/* ── HEADER ── */
+.site-header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(30,35,24,.97);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(143,175,84,.2);
+  padding:.75rem 0;
+}
+.header-inner{max-width:960px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.header-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:400;color:#8FAF54;letter-spacing:.05em}
 .header-logo em{font-style:italic}
 .header-nav{display:flex;gap:1.5rem;align-items:center}
-.header-nav a{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.65);transition:color var(--transition)}
-.header-nav a:hover{color:var(--gold)}
+.header-nav a{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.6);transition:color var(--transition)}
+.header-nav a:hover{color:#8FAF54}
 @media(max-width:768px){.header-nav{display:none}}
 
-/* MOBILE MENU */
-.mobile-menu-btn{display:none;background:none;color:#FAF7F2;font-size:1.6rem;cursor:pointer;border:none;padding:.2rem .4rem;line-height:1}
+/* ── MOBILE MENU ── */
+.mobile-menu-btn{display:none;background:none;color:#EDE8E0;font-size:1.6rem;cursor:pointer;border:none;padding:.2rem .4rem;line-height:1}
 @media(max-width:768px){.mobile-menu-btn{display:block}}
 .mobile-drawer{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6)}
 .mobile-drawer.open{display:block}
-.mobile-drawer-panel{position:absolute;top:0;right:0;bottom:0;width:min(75vw,280px);background:#1A1612;border-left:1px solid rgba(201,168,76,.25);display:flex;flex-direction:column;padding:1.5rem;animation:drawerIn .22s ease}
+.mobile-drawer-panel{
+  position:absolute;top:0;right:0;bottom:0;
+  width:min(75vw,280px);
+  background:#161C10;
+  border-left:1px solid rgba(143,175,84,.3);
+  display:flex;flex-direction:column;
+  padding:1.5rem;
+  animation:drawerIn .22s ease;
+}
 @keyframes drawerIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
-.drawer-close{align-self:flex-end;background:none;border:none;color:rgba(255,255,255,.7);font-size:1.4rem;cursor:pointer;margin-bottom:1.5rem;padding:.25rem}
-.mobile-drawer-panel a{display:block;padding:.9rem 0;font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.8);border-bottom:1px solid rgba(255,255,255,.1);text-decoration:none;transition:color .2s}
+.drawer-close{align-self:flex-end;background:none;border:none;color:rgba(255,255,255,.65);font-size:1.4rem;cursor:pointer;margin-bottom:1.5rem;padding:.25rem}
+.mobile-drawer-panel a{display:block;padding:.9rem 0;font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.75);border-bottom:1px solid rgba(255,255,255,.1);text-decoration:none;transition:color .2s}
 .mobile-drawer-panel a:last-child{border-bottom:none}
-.mobile-drawer-panel a:hover{color:#C9A84C}
-.drawer-cta{color:#C9A84C!important;font-weight:500}
+.mobile-drawer-panel a:hover{color:#8FAF54}
+.drawer-cta{color:#8FAF54!important;font-weight:700}
 
-/* HERO */
-.menu-hero{background:#1A1612;padding:4rem 1.5rem 3rem;text-align:center;position:relative;overflow:hidden}
-.menu-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(201,168,76,.12),transparent 70%);pointer-events:none}
-.menu-hero-sub{font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;opacity:.8}
-.menu-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,6vw,3.5rem);font-weight:300;color:#FAF7F2;letter-spacing:.04em;line-height:1.1}
-.menu-hero h1 em{font-style:italic;color:var(--gold)}
-.menu-hero-info{margin-top:1.5rem;display:flex;gap:2rem;justify-content:center;flex-wrap:wrap}
-.menu-hero-info span{font-size:.78rem;color:rgba(255,255,255,.45);letter-spacing:.05em}
-.menu-hero-info span strong{color:rgba(255,255,255,.7);font-weight:400}
-.hero-divider{width:48px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:1.5rem auto 0}
+/* ── HERO ── */
+.menu-hero{
+  background:linear-gradient(160deg,#1E2318 0%,#2C3520 100%);
+  padding:4.5rem 1.5rem 3.5rem;
+  text-align:center;position:relative;overflow:hidden;
+}
+.menu-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(143,175,84,.18),transparent 70%);
+  pointer-events:none;
+}
+.menu-hero-sub{
+  font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;
+  color:#8FAF54;margin-bottom:1.1rem;font-weight:700;display:block;
+}
+.menu-hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2.4rem,6vw,3.8rem);
+  font-weight:400;color:#FDFAF6;
+  letter-spacing:.02em;line-height:1.05;
+}
+.menu-hero h1 em{font-style:italic;color:#8FAF54}
+.menu-hero-info{
+  margin-top:1.5rem;display:flex;
+  gap:2rem;justify-content:center;flex-wrap:wrap;
+}
+.menu-hero-info span{font-size:.82rem;color:rgba(253,250,246,.5);letter-spacing:.04em;font-weight:300}
+.menu-hero-info span strong{color:rgba(253,250,246,.8);font-weight:400}
+.hero-divider{width:40px;height:2px;background:linear-gradient(90deg,transparent,#8FAF54,transparent);margin:1.5rem auto 0;border-radius:2px}
 
-/* SECTION NAV */
-.menu-nav{background:var(--cream2);border-bottom:1px solid var(--gray-lt);position:sticky;top:57px;z-index:90;overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* ── SECTION NAV ── */
+.menu-nav{
+  background:var(--white);
+  border-bottom:1px solid var(--gray-xlt);
+  position:sticky;top:57px;z-index:90;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+}
 .menu-nav::-webkit-scrollbar{display:none}
 .menu-nav-inner{display:flex;gap:0;min-width:max-content;margin:0 auto;padding:0 1rem}
-.menu-nav a{display:block;padding:.75rem 1.1rem;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);border-bottom:2px solid transparent;transition:all var(--transition);white-space:nowrap;text-decoration:none}
+.menu-nav a{
+  display:block;padding:.8rem 1.1rem;
+  font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+  color:var(--gray);border-bottom:2px solid transparent;
+  transition:all var(--transition);white-space:nowrap;text-decoration:none;
+}
 .menu-nav a:hover{color:var(--dark)}
-.menu-nav a.active{color:var(--gold-dk);border-bottom-color:var(--gold)}
+.menu-nav a.active{color:var(--olive);border-bottom-color:var(--olive)}
 
-/* CONTAINER */
-.menu-container{max-width:900px;margin:0 auto;padding:0 1.5rem 4rem}
+/* ── CONTAINER ── */
+.menu-container{max-width:960px;margin:0 auto;padding:0 1.5rem 5rem}
 
-/* SECTIONS */
-.menu-section{padding:3rem 0 1rem;border-top:1px solid var(--gray-lt)}
+/* ── SECTIONS ── */
+.menu-section{padding:3.5rem 0 1rem;border-top:1px solid var(--gray-xlt)}
 .menu-section:first-of-type{border-top:none}
 .section-header{margin-bottom:2rem}
-.section-title-it{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,2.4rem);font-weight:300;color:#1A1612;letter-spacing:.03em;line-height:1.1}
+.section-tag{
+  font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--olive);font-weight:700;margin-bottom:.5rem;display:block;
+}
+.section-title-it{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2.1rem,4.5vw,2.9rem);
+  font-weight:400;color:#1C1410;
+  letter-spacing:.02em;line-height:1.1;
+}
+.section-rule{width:2rem;height:2px;background:var(--olive);border-radius:2px;margin-top:.75rem}
 
-/* DISHES */
-.dishes{display:grid;grid-template-columns:1fr;gap:0}
-@media(min-width:640px){.dishes.two-col{grid-template-columns:1fr 1fr;gap:0 2rem}}
-.dish{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:.9rem 0;border-bottom:1px solid var(--gray-lt)}
+/* ── DISHES ── */
+.dishes{display:grid;grid-template-columns:1fr}
+.dish{
+  display:flex;justify-content:space-between;
+  align-items:baseline;gap:1rem;
+  padding:1.1rem 0;border-bottom:1px solid var(--gray-xlt);
+}
 .dish:last-child{border-bottom:none}
 .dish-left{flex:1;min-width:0}
-.dish-name-it{font-size:1.05rem;font-weight:400;color:#1A1612;line-height:1.3}
-.dish-name-en{font-size:.85rem;color:var(--gray);font-style:italic;margin-top:.15rem;line-height:1.4;display:block}
-.dish-desc{font-size:.75rem;color:var(--gray);margin-top:.2rem;line-height:1.5}
-.dish-allergens{display:flex;gap:3px;flex-wrap:wrap;margin-top:.35rem}
-.allergen{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--cream2);border:1px solid var(--gray-lt);font-size:.6rem;color:var(--gray);font-weight:500}
-.dish-price{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:400;color:#9A7828;white-space:nowrap;flex-shrink:0}
-.dish-note{font-size:.72rem;color:var(--gray);font-style:italic;margin-top:.2rem;display:block}
+.dish-name-it{font-size:1.15rem;font-weight:400;color:#1C1410;line-height:1.35;font-family:'Playfair Display',serif}
+.dish-desc{font-size:.82rem;color:var(--gray);font-style:italic;margin-top:.25rem;line-height:1.5;font-weight:300}
+.dish-allergens{display:flex;gap:3px;flex-wrap:wrap;margin-top:.4rem}
+.allergen{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:19px;height:19px;border-radius:50%;
+  background:var(--cream2);border:1px solid var(--gray-xlt);
+  font-size:.58rem;color:var(--gray);font-weight:700;
+}
+.dish-price{
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;font-weight:500;
+  color:var(--olive-dk);white-space:nowrap;flex-shrink:0;
+}
+.dish-note{font-size:.75rem;color:var(--gray);font-style:italic;margin-top:.2rem;display:block;font-weight:300}
 
-/* FIXED MENU CARD */
-.fixed-menu-card{background:#1A1612;border:1px solid rgba(201,168,76,.3);border-radius:var(--radius-lg);padding:2rem;margin-bottom:2rem;position:relative;overflow:hidden}
-.fixed-menu-card::before{content:'';position:absolute;top:0;right:0;width:120px;height:120px;background:radial-gradient(circle,rgba(201,168,76,.15),transparent 70%)}
-.fixed-menu-label{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem}
-.fixed-menu-name{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;color:#FAF7F2;margin-bottom:.25rem}
-.fixed-menu-desc{font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.6;margin-bottom:1rem}
-.fixed-menu-price{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--gold);font-weight:300}
-.fixed-menu-price span{font-size:.8rem;font-family:'Jost',sans-serif;color:rgba(255,255,255,.4);margin-left:.25rem}
-.fixed-menu-items{display:flex;flex-direction:column;gap:.4rem;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(201,168,76,.2)}
-.fixed-menu-item{font-size:.82rem;color:rgba(255,255,255,.6);display:flex;gap:.5rem;align-items:flex-start}
-.fixed-menu-item::before{content:'·';color:var(--gold);flex-shrink:0}
+/* ── FIXED MENU CARD ── */
+.fixed-menu-card{
+  background:linear-gradient(135deg,#1E2318 0%,#2C3520 100%);
+  border:1px solid rgba(143,175,84,.3);
+  border-radius:var(--radius-lg);
+  padding:2.25rem;margin-bottom:2rem;
+  position:relative;overflow:hidden;
+}
+.fixed-menu-card::before{content:'';position:absolute;top:0;right:0;width:140px;height:140px;background:radial-gradient(circle,rgba(143,175,84,.18),transparent 70%)}
+.fixed-menu-label{font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;color:#8FAF54;font-weight:700;margin-bottom:.5rem;display:block}
+.fixed-menu-name{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:400;color:#FDFAF6;margin-bottom:.3rem}
+.fixed-menu-desc{font-size:.88rem;color:rgba(253,250,246,.6);line-height:1.65;margin-bottom:1.25rem;font-weight:300}
+.fixed-menu-price{font-family:'Playfair Display',serif;font-size:2.1rem;color:#8FAF54;font-weight:400}
+.fixed-menu-price span{font-size:.8rem;font-family:'Lato',sans-serif;color:rgba(253,250,246,.4);margin-left:.3rem}
+.fixed-menu-items{display:flex;flex-direction:column;gap:.45rem;margin-top:1.1rem;padding-top:1.1rem;border-top:1px solid rgba(143,175,84,.2)}
+.fixed-menu-item{font-size:.85rem;color:rgba(253,250,246,.65);display:flex;gap:.6rem;align-items:flex-start;font-weight:300}
+.fixed-menu-item::before{content:'·';color:#8FAF54;flex-shrink:0}
 
-/* COPERTO */
-.coperto-bar{background:var(--cream2);border:1px solid var(--gray-lt);border-radius:var(--radius-lg);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;margin:2rem 0;flex-wrap:wrap;gap:.5rem}
-.coperto-label{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gray)}
-.coperto-price{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#1A1612}
-
-/* ALLERGEN LEGEND */
-.allergen-legend{background:var(--cream2);border:1px solid var(--gray-lt);border-radius:var(--radius-lg);padding:1.5rem;margin-top:3rem}
-.allergen-legend-title{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-dk);margin-bottom:1rem;font-weight:500}
-.allergen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem}
-.allergen-item{display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:var(--gray);line-height:1.3}
-.allergen-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--cream);border:1px solid var(--gray-lt);font-size:.65rem;color:#1A1612;font-weight:600;flex-shrink:0}
-
-/* WINE COLUMNS */
-.wine-cols{display:grid;gap:2rem}
+/* ── WINE COLUMNS ── */
+.wine-cols{display:grid;gap:2.5rem}
 @media(min-width:640px){.wine-cols{grid-template-columns:1fr 1fr}}
-.wine-category{margin-bottom:1.5rem}
-.wine-category-title{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-dk);padding-bottom:.5rem;border-bottom:1px solid var(--gray-lt);margin-bottom:.75rem}
+.wine-category{margin-bottom:1.75rem}
+.wine-category-title{
+  font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--olive-dk);font-weight:700;
+  padding-bottom:.6rem;border-bottom:1px solid var(--gray-xlt);
+  margin-bottom:.85rem;
+}
 
-/* CTA */
-.menu-cta{text-align:center;padding:3rem 1.5rem;background:#1A1612;margin-top:3rem}
-.menu-cta h2{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:#FAF7F2;margin-bottom:.75rem}
-.menu-cta p{font-size:.85rem;color:rgba(255,255,255,.5);margin-bottom:1.5rem}
-.btn-reserve{display:inline-block;background:var(--gold);color:#1A1612;padding:.85rem 2.5rem;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;font-weight:500;border-radius:var(--radius);transition:all var(--transition)}
-.btn-reserve:hover{background:var(--gold-lt);transform:translateY(-1px)}
+/* ── COPERTO BAR ── */
+.coperto-bar{
+  background:var(--cream2);border:1px solid var(--gray-xlt);
+  border-radius:var(--radius-lg);padding:1.1rem 1.5rem;
+  display:flex;justify-content:space-between;align-items:center;
+  margin:2.5rem 0;flex-wrap:wrap;gap:.5rem;
+}
+.coperto-label{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);font-weight:700}
+.coperto-price{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--dark);font-weight:400}
 
-/* FOOTER */
-footer{background:#1A1612;color:rgba(255,255,255,.5);padding:2rem 0;text-align:center;font-size:.78rem;line-height:2;border-top:1px solid rgba(201,168,76,.15)}
+/* ── ALLERGEN LEGEND ── */
+.allergen-legend{
+  background:var(--cream2);border:1px solid var(--gray-xlt);
+  border-radius:var(--radius-lg);padding:1.75rem;margin-top:3rem;
+}
+.allergen-legend-title{
+  font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--olive-dk);font-weight:700;margin-bottom:1.1rem;
+}
+.allergen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.6rem}
+.allergen-item{display:flex;align-items:center;gap:.6rem;font-size:.8rem;color:var(--gray);line-height:1.3;font-weight:300}
+.allergen-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:50%;
+  background:var(--white);border:1px solid var(--gray-xlt);
+  font-size:.62rem;color:var(--dark);font-weight:700;flex-shrink:0;
+}
+
+/* ── CTA ── */
+.menu-cta{
+  text-align:center;padding:4rem 1.5rem;
+  background:linear-gradient(160deg,#1E2318 0%,#2C3520 100%);
+  margin-top:3rem;
+}
+.menu-cta h2{
+  font-family:'Playfair Display',serif;font-size:2rem;font-weight:400;
+  color:#FDFAF6;margin-bottom:.75rem;
+}
+.menu-cta p{font-size:.9rem;color:rgba(253,250,246,.55);margin-bottom:1.75rem;font-weight:300}
+.btn-reserve{
+  display:inline-block;
+  background:var(--olive);color:var(--white);
+  padding:.9rem 2.75rem;
+  font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
+  border-radius:var(--radius);
+  transition:all var(--transition);
+  box-shadow:0 4px 16px rgba(92,122,46,.4);
+}
+.btn-reserve:hover{background:var(--olive-dk);transform:translateY(-2px);box-shadow:0 8px 24px rgba(92,122,46,.5)}
+
+/* ── FOOTER ── */
+footer{
+  background:#0E1209;color:rgba(255,255,255,.5);
+  padding:3rem 0;text-align:center;font-size:.82rem;line-height:2.2;
+}
 .footer-links{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:.75rem}
-.footer-links a{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65);transition:color var(--transition)}
-.footer-links a:hover{color:var(--gold)}
+.footer-links a{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.55);transition:color var(--transition)}
+.footer-links a:hover{color:#8FAF54}
+footer p{font-size:.7rem;color:rgba(255,255,255,.3)}
 
+/* ── LANG LINK ── */
+.lang-link{
+  font-size:.7rem;letter-spacing:.1em;padding:.3rem .85rem;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
+  border-radius:4px;color:#EDE8E0;font-weight:700;font-family:'Lato',sans-serif;
+  transition:all var(--transition);
+}
+.lang-link:hover{background:rgba(143,175,84,.25);border-color:rgba(143,175,84,.5);color:#8FAF54}
 </style>
-</head>
-<body>
 
+<!-- HEADER -->
 <header class="site-header">
   <div class="header-inner">
     <a href="/" class="header-logo">Antico <em>Frantoio</em></a>
     <nav class="header-nav">
       <a href="/">Home</a>
-      <a href="/menu.html" class="active">Menu</a>
+      <a href="/menu-en.html">Menu</a>
       <a href="/gallery.html">Photogallery</a>
       <a href="/">Book</a>
     </nav>
     <div style="display:flex;align-items:center;gap:.75rem">
-      <a href="/menu.html" style="font-size:.72rem;letter-spacing:.1em;padding:.35rem .9rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:2px;color:#FAF7F2;font-weight:500;font-family:'Jost',sans-serif;">&#127470;&#127481; IT</a>
+      <a href="/menu.html" class="lang-link">&#127470;&#127481; IT</a>
       <button class="mobile-menu-btn" onclick="openMobileDrawer()">&#9776;</button>
     </div>
   </div>
 </header>
 
+<!-- MOBILE DRAWER -->
 <div class="mobile-drawer" id="mobile-drawer" onclick="if(event.target===this)closeMobileDrawer()">
   <div class="mobile-drawer-panel">
     <button class="drawer-close" onclick="closeMobileDrawer()">&#x2715;</button>
     <a href="/">Home</a>
     <a href="/" class="drawer-cta">Book a Table</a>
-    <a href="/menu.html">Menu</a>
+    <a href="/menu-en.html">Menu</a>
     <a href="/gallery.html">Photogallery</a>
     <a href="#">Events</a>
     <a href="#">Contact</a>
   </div>
 </div>
 
+<!-- HERO -->
 <div class="menu-hero">
-  <p class="menu-hero-sub">Via Casarlano 5 &middot; Sorrento, Italy</p>
+  <span class="menu-hero-sub">Via Casarlano 5 &middot; Sorrento, Italy</span>
   <h1>Our <em>Menu</em></h1>
   <div class="menu-hero-info">
     <span><strong>Cover charge</strong> &euro;3.00</span>
@@ -215,40 +343,23 @@ footer{background:#1A1612;color:rgba(255,255,255,.5);padding:2rem 0;text-align:c
   <div class="hero-divider"></div>
 </div>
 
+<!-- SECTION NAV -->
 <nav class="menu-nav">
   <div class="menu-nav-inner">
-    <a href="#menu-fisso">Set Menu</a><a href="#antipasti">Starters</a><a href="#primi">First Courses</a><a href="#secondi">Second Courses</a><a href="#pizze">Pizzas</a><a href="#contorni">Sides</a><a href="#dolci">Desserts</a><a href="#vini">Wines</a><a href="#bevande">Drinks</a><a href="#caffe">Coffee</a>
+    <a href="#antipasti">Starters</a>
+    <a href="#primi">First Courses</a>
+    <a href="#secondi">Second Courses</a>
+    <a href="#pizze">Pizzas</a>
+    <a href="#contorni">Sides</a>
+    <a href="#dolci">Desserts</a>
+    <a href="#vini">Wines</a>
+    <a href="#bevande">Drinks</a>
+    <a href="#caffe">Coffee</a>
   </div>
 </nav>
 
+<!-- MENU CONTENT -->
 <div class="menu-container">
-<section class="menu-section" id="menu-fisso">
-    <div class="section-header">
-      
-      <h2 class="section-title-it ">Set Menu</h2>
-      
-      
-    </div>
-    <div class="fixed-menu-card">
-      
-      <div class="fixed-menu-label ">Daily Set Menu</div>
-      
-      <div class="fixed-menu-name ">Set Menu</div>
-      
-      <div class="fixed-menu-desc ">A gastronomic journey celebrating the flavours of Campanian tradition.</div>
-      <div class="fixed-menu-price">€35,00 <span>per person</span></div>
-      <div class="fixed-menu-items">
-        
-        <div class="fixed-menu-item ">House Mixed Appetizer</div>
-        
-        <div class="fixed-menu-item ">First course (choice): Neapolitan Cannelloni · Cavatello with Turnip Greens & Sausage · Nerano Fusilli · Pacchero with Neapolitan Ragù</div>
-        
-        <div class="fixed-menu-item ">Second course (choice): Glazed Pork Belly · Roast Beef with Potatoes · Sausage & Potatoes · Lemon Escalope</div>
-        
-        <div class="fixed-menu-item ">Side dishes included</div>
-      </div>
-    </div>
-  </section>
 
   <!-- ANTIPASTI -->
   <section class="menu-section" id="antipasti">
@@ -258,7 +369,7 @@ footer{background:#1A1612;color:rgba(255,255,255,.5);padding:2rem 0;text-align:c
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish">
         <div class="dish-left">
           
@@ -339,7 +450,7 @@ footer{background:#1A1612;color:rgba(255,255,255,.5);padding:2rem 0;text-align:c
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish">
         <div class="dish-left">
           
@@ -421,7 +532,7 @@ footer{background:#1A1612;color:rgba(255,255,255,.5);padding:2rem 0;text-align:c
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish">
         <div class="dish-left">
           
@@ -521,31 +632,31 @@ footer{background:#1A1612;color:rgba(255,255,255,.5);padding:2rem 0;text-align:c
       
       
     </div>
-    <div class="dishes two-col">
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">4 Formaggi</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Antico Frantoio</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Baviera</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Birbante</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Calzone Margherita</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€8</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Calzone Napoletano</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Contadina</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Cosacca</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€7</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Croccopizza</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span><span class="allergen">U</span></div></div><div class="dish-price">€9</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Del Popolo</div></div><div class="dish-price">€12</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Diavola</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Focaccia Classica</div><div class="dish-allergens"><span class="allergen">G</span></div></div><div class="dish-price">€4</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Focaccia Farcita</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">La Bufalina</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">La Mia Nerano</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Maialina</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Margherita</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€8</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Margherita con Bufala</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Marinara</div><div class="dish-allergens"><span class="allergen">G</span></div></div><div class="dish-price">€7</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Mortazza</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">F</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Ortolana</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Patatosa</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Prosciutto e Funghi</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Tricolore</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
+    <div class="dishes">
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">4 Formaggi</div><div class="dish-desc">Mozzarella, Provola, Gorgonzola, Parmesan</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Antico Frantoio</div><div class="dish-desc">Fried eggplant, sausage, cherry tomatoes, basil, parmesan, EVO oil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Baviera</div><div class="dish-desc">Frankfurters and french fries</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Birbante</div><div class="dish-desc">Mozzarella, diavoletto cheese, roasted aubergine, olive oil, parmesan, basil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Calzone Margherita</div><div class="dish-desc">Mozzarella, tomato, basil, parmesan, EVO oil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€8</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Calzone Napoletano</div><div class="dish-desc">Mozzarella, Neapolitan salami, black olives, parmesan, oil, basil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Contadina</div><div class="dish-desc">Mozzarella, bacon, onions, parmesan, olive oil, basil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Cosacca</div><div class="dish-desc">Tomato, pecorino, parmesan, pepper, olive oil, basil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€7</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Croccopizza</div><div class="dish-desc">Mozzarella, potato croquette, cooked ham, parmesan, EVO oil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span><span class="allergen">U</span></div></div><div class="dish-price">€9</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Del Popolo</div><div class="dish-desc">Sausage and broccoli</div></div><div class="dish-price">€12</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Diavola</div><div class="dish-desc">Provola cheese, tomato, spicy salami, basil, parmesan, EVO oil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Focaccia Classica</div><div class="dish-desc">Olive oil, salt, pepper</div><div class="dish-allergens"><span class="allergen">G</span></div></div><div class="dish-price">€4</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Focaccia Farcita</div><div class="dish-desc">Parma ham, rocket, parmesan shavings</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">La Bufalina</div><div class="dish-desc">Cherry tomatoes, buffalo mozzarella, basil, EVO oil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">La Mia Nerano</div><div class="dish-desc">Mozzarella, parmesan shavings, lemon, courgette, basil, olive oil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Maialina</div><div class="dish-desc">Mozzarella, sausage, bacon, onion</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Margherita</div><div class="dish-desc">Mozzarella, tomato, basil, parmesan, EVO oil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€8</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Margherita con Bufala</div><div class="dish-desc">Buffalo mozzarella, tomato, basil, EVO oil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Marinara</div><div class="dish-desc">Tomato, garlic, oregano, olive oil, basil</div><div class="dish-allergens"><span class="allergen">G</span></div></div><div class="dish-price">€7</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Mortazza</div><div class="dish-desc">Mozzarella, mortadella, pistachio</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">F</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Ortolana</div><div class="dish-desc">Mozzarella, courgette, peppers, aubergine, parmesan, basil, oil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Patatosa</div><div class="dish-desc">Mozzarella, sausage, french fries or roasted potatoes, parmesan, oil</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Prosciutto e Funghi</div><div class="dish-desc">Mozzarella, cooked ham, mushrooms, tomato</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Tricolore</div><div class="dish-desc">Mozzarella, cherry tomatoes, rocket, parmesan shavings</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
     </div>
   </section>
 
@@ -557,7 +668,7 @@ footer{background:#1A1612;color:rgba(255,255,255,.5);padding:2rem 0;text-align:c
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Mixed Salad</div></div><div class="dish-price">€4</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Green Salad</div></div><div class="dish-price">€4</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Baked Potatoes</div></div><div class="dish-price">€5</div></div>
@@ -575,7 +686,7 @@ footer{background:#1A1612;color:rgba(255,255,255,.5);padding:2rem 0;text-align:c
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Caprese Cake</div><div class="dish-allergens"><span class="allergen">U</span></div></div><div class="dish-price">€5</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Home Made Dessert</div><div class="dish-allergens"><span class="allergen">F</span><span class="allergen">G</span><span class="allergen">L</span><span class="allergen">Sn</span><span class="allergen">U</span></div></div><div class="dish-price">€5</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Seasonal Fruit</div></div><div class="dish-price">€6</div></div>
@@ -680,7 +791,7 @@ footer{background:#1A1612;color:rgba(255,255,255,.5);padding:2rem 0;text-align:c
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Still Water</div></div><div class="dish-price">€2,50</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Sparkling Water</div></div><div class="dish-price">€2,50</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it">Coca Cola (33 cl.)</div></div><div class="dish-price">€3</div></div>
@@ -712,7 +823,7 @@ footer{background:#1A1612;color:rgba(255,255,255,.5);padding:2rem 0;text-align:c
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Espresso Coffee</div></div><div class="dish-price">€1,50</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Decaffeinated Coffee</div></div><div class="dish-price">€2</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it">Latte Macchiato</div></div><div class="dish-price">€2</div></div>
@@ -731,65 +842,39 @@ footer{background:#1A1612;color:rgba(255,255,255,.5);padding:2rem 0;text-align:c
     </div>
   </section>
 
-<div class="coperto-bar">
-    
-    <span class="coperto-label ">Cover Charge</span>
-    <span class="coperto-price">€3,00 <span style="font-size:.75rem;color:var(--gray)">per person</span></span>
-  </div>
 
-  <!-- ALLERGEN LEGEND -->
-  <div class="allergen-legend">
-    <div class="allergen-legend-title">Allergens</div>
-    <div class="allergen-grid">
-      <div class="allergen-item"><span class="allergen-badge">G</span><span>Cereals containing gluten</span></div>
-      <div class="allergen-item"><span class="allergen-badge">C</span><span>Crustaceans</span></div>
-      <div class="allergen-item"><span class="allergen-badge">U</span><span>Eggs</span></div>
-      <div class="allergen-item"><span class="allergen-badge">P</span><span>Fish</span></div>
-      <div class="allergen-item"><span class="allergen-badge">A</span><span>Peanuts</span></div>
-      <div class="allergen-item"><span class="allergen-badge">So</span><span>Soy</span></div>
-      <div class="allergen-item"><span class="allergen-badge">L</span><span>Milk / Lactose</span></div>
-      <div class="allergen-item"><span class="allergen-badge">F</span><span>Tree nuts</span></div>
-      <div class="allergen-item"><span class="allergen-badge">Se</span><span>Celery</span></div>
-      <div class="allergen-item"><span class="allergen-badge">Sn</span><span>Mustard</span></div>
-      <div class="allergen-item"><span class="allergen-badge">Ss</span><span>Sesame seeds</span></div>
-      <div class="allergen-item"><span class="allergen-badge">S</span><span>Sulphur dioxide &amp; sulphites</span></div>
-      <div class="allergen-item"><span class="allergen-badge">Lu</span><span>Lupin</span></div>
-      <div class="allergen-item"><span class="allergen-badge">M</span><span>Molluscs</span></div>
-    </div>
-    
-    <p style="font-size:.72rem;color:var(--gray);margin-top:1rem;line-height:1.6">Allergens present in dishes are indicated with the codes above. For further information on allergens, please inform our staff before ordering.</p>
-  </div>
-</div>
-
-<div class="menu-cta">
-  <h2>Reserve Your Table</h2>
-  <p>Via Casarlano 5, 80067 Sorrento, Italy &middot; +39 081 807 22 00</p>
-  <a href="/" class="btn-reserve">Book Now</a>
 </div>
 
 <footer>
-  <div style="max-width:900px;margin:0 auto;padding:0 1.5rem">
+  <div style="max-width:960px;margin:0 auto;padding:0 1.5rem">
     <div class="footer-links">
       <a href="/">Home</a>
-      <a href="/">Book</a>
-      <a href="/menu.html">Menu</a>
+      <a href="/">Book a Table</a>
+      <a href="/menu-en.html">Menu</a>
       <a href="/gallery.html">Photogallery</a>
       <a href="tel:+390818072200">+39 081 807 22 00</a>
     </div>
-    <p style="font-size:.7rem;color:rgba(255,255,255,.4)">&copy; 2025 Antico Frantoio &middot; Tree Legs and More S.r.l. &middot; P.IVA 10428621212 &middot; Via degli Aranci 33, 80067 Sorrento (NA)</p>
+    <p>&copy; 2025 Antico Frantoio &middot; Tree Legs and More S.r.l. &middot; P.IVA 10428621212</p>
   </div>
 </footer>
 
 <script>
-function openMobileDrawer(){document.getElementById('mobile-drawer').classList.add('open');document.body.style.overflow='hidden';}
-function closeMobileDrawer(){document.getElementById('mobile-drawer').classList.remove('open');document.body.style.overflow='';}
-// Active nav on scroll
+function openMobileDrawer(){
+  document.getElementById('mobile-drawer').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeMobileDrawer(){
+  document.getElementById('mobile-drawer').classList.remove('open');
+  document.body.style.overflow='';
+}
 const sections=document.querySelectorAll('.menu-section');
 const navLinks=document.querySelectorAll('.menu-nav a');
 const observer=new IntersectionObserver(entries=>{
   entries.forEach(entry=>{
     if(entry.isIntersecting){
-      navLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+entry.target.id);});
+      navLinks.forEach(a=>{
+        a.classList.toggle('active',a.getAttribute('href')==='#'+entry.target.id);
+      });
     }
   });
 },{rootMargin:'-40% 0px -55% 0px'});
