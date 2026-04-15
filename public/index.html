@@ -192,7 +192,12 @@ section{padding:clamp(4rem,8vw,8rem) 0}
 @media(max-width:768px){.about-pillars{grid-template-columns:1fr;gap:1.5rem}}
 .pillar{text-align:center;padding:2.5rem 1.75rem;border:1px solid var(--gray-xlt);border-radius:var(--radius-lg);transition:box-shadow var(--transition),transform var(--transition)}
 .pillar:hover{box-shadow:0 8px 32px rgba(92,122,46,.1);transform:translateY(-3px)}
-.pillar-icon{font-size:2.2rem;margin-bottom:1.1rem;display:block;line-height:1}
+.pillar-photo,.pillar-img{width:100%;height:200px;overflow:hidden;border-radius:var(--radius);margin-bottom:1.25rem}
+.pillar-photo img,.pillar-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.pillar:hover .pillar-photo img,.pillar:hover .pillar-img img{transform:scale(1.04)}
+.pillar-img{width:100%;height:200px;overflow:hidden;border-radius:var(--radius);margin-bottom:1.25rem}
+.pillar-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.pillar:hover .pillar-img img{transform:scale(1.04)}
 .pillar h3{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:400;color:#1C1410;margin-bottom:.75rem}
 .pillar p{font-size:.92rem;color:#5A5040;line-height:1.8;font-weight:300}
 .about-split{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;margin-bottom:5rem}
@@ -214,7 +219,7 @@ section{padding:clamp(4rem,8vw,8rem) 0}
 .about-events-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:2.5rem}
 @media(max-width:640px){.about-events-grid{grid-template-columns:1fr}}
 .event-tag{padding:1.1rem 1.5rem;background:var(--white);border:1px solid var(--gray-xlt);border-radius:var(--radius);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:#1C1410;transition:all var(--transition)}
-.event-tag:hover{border-color:var(--olive);color:var(--olive);background:rgba(92,122,46,.05)}
+.event-tag{cursor:default}
 .reservation-wrap{
   display:grid;
   grid-template-columns:1fr 1.75fr;
@@ -712,17 +717,17 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
     <!-- Three pillars -->
     <div class="about-pillars">
       <div class="pillar">
-        <span class="pillar-icon">🌿</span>
+        <div class="pillar-img"><img src="/public/img/landing_page_1.jpg" alt="Ingredienti del Territorio" loading="lazy"></div>
         <h3 data-i18n="pillar1.title">Ingredienti del Territorio</h3>
         <p data-i18n="pillar1.text">Selezioniamo i migliori prodotti locali, freschi e di stagione, per portare in tavola sapori autentici della tradizione campana.</p>
       </div>
       <div class="pillar">
-        <span class="pillar-icon">🍕</span>
+        <div class="pillar-img"><img src="/public/img/landing_page_2.jpg" alt="La Nostra Pizza" loading="lazy"></div>
         <h3 data-i18n="pillar2.title">La Nostra Pizza</h3>
         <p data-i18n="pillar2.text">Realizzata da mani esperte con le migliori materie prime, la nostra pizza è un omaggio alla tradizione napoletana con un tocco creativo.</p>
       </div>
       <div class="pillar">
-        <span class="pillar-icon">🌊</span>
+        <div class="pillar-img"><img src="/public/img/landing_page_3.jpg" alt="Vista sul Mare" loading="lazy"></div>
         <h3 data-i18n="pillar3.title">Vista sul Mare</h3>
         <p data-i18n="pillar3.text">Affacciato sul golfo di Sorrento, il nostro ristorante offre una cornice unica per ogni occasione, dal pranzo romantico alla serata in famiglia.</p>
       </div>
@@ -738,7 +743,7 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
         <p data-i18n="philosophy.p2">Utilizziamo esclusivamente prodotti di alta qualità, selezionati da fornitori locali di fiducia. Dalla pasta fresca ai prodotti del mare, ogni ingrediente è scelto per esaltare i sapori autentici della Campania.</p>
       </div>
       <div class="about-img">
-        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80" alt="La cucina dell'Antico Frantoio" loading="lazy">
+        <img src="/public/img/landing_page_4.jpg" alt="La filosofia dell'Antico Frantoio" loading="lazy">
       </div>
     </div>
 
@@ -749,9 +754,9 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
       <div class="section-rule center"></div>
       <p data-i18n="events.text">Grazie alla nostra posizione privilegiata e alla sala capiente, siamo la scelta ideale per eventi privati, cene aziendali e grandi comitive. Che si tratti di un matrimonio, di un anniversario o di una cena di gala, il nostro team si occupa di ogni dettaglio per rendere la tua serata indimenticabile.</p>
       <div class="about-events-grid">
-        <div class="event-tag" data-i18n="event1">🥂 Matrimoni</div>
-        <div class="event-tag" data-i18n="event2">🎉 Compleanni &amp; Anniversari</div>
-        <div class="event-tag" data-i18n="event3">🍽️ Cene di Gala</div>
+        <div class="event-tag" data-i18n="event1">Matrimoni</div>
+        <div class="event-tag" data-i18n="event2">Compleanni &amp; Anniversari</div>
+        <div class="event-tag" data-i18n="event3">Cene di Gala</div>
       </div>
     </div>
 
@@ -1110,7 +1115,7 @@ const translations = {
     'philosophy.p2':'Utilizziamo esclusivamente prodotti di alta qualità, selezionati da fornitori locali di fiducia. Dalla pasta fresca ai prodotti del mare, ogni ingrediente è scelto per esaltare i sapori autentici della Campania.',
     'events.tag':'Eventi &amp; Occasioni Speciali','events.heading':'Il tuo momento\nspeciale',
     'events.text':'Grazie alla nostra posizione privilegiata e alla sala capiente, siamo la scelta ideale per eventi privati, cene aziendali e grandi comitive. Che si tratti di un matrimonio, di un anniversario o di una cena di gala, il nostro team si occupa di ogni dettaglio per rendere la tua serata indimenticabile.',
-    'event1':'🥂 Matrimoni','event2':'🎉 Compleanni &amp; Anniversari','event3':'🍽️ Cene di Gala',
+    'event1':'Matrimoni','event2':'Compleanni &amp; Anniversari','event3':'Cene di Gala',
     'res.eyebrow':'Prenotazioni','res.heading':'Riserva il Tuo\nMomento',
     'res.intro':'Ogni tavolo da noi è una storia. Lasciati avvolgere da un\'atmosfera unica, tra sapori autentici e un servizio impeccabile.',
     'info.hours':'Orari','info.hours.val':'Martedì – Sabato\n12:00 – 15:00 · 18:30 – 23:00\nDomenica: 12:00 – 15:30 · 18:30 – 23:00',
@@ -1157,7 +1162,7 @@ const translations = {
     'philosophy.p2':'We use only the highest quality ingredients, sourced from trusted local suppliers. From fresh pasta to the finest seafood, every ingredient is chosen to celebrate the authentic flavours of Campania.',
     'events.tag':'Events &amp; Special Occasions','events.heading':'Your special\nmoment',
     'events.text':'Thanks to our privileged location and spacious dining room, we are the ideal choice for private events, corporate dinners and large groups. Whether it\'s a wedding, anniversary or gala dinner, our team takes care of every detail to make your evening unforgettable.',
-    'event1':'🥂 Weddings','event2':'🎉 Birthdays &amp; Anniversaries','event3':'🍽️ Gala Dinners',
+    'event1':'Weddings','event2':'Birthdays &amp; Anniversaries','event3':'Gala Dinners',
     'res.eyebrow':'Reservations','res.heading':'Reserve Your\nMoment',
     'res.intro':'Every table here tells a story. Let yourself be enveloped by a unique atmosphere, authentic flavors, and impeccable service.',
     'info.hours':'Hours','info.hours.val':'Tuesday – Saturday\n12:00 – 3:00 PM · 6:30 – 11:00 PM\nSunday: 12:00 – 3:30 PM · 6:30 – 11:00 PM',
