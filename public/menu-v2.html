@@ -52,7 +52,8 @@
   .fixed-menu-item{color:rgba(237,232,224,.75)!important}
   .fixed-menu-items{border-top-color:rgba(143,175,84,.2)!important}
   .dish{border-bottom-color:rgba(255,255,255,.07)!important}
-  .dish-name-it{color:#EDE8E0!important}
+  .dish-name-it{color:#EDE8E0!important;font-family:'Playfair Display',serif!important}
+  .dish-desc{color:rgba(237,232,224,.6)!important}
   .dish-price{color:#8FAF54!important}
   .wine-category-title{color:#8FAF54!important;border-bottom-color:rgba(255,255,255,.08)!important}
   .coperto-bar{background:#161C10!important;border-color:rgba(143,175,84,.25)!important}
@@ -171,23 +172,23 @@ button{cursor:pointer;border:none;font-family:'Lato',sans-serif}
 }
 .section-title-it{
   font-family:'Playfair Display',serif;
-  font-size:clamp(1.9rem,4vw,2.6rem);
-  font-weight:400;color:var(--dark);
+  font-size:clamp(2.1rem,4.5vw,2.9rem);
+  font-weight:400;color:#1C1410;
   letter-spacing:.02em;line-height:1.1;
 }
 .section-rule{width:2rem;height:2px;background:var(--olive);border-radius:2px;margin-top:.75rem}
 
 /* ── DISHES ── */
 .dishes{display:grid;grid-template-columns:1fr}
-@media(min-width:640px){.dishes.two-col{grid-template-columns:1fr 1fr;gap:0 3rem}}
 .dish{
   display:flex;justify-content:space-between;
   align-items:baseline;gap:1rem;
-  padding:1rem 0;border-bottom:1px solid var(--gray-xlt);
+  padding:1.1rem 0;border-bottom:1px solid var(--gray-xlt);
 }
 .dish:last-child{border-bottom:none}
 .dish-left{flex:1;min-width:0}
-.dish-name-it{font-size:1.05rem;font-weight:400;color:var(--dark);line-height:1.3}
+.dish-name-it{font-size:1.15rem;font-weight:400;color:#1C1410;line-height:1.35;font-family:'Playfair Display',serif}
+.dish-desc{font-size:.82rem;color:var(--gray);font-style:italic;margin-top:.25rem;line-height:1.5;font-weight:300}
 .dish-allergens{display:flex;gap:3px;flex-wrap:wrap;margin-top:.4rem}
 .allergen{
   display:inline-flex;align-items:center;justify-content:center;
@@ -347,7 +348,6 @@ footer p{font-size:.7rem;color:rgba(255,255,255,.3)}
 <!-- SECTION NAV -->
 <nav class="menu-nav">
   <div class="menu-nav-inner">
-    <a href="#menu-fisso">Menu Fisso</a>
     <a href="#antipasti">Antipasti</a>
     <a href="#primi">Primi</a>
     <a href="#secondi">Secondi</a>
@@ -362,33 +362,7 @@ footer p{font-size:.7rem;color:rgba(255,255,255,.3)}
 
 <!-- MENU CONTENT -->
 <div class="menu-container">
-<section class="menu-section" id="menu-fisso">
-    <div class="section-header">
-      <h2 class="section-title-it ">Menu Fisso</h2>
-      
-      
-      
-    </div>
-    <div class="fixed-menu-card">
-      <div class="fixed-menu-label ">Menu del Giorno</div>
-      
-      <div class="fixed-menu-name ">Menu Fisso</div>
-      
-      <div class="fixed-menu-desc ">Un percorso gastronomico che celebra i sapori della tradizione campana.</div>
-      
-      <div class="fixed-menu-price">€35,00 <span>a persona</span></div>
-      <div class="fixed-menu-items">
-        <div class="fixed-menu-item ">Antipasto Misto della Casa</div>
-        
-        <div class="fixed-menu-item ">Primo a scelta tra: Cannelloni alla Napoletana · Cavatello Cime di Rapa e Salsiccia · Fusilli alla Nerano · Pacchero al Ragù Napoletano</div>
-        
-        <div class="fixed-menu-item ">Secondo a scelta tra: Pancetta di Maiale Glassata · Roast Beef con Patate · Salsiccia e Patate · Scaloppina al Limone</div>
-        
-        <div class="fixed-menu-item ">Contorni inclusi</div>
-        
-      </div>
-    </div>
-  </section>
+
 
   <!-- ANTIPASTI -->
   <section class="menu-section" id="antipasti">
@@ -398,7 +372,7 @@ footer p{font-size:.7rem;color:rgba(255,255,255,.3)}
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish">
         <div class="dish-left">
           <div class="dish-name-it ">Gamberetti di Crapolla Sale e Pepe</div>
@@ -479,7 +453,7 @@ footer p{font-size:.7rem;color:rgba(255,255,255,.3)}
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish">
         <div class="dish-left">
           <div class="dish-name-it ">Cannelloni alla Napoletana</div>
@@ -561,7 +535,7 @@ footer p{font-size:.7rem;color:rgba(255,255,255,.3)}
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish">
         <div class="dish-left">
           <div class="dish-name-it ">Costata di Scottona Spagnola</div>
@@ -661,31 +635,31 @@ footer p{font-size:.7rem;color:rgba(255,255,255,.3)}
       
       
     </div>
-    <div class="dishes two-col">
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">4 Formaggi</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Antico Frantoio</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Baviera</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Birbante</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Calzone Margherita</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€8</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Calzone Napoletano</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Contadina</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Cosacca</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€7</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Croccopizza</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span><span class="allergen">U</span></div></div><div class="dish-price">€9</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Del Popolo</div></div><div class="dish-price">€12</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Diavola</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Focaccia Classica</div><div class="dish-allergens"><span class="allergen">G</span></div></div><div class="dish-price">€4</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Focaccia Farcita</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">La Bufalina</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">La Mia Nerano</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Maialina</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Margherita</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€8</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Margherita con Bufala</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Marinara</div><div class="dish-allergens"><span class="allergen">G</span></div></div><div class="dish-price">€7</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Mortazza</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">F</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Ortolana</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Patatosa</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Prosciutto e Funghi</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
-      <div class="dish"><div class="dish-left"><div class="dish-name-it">Tricolore</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
+    <div class="dishes">
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">4 Formaggi</div><div class="dish-desc">Mozzarella, Provola, Gorgonzola, Parmigiano</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Antico Frantoio</div><div class="dish-desc">Melanzane a funghetti, salsiccia, pomodorini, basilico, parmigiano, olio EVO</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Baviera</div><div class="dish-desc">Wurstel e patatine</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Birbante</div><div class="dish-desc">Fior di latte, diavoletto, melanzane arrostite, olio, parmigiano, basilico</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Calzone Margherita</div><div class="dish-desc">Mozzarella, pomodoro, basilico, parmigiano, olio EVO</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€8</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Calzone Napoletano</div><div class="dish-desc">Fior di latte, salame Napoli, olive nere, parmigiano, olio, basilico</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Contadina</div><div class="dish-desc">Mozzarella, pancetta, cipolle, parmigiano, olio, basilico</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Cosacca</div><div class="dish-desc">Pomodoro, pecorino, parmigiano, pepe, olio, basilico</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€7</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Croccopizza</div><div class="dish-desc">Mozzarella, crocchè, prosciutto cotto, parmigiano, olio EVO</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span><span class="allergen">U</span></div></div><div class="dish-price">€9</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Del Popolo</div><div class="dish-desc">Salsiccia e broccoli</div></div><div class="dish-price">€12</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Diavola</div><div class="dish-desc">Provola, pomodoro, salame piccante, basilico, parmigiano, olio EVO</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Focaccia Classica</div><div class="dish-desc">Olio, sale, pepe</div><div class="dish-allergens"><span class="allergen">G</span></div></div><div class="dish-price">€4</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Focaccia Farcita</div><div class="dish-desc">Prosciutto crudo, rucola, scaglie di parmigiano</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">La Bufalina</div><div class="dish-desc">Pomodorini, mozzarella di bufala, basilico, olio EVO</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">La Mia Nerano</div><div class="dish-desc">Mozzarella, scaglie di parmigiano, limone, zucchine, basilico, olio</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Maialina</div><div class="dish-desc">Mozzarella, salsiccia, pancetta, cipolla</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Margherita</div><div class="dish-desc">Mozzarella, pomodoro, basilico, parmigiano, olio EVO</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€8</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Margherita con Bufala</div><div class="dish-desc">Mozzarella di bufala, pomodoro, basilico, olio EVO</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Marinara</div><div class="dish-desc">Pomodoro, aglio, origano, olio, basilico</div><div class="dish-allergens"><span class="allergen">G</span></div></div><div class="dish-price">€7</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Mortazza</div><div class="dish-desc">Mozzarella, mortadella, pistacchio</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">F</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Ortolana</div><div class="dish-desc">Mozzarella, zucchine, peperoni, melanzane, parmigiano, basilico, olio</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Patatosa</div><div class="dish-desc">Fior di latte, salsiccia, patate fritte o al forno, parmigiano, olio</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Prosciutto e Funghi</div><div class="dish-desc">Mozzarella, prosciutto cotto, funghi, pomodoro</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€10</div></div>
+      <div class="dish"><div class="dish-left"><div class="dish-name-it">Tricolore</div><div class="dish-desc">Mozzarella, pomodorini, rucola, scaglie di parmigiano</div><div class="dish-allergens"><span class="allergen">G</span><span class="allergen">L</span></div></div><div class="dish-price">€9</div></div>
     </div>
   </section>
 
@@ -697,7 +671,7 @@ footer p{font-size:.7rem;color:rgba(255,255,255,.3)}
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Insalata Mista</div></div><div class="dish-price">€4</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Insalata Verde</div></div><div class="dish-price">€4</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Patate al Forno</div></div><div class="dish-price">€5</div></div>
@@ -715,7 +689,7 @@ footer p{font-size:.7rem;color:rgba(255,255,255,.3)}
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Caprese</div><div class="dish-allergens"><span class="allergen">U</span></div></div><div class="dish-price">€5</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Dolce della Casa</div><div class="dish-allergens"><span class="allergen">F</span><span class="allergen">G</span><span class="allergen">L</span><span class="allergen">Sn</span><span class="allergen">U</span></div></div><div class="dish-price">€5</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Frutta di Stagione</div></div><div class="dish-price">€6</div></div>
@@ -820,7 +794,7 @@ footer p{font-size:.7rem;color:rgba(255,255,255,.3)}
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Acqua Liscia</div></div><div class="dish-price">€2,50</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Acqua Gassata</div></div><div class="dish-price">€2,50</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it">Coca Cola (33 cl.)</div></div><div class="dish-price">€3</div></div>
@@ -852,7 +826,7 @@ footer p{font-size:.7rem;color:rgba(255,255,255,.3)}
       
       
     </div>
-    <div class="dishes two-col">
+    <div class="dishes">
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Caffè</div></div><div class="dish-price">€1,50</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it ">Caffè Decaffeinato</div></div><div class="dish-price">€2</div></div>
       <div class="dish"><div class="dish-left"><div class="dish-name-it">Latte Macchiato</div></div><div class="dish-price">€2</div></div>
