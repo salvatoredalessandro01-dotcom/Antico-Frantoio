@@ -643,6 +643,60 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
 .hidden{display:none!important}.mt1{margin-top:1rem}.mt2{margin-top:2rem}.text-center{text-align:center}.text-terra{color:var(--terra)}.text-gray{color:var(--gray)}.text-sm{font-size:.82rem}
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ── CONTACT SIDEBAR ── */
+.contact-sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:7999}
+.contact-sidebar-overlay.open{display:block}
+.contact-sidebar{
+  position:fixed;top:0;right:0;bottom:0;
+  width:min(85vw,340px);
+  background:#fff;
+  border-left:3px solid var(--olive);
+  box-shadow:-8px 0 40px rgba(0,0,0,.15);
+  z-index:8000;
+  display:flex;flex-direction:column;
+  padding:2rem 1.75rem;
+  transform:translateX(100%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+.contact-sidebar.open{transform:translateX(0)}
+.contact-sidebar-close{
+  align-self:flex-end;background:none;border:none;
+  color:var(--gray);font-size:1.4rem;cursor:pointer;
+  margin-bottom:2rem;padding:.25rem;
+  transition:color var(--transition);
+}
+.contact-sidebar-close:hover{color:var(--olive)}
+.contact-sidebar-title{
+  font-family:'Playfair Display',serif;
+  font-size:1.5rem;font-weight:400;
+  color:var(--dark);margin-bottom:.5rem;
+}
+.contact-sidebar-rule{width:2rem;height:2px;background:var(--olive);border-radius:2px;margin-bottom:2rem}
+.contact-item{display:flex;align-items:flex-start;gap:.85rem;margin-bottom:1.75rem}
+.contact-item-icon{
+  width:38px;height:38px;flex-shrink:0;
+  background:rgba(92,122,46,.08);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;margin-top:.1rem;
+}
+.contact-item-label{
+  font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--olive);font-weight:700;margin-bottom:.3rem;display:block;
+}
+.contact-item-value{font-size:.95rem;color:var(--dark);line-height:1.65;font-weight:400}
+.contact-item-value a{color:var(--dark);text-decoration:none;transition:color var(--transition)}
+.contact-item-value a:hover{color:var(--olive)}
+.contact-social{display:flex;gap:.75rem;margin-top:.35rem}
+.social-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:44px;height:44px;border-radius:50%;
+  border:1.5px solid var(--gray-xlt);
+  color:var(--dark);text-decoration:none;
+  transition:all var(--transition);
+}
+.social-btn:hover{border-color:var(--olive);color:var(--olive);background:rgba(92,122,46,.06);transform:translateY(-2px)}
+.social-btn svg{width:20px;height:20px;fill:currentColor}
 </style>
 </head>
 <body>
