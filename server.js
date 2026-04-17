@@ -203,7 +203,14 @@ async function initDB() {
     );
     console.log('✅ Default superadmin created: admin / anticofrantoio2025');
   }
+
+  await initExperiencesDB();
   console.log('✅ Database initialized');
+}
+
+// ── EXPERIENCE DB INIT ────────────────────────────────────────────
+async function initExperiencesDB() {
+  // Tables created via SQL in initDB above
 }
 
 // ── HELPERS ─────────────────────────────────────────────────────
@@ -1302,6 +1309,572 @@ app.post('/api/reminders/send', async (req, res) => {
   const count = await processReminders();
   res.json({ success:true, remindersSent:count });
 });
+
+
+// ══════════════════════════════════════════════════════════════════
+// EXPERIENCES — Cooking Class & Pizza School
+// ══════════════════════════════════════════════════════════════════
+
+// ── DB MIGRATION: create experience tables ──────────────────────
+async function initExperiencesDB() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS experience_types (
+      id SERIAL PRIMARY KEY,
+      slug VARCHAR(50) NOT NULL UNIQUE,
+      name_it VARCHAR(100) NOT NULL,
+      name_en VARCHAR(100) NOT NULL,
+      description_it TEXT,
+      description_en TEXT,
+      price NUMERIC(10,2) NOT NULL DEFAULT 0,
+      max_guests INTEGER NOT NULL DEFAULT 20,
+      active BOOLEAN DEFAULT true,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS experience_sessions (
+      id SERIAL PRIMARY KEY,
+      experience_type_id INTEGER NOT NULL REFERENCES experience_types(id) ON DELETE CASCADE,
+      day_of_week INTEGER CHECK (day_of_week BETWEEN 0 AND 6),
+      specific_date DATE,
+      session_time TIME NOT NULL,
+      max_guests INTEGER,
+      active BOOLEAN DEFAULT true,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS experience_bookings (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      experience_type_id INTEGER NOT NULL REFERENCES experience_types(id),
+      session_id INTEGER REFERENCES experience_sessions(id),
+      name VARCHAR(100) NOT NULL,
+      email VARCHAR(150) NOT NULL,
+      phone VARCHAR(30) NOT NULL,
+      booking_date DATE NOT NULL,
+      booking_time TIME NOT NULL,
+      guests INTEGER NOT NULL DEFAULT 1,
+      amount_paid NUMERIC(10,2) NOT NULL DEFAULT 0,
+      stripe_session_id VARCHAR(200),
+      stripe_payment_intent VARCHAR(200),
+      language VARCHAR(5) DEFAULT 'it',
+      status VARCHAR(20) NOT NULL DEFAULT 'confirmed',
+      notes TEXT,
+      cancelled_at TIMESTAMPTZ,
+      refund_amount NUMERIC(10,2),
+      refund_id VARCHAR(200),
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    INSERT INTO experience_types (slug, name_it, name_en, description_it, description_en, price, max_guests, active)
+    VALUES
+      ('cooking-class', 'Cooking Class', 'Cooking Class',
+       'Pizza, gnocchi, ravioli, parmigiana, tiramisù, limoncello e marmellata di limoni con vista sul Golfo.',
+       'Pizza, gnocchi, ravioli, aubergine parmigiana, tiramisù, limoncello and lemon marmalade with Gulf views.',
+       75.00, 20, true),
+      ('pizza-school', 'Pizza School', 'Pizza School',
+       'Impara l''arte della pizza napoletana con il pizzaiolo Claudio sulla terrazza panoramica.',
+       'Learn the art of Neapolitan pizza with pizzaiolo Claudio on the panoramic terrace.',
+       45.00, 20, true)
+    ON CONFLICT (slug) DO NOTHING;
+
+    INSERT INTO experience_sessions (experience_type_id, day_of_week, session_time, active)
+    SELECT id, dow, '18:30', true
+    FROM experience_types, generate_series(0,6) AS dow
+    WHERE slug = 'cooking-class'
+      AND NOT EXISTS (SELECT 1 FROM experience_sessions es WHERE es.experience_type_id = experience_types.id AND es.day_of_week = dow)
+    ON CONFLICT DO NOTHING;
+
+    INSERT INTO experience_sessions (experience_type_id, day_of_week, session_time, active)
+    SELECT id, dow, '11:30', true
+    FROM experience_types, generate_series(0,6) AS dow
+    WHERE slug = 'pizza-school'
+      AND NOT EXISTS (SELECT 1 FROM experience_sessions es WHERE es.experience_type_id = experience_types.id AND es.day_of_week = dow)
+    ON CONFLICT DO NOTHING;
+
+    ALTER TABLE experience_types ADD COLUMN IF NOT EXISTS discount_pct NUMERIC(5,2) DEFAULT 0;
+    ALTER TABLE experience_types ADD COLUMN IF NOT EXISTS discount_label VARCHAR(100);
+  `);
+  console.log('✅ Experience tables initialized');
+}
+
+// ── EXPERIENCE HELPERS ──────────────────────────────────────────
+
+// Returns booked guest count for a specific date+time+type
+async function getExpBookedGuests(expTypeId, date, time) {
+  const r = await pool.query(
+    `SELECT COALESCE(SUM(guests),0) AS total
+     FROM experience_bookings
+     WHERE experience_type_id=$1 AND booking_date=$2
+       AND booking_time::text LIKE $3 AND status='confirmed'`,
+    [expTypeId, date, time.substring(0,5)+'%']
+  );
+  return parseInt(r.rows[0].total) || 0;
+}
+
+// Is cancellation eligible? Before 20:00 of the day before
+function canCancelExperience(bookingDate, bookedAt) {
+  const now = new Date();
+  const bDate = new Date(bookingDate + 'T00:00:00');
+  const cutoff = new Date(bDate);
+  cutoff.setDate(cutoff.getDate() - 1);
+  cutoff.setHours(20, 0, 0, 0);
+  return now < cutoff;
+}
+
+// Email for experience confirmations
+async function sendExpConfirmationEmail(booking, expType, lang) {
+  const isIT = lang === 'it';
+  const cancelUrl = `${process.env.FRONTEND_URL || 'https://anticofrantoiosorrento.it'}/esperienze.html?cancel=${booking.id}`;
+  const typeName = isIT ? expType.name_it : expType.name_en;
+  const dateDisp = formatDateLong(booking.booking_date, lang);
+  const timeDisp = booking.booking_time.substring(0,5);
+
+  const cancelPolicy = `<div style="background:#f0f4eb;border:1px solid #8FAF54;border-radius:6px;padding:14px;margin:16px 0;font-size:.82rem;color:#3B5218;text-align:center">
+    <strong>${isIT?'Politica di rimborso':'Refund policy'}</strong><br>
+    ${isIT
+      ? 'Rimborso 100% se cancelli entro le ore 20:00 del giorno precedente.'
+      : '100% refund if cancelled by 8:00 PM the day before your experience.'}
+  </div>`;
+
+  await sendEmail({
+    to: booking.email, toName: booking.name,
+    subject: isIT
+      ? `Prenotazione confermata — ${typeName} — ${dateDisp}`
+      : `Booking confirmed — ${typeName} — ${dateDisp}`,
+    html: emailWrapper(`
+      <h2 style="font-weight:300;font-size:1.4rem;margin-bottom:8px">${isIT?'La tua esperienza è confermata ✓':'Your experience is confirmed ✓'}</h2>
+      <table style="width:100%;border-collapse:collapse;margin:20px 0">
+        <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;width:130px">${isIT?'Esperienza':'Experience'}</td><td style="padding:7px 0;font-size:.9rem"><strong>${typeName}</strong></td></tr>
+        <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">${isIT?'Nome':'Name'}</td><td style="padding:7px 0;font-size:.9rem"><strong>${booking.name}</strong></td></tr>
+        <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">${isIT?'Data':'Date'}</td><td style="padding:7px 0;font-size:.9rem"><strong>${dateDisp}</strong></td></tr>
+        <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">${isIT?'Orario':'Time'}</td><td style="padding:7px 0;font-size:.9rem"><strong>${timeDisp}</strong></td></tr>
+        <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">${isIT?'Partecipanti':'Guests'}</td><td style="padding:7px 0;font-size:.9rem"><strong>${booking.guests}</strong></td></tr>
+        <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">${isIT?'Pagato':'Paid'}</td><td style="padding:7px 0;font-size:.9rem"><strong>€${parseFloat(booking.amount_paid).toFixed(2)} ✓</strong></td></tr>
+        ${booking.notes ? `<tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">${isIT?'Note':'Notes'}</td><td style="padding:7px 0;font-size:.9rem"><strong>${booking.notes}</strong></td></tr>` : ''}
+      </table>
+      ${cancelPolicy}
+      <div style="text-align:center;margin-top:16px">
+        <a href="${cancelUrl}" style="color:#B03030;font-size:.82rem">${isIT?'Cancella la prenotazione':'Cancel your booking'}</a>
+      </div>
+    `),
+  });
+
+  // Notify restaurant
+  const restaurantEmail = await getSetting('restaurant_email');
+  if (restaurantEmail?.trim()) {
+    await sendEmail({
+      to: restaurantEmail.trim(), toName: 'Antico Frantoio',
+      subject: `🍕 Nuova esperienza — ${booking.name} — ${typeName} — ${dateDisp} ${timeDisp}`,
+      html: emailWrapper(`
+        <h2 style="font-weight:300;font-size:1.4rem;margin-bottom:8px">Nuova prenotazione esperienza</h2>
+        <table style="width:100%;border-collapse:collapse;margin:20px 0">
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;width:130px">Esperienza</td><td style="padding:7px 0;font-size:.9rem"><strong>${expType.name_it}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Nome</td><td style="padding:7px 0;font-size:.9rem"><strong>${booking.name}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Email</td><td style="padding:7px 0;font-size:.9rem"><strong>${booking.email}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Telefono</td><td style="padding:7px 0;font-size:.9rem"><strong>${booking.phone}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Data</td><td style="padding:7px 0;font-size:.9rem"><strong>${dateDisp}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Orario</td><td style="padding:7px 0;font-size:.9rem"><strong>${timeDisp}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Partecipanti</td><td style="padding:7px 0;font-size:.9rem"><strong>${booking.guests}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Pagato</td><td style="padding:7px 0;font-size:.9rem"><strong>€${parseFloat(booking.amount_paid).toFixed(2)}</strong></td></tr>
+        </table>
+      `),
+    });
+  }
+}
+
+async function sendExpCancellationEmail(booking, expType, lang, refunded) {
+  const isIT = lang === 'it';
+  const typeName = isIT ? expType.name_it : expType.name_en;
+  const dateDisp = formatDateLong(booking.booking_date, lang);
+
+  await sendEmail({
+    to: booking.email, toName: booking.name,
+    subject: isIT
+      ? `Cancellazione — ${typeName} — ${dateDisp}`
+      : `Cancellation — ${typeName} — ${dateDisp}`,
+    html: emailWrapper(`
+      <div style="text-align:center;padding:20px 0">
+        <h2 style="font-weight:300;font-size:1.5rem;margin-bottom:12px">${isIT?'Prenotazione cancellata':'Booking cancelled'}</h2>
+        <p style="color:#6B6460;font-size:.9rem;margin-bottom:16px">
+          ${refunded
+            ? (isIT?`Il rimborso di <strong>€${parseFloat(booking.amount_paid).toFixed(2)}</strong> è stato elaborato e riceverai il rimborso entro 5-10 giorni lavorativi.`
+                    :`A refund of <strong>€${parseFloat(booking.amount_paid).toFixed(2)}</strong> has been processed and will appear within 5-10 business days.`)
+            : (isIT?'La cancellazione non è rimborsabile oltre il termine previsto.'
+                    :'Cancellation is non-refundable past the deadline.')}
+        </p>
+      </div>
+    `),
+  });
+}
+
+// ── PUBLIC: GET experience types + availability ─────────────────
+app.get('/api/experiences', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, slug, name_it, name_en, description_it, description_en,
+              price, max_guests, active, discount_pct, discount_label
+       FROM experience_types WHERE active=true ORDER BY id`
+    );
+    res.json({ experiences: result.rows });
+  } catch(err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/experiences/availability?date=YYYY-MM-DD
+app.get('/api/experiences/availability', async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return res.status(400).json({ error: 'Invalid date' });
+
+    const dow = new Date(date + 'T00:00:00').getDay();
+    const types = await pool.query(
+      `SELECT et.*, es.id AS session_id, es.session_time, es.max_guests AS session_max_guests, es.active AS session_active
+       FROM experience_types et
+       JOIN experience_sessions es ON es.experience_type_id = et.id
+       WHERE et.active = true AND es.active = true
+         AND (es.specific_date = $1 OR (es.specific_date IS NULL AND es.day_of_week = $2))
+       ORDER BY et.id, es.session_time`,
+      [date, dow]
+    );
+
+    const result = {};
+    for (const row of types.rows) {
+      if (!result[row.slug]) {
+        result[row.slug] = {
+          id: row.id, slug: row.slug,
+          name_it: row.name_it, name_en: row.name_en,
+          price: parseFloat(row.price),
+          discount_pct: parseFloat(row.discount_pct) || 0,
+          discount_label: row.discount_label,
+          max_guests: row.max_guests,
+          sessions: []
+        };
+      }
+      const maxG = row.session_max_guests || row.max_guests;
+      const booked = await getExpBookedGuests(row.id, date, row.session_time.substring(0,5));
+      result[row.slug].sessions.push({
+        session_id: row.session_id,
+        time: row.session_time.substring(0,5),
+        max_guests: maxG,
+        booked,
+        available: maxG - booked,
+        spots_left: Math.max(0, maxG - booked)
+      });
+    }
+
+    res.json({ date, availability: result });
+  } catch(err) {
+    console.error('Availability error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /api/experiences/create-payment — Stripe Checkout Session
+app.post('/api/experiences/create-payment', reservationLimiter, async (req, res) => {
+  try {
+    const { experience_type_id, session_id, name, email, phone, date, time, guests, language, notes } = req.body;
+    if (!experience_type_id || !name || !email || !date || !time || !guests) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Get experience type
+    const expRes = await pool.query('SELECT * FROM experience_types WHERE id=$1 AND active=true', [experience_type_id]);
+    if (!expRes.rows.length) return res.status(404).json({ error: 'Experience not found' });
+    const exp = expRes.rows[0];
+
+    // Check availability
+    const booked = await getExpBookedGuests(experience_type_id, date, time);
+    const maxG = exp.max_guests;
+    if (booked + parseInt(guests) > maxG) {
+      return res.status(409).json({ error: 'not_enough_spots', spotsLeft: Math.max(0, maxG - booked) });
+    }
+
+    // Calculate price with discount
+    let unitPrice = parseFloat(exp.price);
+    if (exp.discount_pct > 0) {
+      unitPrice = unitPrice * (1 - exp.discount_pct / 100);
+    }
+    const totalAmount = Math.round(unitPrice * parseInt(guests) * 100); // in cents
+
+    const lang = language || 'it';
+    const isIT = lang === 'it';
+    const expName = isIT ? exp.name_it : exp.name_en;
+    const cancelUrl = `${process.env.FRONTEND_URL || 'https://anticofrantoiosorrento.it'}/${lang === 'it' ? 'esperienze' : 'experiences'}.html`;
+
+    const dateDisp = formatDateDisplay(date);
+
+    // Create Stripe Checkout Session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: `${expName} — Antico Frantoio`,
+            description: `${dateDisp} ${time} · ${guests} ${isIT?'partecipanti':'participants'}`,
+          },
+          unit_amount: Math.round(unitPrice * 100),
+        },
+        quantity: parseInt(guests),
+      }],
+      mode: 'payment',
+      success_url: `${process.env.FRONTEND_URL}/${lang === 'it' ? 'esperienze' : 'experiences'}.html?exp_success={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${cancelUrl}?exp_cancelled=1`,
+      customer_email: email,
+      metadata: {
+        experience_type_id: String(experience_type_id),
+        session_id: String(session_id || ''),
+        name, email, phone, date, time,
+        guests: String(guests),
+        language: lang,
+        notes: notes || '',
+        amount: String((totalAmount / 100).toFixed(2)),
+      },
+    });
+
+    res.json({ checkoutUrl: session.url, sessionId: session.id });
+  } catch(err) {
+    console.error('Create payment error:', err);
+    res.status(500).json({ error: 'Payment creation failed' });
+  }
+});
+
+// POST /api/experiences/confirm — called after Stripe success
+app.post('/api/experiences/confirm', async (req, res) => {
+  try {
+    const { stripe_session_id } = req.body;
+    if (!stripe_session_id) return res.status(400).json({ error: 'Missing session id' });
+
+    // Check not already confirmed
+    const existing = await pool.query('SELECT id FROM experience_bookings WHERE stripe_session_id=$1', [stripe_session_id]);
+    if (existing.rows.length) return res.json({ success: true, booking_id: existing.rows[0].id, already_confirmed: true });
+
+    // Retrieve from Stripe
+    const session = await stripe.checkout.sessions.retrieve(stripe_session_id);
+    if (session.payment_status !== 'paid') return res.status(402).json({ error: 'Payment not completed' });
+
+    const m = session.metadata;
+    const expRes = await pool.query('SELECT * FROM experience_types WHERE id=$1', [parseInt(m.experience_type_id)]);
+    if (!expRes.rows.length) return res.status(404).json({ error: 'Experience not found' });
+    const exp = expRes.rows[0];
+
+    // Re-check availability (race condition protection)
+    const booked = await getExpBookedGuests(parseInt(m.experience_type_id), m.date, m.time);
+    if (booked + parseInt(m.guests) > exp.max_guests) {
+      // Refund immediately
+      await stripe.refunds.create({ payment_intent: session.payment_intent });
+      return res.status(409).json({ error: 'overbooking', message: 'Fully booked — refund initiated' });
+    }
+
+    const bookingRes = await pool.query(
+      `INSERT INTO experience_bookings
+         (experience_type_id, session_id, name, email, phone, booking_date, booking_time, guests, amount_paid,
+          stripe_session_id, stripe_payment_intent, language, status, notes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'confirmed',$13)
+       RETURNING *`,
+      [
+        parseInt(m.experience_type_id),
+        m.session_id ? parseInt(m.session_id) : null,
+        m.name, m.email, m.phone, m.date, m.time,
+        parseInt(m.guests), parseFloat(m.amount),
+        stripe_session_id, session.payment_intent,
+        m.language || 'it', m.notes || null
+      ]
+    );
+    const booking = bookingRes.rows[0];
+
+    // Send confirmation email
+    try { await sendExpConfirmationEmail(booking, exp, m.language || 'it'); } catch(e) { console.error('Exp email error:', e); }
+
+    res.json({ success: true, booking_id: booking.id });
+  } catch(err) {
+    console.error('Confirm experience error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/experiences/booking/:id — get booking details for cancellation page
+app.get('/api/experiences/booking/:id', async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT eb.*, et.name_it, et.name_en
+       FROM experience_bookings eb
+       JOIN experience_types et ON et.id = eb.experience_type_id
+       WHERE eb.id=$1`,
+      [req.params.id]
+    );
+    if (!r.rows.length) return res.status(404).json({ error: 'Not found' });
+    res.json({ booking: r.rows[0] });
+  } catch(err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// POST /api/experiences/cancel/:id
+app.post('/api/experiences/cancel/:id', async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT eb.*, et.name_it, et.name_en
+       FROM experience_bookings eb
+       JOIN experience_types et ON et.id = eb.experience_type_id
+       WHERE eb.id=$1`,
+      [req.params.id]
+    );
+    if (!r.rows.length) return res.status(404).json({ error: 'Not found' });
+    const booking = r.rows[0];
+
+    if (booking.status === 'cancelled') return res.json({ success: true, already_cancelled: true });
+
+    const eligible = canCancelExperience(booking.booking_date, booking.created_at);
+    let refunded = false;
+    let refundId = null;
+
+    if (eligible && booking.stripe_payment_intent) {
+      try {
+        const refund = await stripe.refunds.create({ payment_intent: booking.stripe_payment_intent });
+        refunded = true;
+        refundId = refund.id;
+      } catch(e) { console.error('Refund error:', e); }
+    }
+
+    await pool.query(
+      `UPDATE experience_bookings SET status='cancelled', cancelled_at=NOW(), refund_id=$1, updated_at=NOW() WHERE id=$2`,
+      [refundId, booking.id]
+    );
+
+    const exp = { name_it: booking.name_it, name_en: booking.name_en };
+    try { await sendExpCancellationEmail(booking, exp, booking.language || 'it', refunded); } catch(e) {}
+
+    res.json({ success: true, refunded, refundId, amount: refunded ? booking.amount_paid : 0 });
+  } catch(err) {
+    console.error('Cancel experience error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ── ADMIN: experience endpoints ─────────────────────────────────
+
+// GET all experience bookings
+app.get('/api/admin/experiences/bookings', authMiddleware, async (req, res) => {
+  try {
+    const { date_from, date_to, status, slug } = req.query;
+    let q = `SELECT eb.*, et.name_it, et.name_en, et.slug
+             FROM experience_bookings eb
+             JOIN experience_types et ON et.id = eb.experience_type_id
+             WHERE 1=1`;
+    const params = [];
+    if (date_from) { params.push(date_from); q += ` AND eb.booking_date >= $${params.length}`; }
+    if (date_to)   { params.push(date_to);   q += ` AND eb.booking_date <= $${params.length}`; }
+    if (status)    { params.push(status);    q += ` AND eb.status = $${params.length}`; }
+    if (slug)      { params.push(slug);      q += ` AND et.slug = $${params.length}`; }
+    q += ' ORDER BY eb.booking_date DESC, eb.booking_time ASC';
+    const r = await pool.query(q, params);
+    res.json({ bookings: r.rows });
+  } catch(err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// GET/PATCH experience types (price, capacity, discount)
+app.get('/api/admin/experiences/types', authMiddleware, async (req, res) => {
+  try {
+    const r = await pool.query('SELECT * FROM experience_types ORDER BY id');
+    res.json({ types: r.rows });
+  } catch(err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+app.patch('/api/admin/experiences/types/:id', authMiddleware, async (req, res) => {
+  if (!['superadmin','admin'].includes(req.user.role)) return res.status(403).json({ error: 'Forbidden' });
+  try {
+    const { price, max_guests, discount_pct, discount_label, active, name_it, name_en, description_it, description_en } = req.body;
+    const r = await pool.query(
+      `UPDATE experience_types SET
+         price=COALESCE($1,price),
+         max_guests=COALESCE($2,max_guests),
+         discount_pct=COALESCE($3,discount_pct),
+         discount_label=COALESCE($4,discount_label),
+         active=COALESCE($5,active),
+         name_it=COALESCE($6,name_it),
+         name_en=COALESCE($7,name_en),
+         description_it=COALESCE($8,description_it),
+         description_en=COALESCE($9,description_en),
+         updated_at=NOW()
+       WHERE id=$10 RETURNING *`,
+      [price, max_guests, discount_pct, discount_label, active, name_it, name_en, description_it, description_en, req.params.id]
+    );
+    res.json({ type: r.rows[0] });
+  } catch(err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// GET/POST/PATCH/DELETE sessions
+app.get('/api/admin/experiences/sessions', authMiddleware, async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT es.*, et.name_it, et.slug
+       FROM experience_sessions es
+       JOIN experience_types et ON et.id = es.experience_type_id
+       ORDER BY et.id, es.day_of_week, es.specific_date, es.session_time`
+    );
+    res.json({ sessions: r.rows });
+  } catch(err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+app.post('/api/admin/experiences/sessions', authMiddleware, async (req, res) => {
+  if (!['superadmin','admin'].includes(req.user.role)) return res.status(403).json({ error: 'Forbidden' });
+  try {
+    const { experience_type_id, day_of_week, specific_date, session_time, max_guests } = req.body;
+    const r = await pool.query(
+      `INSERT INTO experience_sessions (experience_type_id, day_of_week, specific_date, session_time, max_guests, active)
+       VALUES ($1,$2,$3,$4,$5,true) RETURNING *`,
+      [experience_type_id, day_of_week ?? null, specific_date || null, session_time, max_guests || null]
+    );
+    res.json({ session: r.rows[0] });
+  } catch(err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+app.patch('/api/admin/experiences/sessions/:id', authMiddleware, async (req, res) => {
+  if (!['superadmin','admin'].includes(req.user.role)) return res.status(403).json({ error: 'Forbidden' });
+  try {
+    const { session_time, max_guests, active } = req.body;
+    const r = await pool.query(
+      `UPDATE experience_sessions SET
+         session_time=COALESCE($1,session_time),
+         max_guests=COALESCE($2,max_guests),
+         active=COALESCE($3,active)
+       WHERE id=$4 RETURNING *`,
+      [session_time, max_guests, active, req.params.id]
+    );
+    res.json({ session: r.rows[0] });
+  } catch(err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+app.delete('/api/admin/experiences/sessions/:id', authMiddleware, async (req, res) => {
+  if (!['superadmin','admin'].includes(req.user.role)) return res.status(403).json({ error: 'Forbidden' });
+  try {
+    await pool.query('DELETE FROM experience_sessions WHERE id=$1', [req.params.id]);
+    res.json({ success: true });
+  } catch(err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// Admin cancel experience booking
+app.post('/api/admin/experiences/bookings/:id/cancel', authMiddleware, async (req, res) => {
+  if (!['superadmin','admin'].includes(req.user.role)) return res.status(403).json({ error: 'Forbidden' });
+  try {
+    const r = await pool.query('SELECT * FROM experience_bookings WHERE id=$1', [req.params.id]);
+    if (!r.rows.length) return res.status(404).json({ error: 'Not found' });
+    const booking = r.rows[0];
+    const { refund } = req.body;
+    let refundId = null;
+    if (refund && booking.stripe_payment_intent) {
+      const rf = await stripe.refunds.create({ payment_intent: booking.stripe_payment_intent });
+      refundId = rf.id;
+    }
+    await pool.query(
+      `UPDATE experience_bookings SET status='cancelled', cancelled_at=NOW(), refund_id=$1, updated_at=NOW() WHERE id=$2`,
+      [refundId, booking.id]
+    );
+    res.json({ success: true, refunded: !!refundId });
+  } catch(err) { res.status(500).json({ error: 'Server error' }); }
+});
+
 
 // Health — also pings DB to prevent Supabase free tier pausing
 app.get('/health', async (req, res) => {
