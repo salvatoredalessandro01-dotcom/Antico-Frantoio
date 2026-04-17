@@ -1876,6 +1876,23 @@ app.post('/api/admin/experiences/bookings/:id/cancel', authMiddleware, async (re
 });
 
 
+// Stripe connectivity test
+app.get('/api/stripe-test', async (req, res) => {
+  try {
+    const account = await stripe.accounts.retrieve();
+    res.json({
+      ok: true,
+      account_id: account.id,
+      charges_enabled: account.charges_enabled,
+      payouts_enabled: account.payouts_enabled,
+      country: account.country,
+      currency: account.default_currency,
+    });
+  } catch(err) {
+    res.status(500).json({ ok: false, error: err.message, type: err.type, code: err.code });
+  }
+});
+
 // Health — also pings DB to prevent Supabase free tier pausing
 app.get('/health', async (req, res) => {
   try {
