@@ -712,6 +712,7 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
         <li><a href="/" data-i18n="nav.home">Home</a></li>
         <li><a href="/menu.html" data-i18n="nav.menu">Menu</a></li>
         <li><a href="#reservation" data-i18n="nav.reserve">Prenota Ora</a></li>
+        <li><a href="/esperienze.html" data-i18n="nav.experiences">Esperienze</a></li>
         <li><a href="#" data-i18n="nav.events">Eventi</a></li>
         <li><a href="#" onclick="openContactSidebar();return false;" data-i18n="nav.contact">Contatti</a></li>
       </ul>
@@ -734,6 +735,7 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
     <a href="/" onclick="closeMobileDrawer()" data-i18n="nav.home">Home</a>
     <a href="#reservation" onclick="closeMobileDrawer()" class="drawer-prenota" data-i18n="nav.reserve">Prenota Ora</a>
     <a href="/menu.html" onclick="closeMobileDrawer()" data-i18n="nav.menu">Menu</a>
+    <a href="/esperienze.html" onclick="closeMobileDrawer()" data-i18n="nav.experiences">Esperienze</a>
     <a href="#" onclick="closeMobileDrawer()">Eventi</a>
     <a href="#" onclick="closeMobileDrawer();openContactSidebar();return false;">Contatti</a>
   </div>
@@ -1202,7 +1204,7 @@ let currentUser = { username:'', role:'' };
 // ═══════════════════════════════════════════════════════════════
 const translations = {
   it: {
-    'nav.menu':'Menu','nav.reserve':'Prenota Ora','nav.events':'Eventi','nav.contact':'Contatti','contact.title':'Contatti','contact.address.label':'Indirizzo','contact.phone.label':'Telefono','contact.social.label':'Seguici','nav.home':'Home','nav.gallery':'Galleria',
+    'nav.menu':'Menu','nav.reserve':'Prenota Ora','nav.events':'Eventi','nav.experiences':'Esperienze','nav.contact':'Contatti','contact.title':'Contatti','contact.address.label':'Indirizzo','contact.phone.label':'Telefono','contact.social.label':'Seguici','nav.home':'Home','nav.gallery':'Galleria',
     'hero.eyebrow':'Sorrento','hero.tagline':'Un\'esperienza che va oltre il pasto',
     'hero.cta':'Prenota un Tavolo','hero.scroll':'Scopri',
     'about.tag':'Il Ristorante','about.heading':'Un luogo dove il tempo\nsi ferma',
@@ -1249,7 +1251,7 @@ const translations = {
     'paid':'Pagata','unpaid':'—',
   },
   en: {
-    'nav.menu':'Menu','nav.reserve':'Book Now','nav.events':'Events','nav.contact':'Contact','contact.title':'Contact Us','contact.address.label':'Address','contact.phone.label':'Phone','contact.social.label':'Follow Us','nav.home':'Home','nav.gallery':'Gallery',
+    'nav.menu':'Menu','nav.reserve':'Book Now','nav.events':'Events','nav.experiences':'Experiences','nav.contact':'Contact','contact.title':'Contact Us','contact.address.label':'Address','contact.phone.label':'Phone','contact.social.label':'Follow Us','nav.home':'Home','nav.gallery':'Gallery',
     'hero.eyebrow':'Sorrento','hero.tagline':'An experience beyond the meal',
     'hero.cta':'Book a Table','hero.scroll':'Discover',
     'about.tag':'The Restaurant','about.heading':'A place where time\nstands still',
@@ -1314,6 +1316,258 @@ function applyTranslations() {
     if(el.tagName==='INPUT'||el.tagName==='TEXTAREA') el.placeholder=text;
     else el.innerHTML=text.replace(/\n/g,'<br>');
   });
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN: EXPERIENCE BOOKINGS TAB
+// ═══════════════════════════════════════════════════════════════
+async function renderExpBookingsTab(container) {
+  const today = todayStr();
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+  const weekAgoStr = weekAgo.toISOString().split('T')[0];
+  container.innerHTML = `
+    <div class="admin-filter-bar">
+      <input type="date" id="exp-from" value="${weekAgoStr}" onchange="loadExpBookings()">
+      <input type="date" id="exp-to" value="${today}" onchange="loadExpBookings()">
+      <select id="exp-type-filter" onchange="loadExpBookings()" style="padding:.5rem .75rem;font-size:.8rem;width:auto">
+        <option value="">Tutte le esperienze</option>
+        <option value="cooking-class">Cooking Class</option>
+        <option value="pizza-school">Pizza School</option>
+      </select>
+      <select id="exp-status-filter" onchange="loadExpBookings()" style="padding:.5rem .75rem;font-size:.8rem;width:auto">
+        <option value="">Tutti gli stati</option>
+        <option value="confirmed">Confermato</option>
+        <option value="cancelled">Cancellato</option>
+      </select>
+    </div>
+    <div class="bookings-table-wrap">
+      <table class="bookings-table">
+        <thead><tr><th>Data</th><th>Orario</th><th>Esperienza</th><th>Nome</th><th>Email</th><th>Partecipanti</th><th>Pagato</th><th>Stato</th><th>Azioni</th></tr></thead>
+        <tbody id="exp-tbody"><tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--gray)">Caricamento...</td></tr></tbody>
+      </table>
+    </div>`;
+  await loadExpBookings();
+}
+
+async function loadExpBookings() {
+  const from = document.getElementById('exp-from')?.value || '';
+  const to = document.getElementById('exp-to')?.value || '';
+  const slug = document.getElementById('exp-type-filter')?.value || '';
+  const status = document.getElementById('exp-status-filter')?.value || '';
+  const tbody = document.getElementById('exp-tbody');
+  if (!tbody) return;
+  try {
+    let url = `${API_BASE}/api/admin/experiences/bookings?date_from=${from}&date_to=${to}`;
+    if (slug) url += `&slug=${slug}`;
+    if (status) url += `&status=${status}`;
+    const r = await adminFetch(url);
+    const d = await r.json();
+    if (!d.bookings?.length) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--gray)">Nessuna prenotazione</td></tr>';
+      return;
+    }
+    tbody.innerHTML = d.bookings.map(b => `
+      <tr>
+        <td>${fmtDate(b.booking_date)}</td>
+        <td>${fmtTime(b.booking_time)}</td>
+        <td><span class="status-badge ${b.slug==='cooking-class'?'status-confirmed':'status-arrived'}">${b.name_it}</span></td>
+        <td><strong>${b.name}</strong></td>
+        <td style="font-size:.75rem">${b.email}</td>
+        <td style="text-align:center"><strong>${b.guests}</strong></td>
+        <td>€${parseFloat(b.amount_paid).toFixed(2)}</td>
+        <td>${b.status==='confirmed'?'<span class="status-badge status-confirmed">Confermato</span>':'<span class="status-badge status-cancelled">Cancellato</span>'}</td>
+        <td>${b.status==='confirmed'&&['superadmin','admin'].includes(currentUser.role)?`<button class="btn-sm btn-secondary btn-danger" onclick="adminCancelExp('${b.id}')">Cancella</button>`:'—'}</td>
+      </tr>`).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--red)">Errore caricamento</td></tr>';
+  }
+}
+
+async function adminCancelExp(id) {
+  const refund = confirm('Rimborsare il pagamento Stripe?');
+  try {
+    const r = await adminFetch(`${API_BASE}/api/admin/experiences/bookings/${id}/cancel`, {
+      method:'POST', body: JSON.stringify({ refund })
+    });
+    const d = await r.json();
+    if (d.success) { showToast(d.refunded ? 'Cancellato con rimborso ✓' : 'Cancellato (nessun rimborso) ✓'); loadExpBookings(); }
+    else showToast('Errore cancellazione', 'error');
+  } catch(e) { showToast('Errore', 'error'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN: EXPERIENCE SETTINGS TAB
+// ═══════════════════════════════════════════════════════════════
+async function renderExpSettingsTab(container) {
+  container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray)">Caricamento...</div>';
+  try {
+    const [typesRes, sessRes] = await Promise.all([
+      adminFetch(`${API_BASE}/api/admin/experiences/types`),
+      adminFetch(`${API_BASE}/api/admin/experiences/sessions`)
+    ]);
+    const { types } = await typesRes.json();
+    const { sessions } = await sessRes.json();
+    const days = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
+
+    container.innerHTML = `
+      <div class="admin-section">
+        <div class="admin-section-title">Prezzi &amp; Capacità</div>
+        ${types.map(t => `
+        <div class="admin-card">
+          <h4>${t.name_it}</h4>
+          <p class="desc">${t.description_it}</p>
+          <div class="inline-form">
+            <div class="form-group">
+              <label>Prezzo (€/persona)</label>
+              <input type="number" id="exp-price-${t.id}" value="${parseFloat(t.price).toFixed(2)}" step="0.01" min="0" class="table-input" style="width:90px">
+            </div>
+            <div class="form-group">
+              <label>Max partecipanti</label>
+              <input type="number" id="exp-maxg-${t.id}" value="${t.max_guests}" min="1" max="50" class="table-input" style="width:70px">
+            </div>
+            <div class="form-group">
+              <label>Sconto %</label>
+              <input type="number" id="exp-disc-${t.id}" value="${parseFloat(t.discount_pct||0).toFixed(0)}" min="0" max="100" class="table-input" style="width:60px">
+            </div>
+            <div class="form-group">
+              <label>Etichetta sconto</label>
+              <input type="text" id="exp-dlabel-${t.id}" value="${t.discount_label||''}" placeholder="Es: Offerta speciale" style="width:160px;padding:.3rem .5rem;font-size:.8rem;border:1px solid var(--gray-lt);border-radius:var(--radius)">
+            </div>
+            <div class="form-group" style="align-self:flex-end">
+              <label>&nbsp;</label>
+              <button class="btn-sm btn-secondary" onclick="saveExpType(${t.id})">Salva</button>
+            </div>
+          </div>
+        </div>`).join('')}
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-section-title">Sessioni &amp; Orari</div>
+        <div class="admin-card">
+          <div class="bookings-table-wrap">
+            <table class="bookings-table" id="sessions-table">
+              <thead><tr><th>Esperienza</th><th>Giorno</th><th>Data specifica</th><th>Orario</th><th>Max ospiti</th><th>Attivo</th><th>Azioni</th></tr></thead>
+              <tbody>
+                ${sessions.map(s => `<tr id="sess-row-${s.id}">
+                  <td>${s.name_it}</td>
+                  <td>${s.day_of_week !== null ? days[s.day_of_week] : '—'}</td>
+                  <td>${s.specific_date ? fmtDate(s.specific_date) : '—'}</td>
+                  <td><input type="time" value="${s.session_time.substring(0,5)}" id="st-${s.id}" style="width:100px;padding:.3rem .5rem;font-size:.82rem;border:1px solid var(--gray-lt);border-radius:3px"></td>
+                  <td><input type="number" value="${s.max_guests||''}" id="sg-${s.id}" placeholder="Default" style="width:80px;padding:.3rem .5rem;font-size:.82rem;border:1px solid var(--gray-lt);border-radius:3px" min="1" max="50"></td>
+                  <td><label class="toggle"><input type="checkbox" ${s.active?'checked':''} onchange="toggleSession(${s.id},this.checked)"><span class="toggle-slider"></span></label></td>
+                  <td style="display:flex;gap:.4rem">
+                    <button class="btn-sm btn-secondary" onclick="saveSession(${s.id})">Salva</button>
+                    <button class="btn-sm btn-secondary btn-danger" onclick="deleteSession(${s.id})">Elimina</button>
+                  </td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="admin-card" style="margin-top:1rem">
+          <h4>Aggiungi sessione</h4>
+          <div class="inline-form">
+            <div class="form-group">
+              <label>Esperienza</label>
+              <select id="new-exp-type" style="padding:.4rem .6rem;font-size:.82rem">
+                ${types.map(t => `<option value="${t.id}">${t.name_it}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Giorno settimana</label>
+              <select id="new-exp-dow" style="padding:.4rem .6rem;font-size:.82rem">
+                <option value="">— Data specifica —</option>
+                ${days.map((d,i)=>`<option value="${i}">${d}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Data specifica (opt)</label>
+              <input type="date" id="new-exp-date" style="padding:.3rem .5rem;font-size:.82rem;border:1px solid var(--gray-lt);border-radius:3px">
+            </div>
+            <div class="form-group">
+              <label>Orario</label>
+              <input type="time" id="new-exp-time" value="18:30" style="width:100px;padding:.3rem .5rem;font-size:.82rem;border:1px solid var(--gray-lt);border-radius:3px">
+            </div>
+            <div class="form-group">
+              <label>Max ospiti (opt)</label>
+              <input type="number" id="new-exp-maxg" placeholder="Default" style="width:80px;padding:.3rem .5rem;font-size:.82rem;border:1px solid var(--gray-lt);border-radius:3px" min="1">
+            </div>
+            <div class="form-group" style="align-self:flex-end">
+              <button class="btn-sm btn-primary" style="white-space:nowrap" onclick="addSession()">+ Aggiungi</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  } catch(e) {
+    container.innerHTML = '<div style="color:var(--red);padding:1rem">Errore caricamento impostazioni</div>';
+  }
+}
+
+async function saveExpType(id) {
+  const price = document.getElementById(`exp-price-${id}`)?.value;
+  const max_guests = document.getElementById(`exp-maxg-${id}`)?.value;
+  const discount_pct = document.getElementById(`exp-disc-${id}`)?.value;
+  const discount_label = document.getElementById(`exp-dlabel-${id}`)?.value;
+  try {
+    const r = await adminFetch(`${API_BASE}/api/admin/experiences/types/${id}`, {
+      method:'PATCH', body: JSON.stringify({ price, max_guests, discount_pct, discount_label })
+    });
+    if (r.ok) showToast('Salvato ✓'); else showToast('Errore', 'error');
+  } catch(e) { showToast('Errore', 'error'); }
+}
+
+async function saveSession(id) {
+  const session_time = document.getElementById(`st-${id}`)?.value;
+  const max_guests = document.getElementById(`sg-${id}`)?.value || null;
+  try {
+    const r = await adminFetch(`${API_BASE}/api/admin/experiences/sessions/${id}`, {
+      method:'PATCH', body: JSON.stringify({ session_time, max_guests: max_guests || null })
+    });
+    if (r.ok) showToast('Sessione aggiornata ✓'); else showToast('Errore', 'error');
+  } catch(e) { showToast('Errore', 'error'); }
+}
+
+async function toggleSession(id, active) {
+  try {
+    await adminFetch(`${API_BASE}/api/admin/experiences/sessions/${id}`, {
+      method:'PATCH', body: JSON.stringify({ active })
+    });
+    showToast(active ? 'Sessione attivata ✓' : 'Sessione disattivata');
+  } catch(e) { showToast('Errore', 'error'); }
+}
+
+async function deleteSession(id) {
+  if (!confirm('Eliminare questa sessione?')) return;
+  try {
+    const r = await adminFetch(`${API_BASE}/api/admin/experiences/sessions/${id}`, { method:'DELETE' });
+    if (r.ok) { document.getElementById(`sess-row-${id}`)?.remove(); showToast('Sessione eliminata'); }
+    else showToast('Errore', 'error');
+  } catch(e) { showToast('Errore', 'error'); }
+}
+
+async function addSession() {
+  const experience_type_id = document.getElementById('new-exp-type')?.value;
+  const dow = document.getElementById('new-exp-dow')?.value;
+  const specific_date = document.getElementById('new-exp-date')?.value || null;
+  const session_time = document.getElementById('new-exp-time')?.value;
+  const max_guests = document.getElementById('new-exp-maxg')?.value || null;
+  if (!session_time) { showToast('Inserisci un orario', 'error'); return; }
+  if (!dow && !specific_date) { showToast('Seleziona giorno o data specifica', 'error'); return; }
+  try {
+    const r = await adminFetch(`${API_BASE}/api/admin/experiences/sessions`, {
+      method:'POST', body: JSON.stringify({
+        experience_type_id,
+        day_of_week: dow !== '' ? parseInt(dow) : null,
+        specific_date,
+        session_time,
+        max_guests: max_guests || null,
+      })
+    });
+    if (r.ok) { showToast('Sessione aggiunta ✓'); renderExpSettingsTab(document.getElementById('admin-content-area')); }
+    else showToast('Errore', 'error');
+  } catch(e) { showToast('Errore', 'error'); }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1689,8 +1943,11 @@ const ROLE_NAV = {
     {id:'new-booking',icon:'➕',label:'Nuova Prenotazione'},
     {section:'Calendario'},
     {id:'schedule',icon:'📅',label:'Chiusure & Orari'},
+    {section:'Esperienze'},
+    {id:'exp-bookings',icon:'🍕',label:'Prenotazioni Esperienze'},
+    {id:'exp-settings',icon:'⚙️',label:'Impostazioni Esperienze'},
     {section:'Configurazione'},
-    {id:'settings',icon:'⚙️',label:'Impostazioni'},
+    {id:'settings',icon:'⚙️',label:'Rist. Impostazioni'},
     {id:'users',icon:'👤',label:'Utenti'},
   ],
   admin: [
@@ -1808,7 +2065,7 @@ function switchAdminTab(tab,link){
   content.innerHTML='';
   document.querySelectorAll('#admin-nav-list a').forEach(a=>a.classList.remove('active'));
   if(link)link.classList.add('active');
-  const titles={dashboard:'Dashboard',bookings:'Prenotazioni','new-booking':'Nuova Prenotazione',schedule:'Chiusure & Orari',settings:'Impostazioni',users:'Utenti',arrivals:'Arrivi'};
+  const titles={dashboard:'Dashboard',bookings:'Prenotazioni','new-booking':'Nuova Prenotazione',schedule:'Chiusure & Orari',settings:'Impostazioni',users:'Utenti',arrivals:'Arrivi','exp-bookings':'Prenotazioni Esperienze','exp-settings':'Impostazioni Esperienze'};
   document.getElementById('admin-tab-title').textContent=titles[tab]||tab;
   // Render tab
   if(tab==='dashboard')renderDashboard(content);
@@ -1818,6 +2075,8 @@ function switchAdminTab(tab,link){
   else if(tab==='settings')renderSettingsTab(content);
   else if(tab==='users')renderUsersTab(content);
   else if(tab==='arrivals')renderArrivalsTab(content);
+  else if(tab==='exp-bookings')renderExpBookingsTab(content);
+  else if(tab==='exp-settings')renderExpSettingsTab(content);
 }
 
 // ═══════════════════════════════════════════════════════════════
