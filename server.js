@@ -1606,8 +1606,7 @@ app.post('/api/experiences/create-payment', reservationLimiter, async (req, res)
     const dateDisp = formatDateDisplay(date);
 
     // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+    const stripeSession = await stripe.checkout.sessions.create({
       line_items: [{
         price_data: {
           currency: 'eur',
@@ -1625,7 +1624,7 @@ app.post('/api/experiences/create-payment', reservationLimiter, async (req, res)
       customer_email: email,
       metadata: {
         experience_type_id: String(experience_type_id),
-        session_id: String(session_id || ''),
+        exp_session_id: String(session_id || ''),
         name, email, phone, date, time,
         guests: String(guests),
         language: lang,
@@ -1634,10 +1633,11 @@ app.post('/api/experiences/create-payment', reservationLimiter, async (req, res)
       },
     });
 
-    res.json({ checkoutUrl: session.url, sessionId: session.id });
+    res.json({ checkoutUrl: stripeSession.url, sessionId: stripeSession.id });
   } catch(err) {
-    console.error('Create payment error:', err);
-    res.status(500).json({ error: 'Payment creation failed' });
+    console.error('Create payment error:', err.message);
+    if (err.type) console.error('Stripe error type:', err.type, '| code:', err.code, '| param:', err.param);
+    res.status(500).json({ error: 'Payment creation failed', detail: err.message });
   }
 });
 
@@ -1676,7 +1676,7 @@ app.post('/api/experiences/confirm', async (req, res) => {
        RETURNING *`,
       [
         parseInt(m.experience_type_id),
-        m.session_id ? parseInt(m.session_id) : null,
+        m.exp_session_id ? parseInt(m.exp_session_id) : null,
         m.name, m.email, m.phone, m.date, m.time,
         parseInt(m.guests), parseFloat(m.amount),
         stripe_session_id, session.payment_intent,
