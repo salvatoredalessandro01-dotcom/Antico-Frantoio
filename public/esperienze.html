@@ -670,16 +670,19 @@ initDateInputs();
 async function loadExpTypes() {
   try {
     const r = await fetch(`${API}/api/experiences`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
+    if (!d.experiences?.length) throw new Error('Nessuna esperienza trovata');
     d.experiences.forEach(exp => {
-      const price = exp.discount_pct > 0
+      const unitPrice = exp.discount_pct > 0
         ? (exp.price * (1 - exp.discount_pct/100)).toFixed(2)
         : parseFloat(exp.price).toFixed(2);
+      const discLabel = exp.discount_label ? ` (${exp.discount_label})` : '';
       if (exp.slug === 'cooking-class') {
         ccData.typeId = exp.id;
         ccData.price = parseFloat(exp.price);
         ccData.discountPct = parseFloat(exp.discount_pct) || 0;
-        document.getElementById('cc-price').textContent = `€${price} / persona${exp.discount_label ? ' (' + exp.discount_label + ')' : ''}`;
+        document.getElementById('cc-price').textContent = `€${unitPrice} / persona${discLabel}`;
         document.getElementById('cc-max-guests').textContent = `${exp.max_guests} persone`;
         document.getElementById('cc-guests').max = exp.max_guests;
       }
@@ -687,12 +690,21 @@ async function loadExpTypes() {
         psData.typeId = exp.id;
         psData.price = parseFloat(exp.price);
         psData.discountPct = parseFloat(exp.discount_pct) || 0;
-        document.getElementById('ps-price').textContent = `€${price} / persona${exp.discount_label ? ' (' + exp.discount_label + ')' : ''}`;
+        document.getElementById('ps-price').textContent = `€${unitPrice} / persona${discLabel}`;
         document.getElementById('ps-max-guests').textContent = `${exp.max_guests} persone`;
         document.getElementById('ps-guests').max = exp.max_guests;
       }
     });
-  } catch(e) { console.log('Could not load exp types', e); }
+    console.log('✅ Experience types loaded', ccData.typeId, psData.typeId);
+  } catch(e) {
+    console.error('loadExpTypes error:', e);
+    // Show warning on both submit buttons
+    ['cc-submit-label','ps-submit-label'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = 'Ricarica la pagina';
+    });
+    showToast('Errore connessione server. Ricarica la pagina.', 'error');
+  }
 }
 loadExpTypes();
 
@@ -796,6 +808,13 @@ function validateForm(prefix, dataObj) {
 
 async function submitForm(prefix, dataObj, slug) {
   if (!validateForm(prefix, dataObj)) return;
+
+  // Guard: typeId must be loaded from backend
+  if (!dataObj.typeId) {
+    showToast('Errore: impossibile caricare i dati dell\'esperienza. Ricarica la pagina.', 'error');
+    return;
+  }
+
   const btn = document.getElementById(`${prefix}-submit`);
   const lbl = document.getElementById(`${prefix}-submit-label`);
   const spinner = document.getElementById(`${prefix}-spinner`);
@@ -819,8 +838,11 @@ async function submitForm(prefix, dataObj, slug) {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     });
     const d = await r.json();
-    if (!r.ok) throw new Error(d.error || 'Errore');
-    // Redirect to Stripe
+    if (!r.ok) {
+      if (d.error === 'not_enough_spots') throw new Error(`Solo ${d.spotsLeft} posti disponibili per questa sessione`);
+      throw new Error(d.error || 'Errore del server');
+    }
+    if (!d.checkoutUrl) throw new Error('URL pagamento non ricevuto');
     window.location.href = d.checkoutUrl;
   } catch(err) {
     showToast('Errore: ' + err.message, 'error');
