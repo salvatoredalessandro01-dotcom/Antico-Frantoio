@@ -1488,6 +1488,7 @@ async function sendExpCancellationEmail(booking, expType, lang, refunded) {
   const typeName = isIT ? expType.name_it : expType.name_en;
   const dateDisp = formatDateLong(booking.booking_date, lang);
 
+  // Email to customer
   await sendEmail({
     to: booking.email, toName: booking.name,
     subject: isIT
@@ -1506,6 +1507,30 @@ async function sendExpCancellationEmail(booking, expType, lang, refunded) {
       </div>
     `),
   });
+
+  // Email to restaurant
+  const restaurantEmail = await getSetting('restaurant_email');
+  if (restaurantEmail?.trim()) {
+    await sendEmail({
+      to: restaurantEmail.trim(), toName: 'Antico Frantoio',
+      subject: `❌ Cancellazione esperienza — ${booking.name} — ${expType.name_it} — ${formatDateDisplay(booking.booking_date)}`,
+      html: emailWrapper(`
+        <div style="background:#A3303015;border-radius:4px;padding:12px;margin-bottom:16px;text-align:center;color:#A33030">
+          <strong>Esperienza cancellata</strong>
+        </div>
+        <table style="width:100%;border-collapse:collapse;margin:20px 0">
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;width:130px">Esperienza</td><td style="padding:7px 0;font-size:.9rem"><strong>${expType.name_it}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Nome</td><td style="padding:7px 0;font-size:.9rem"><strong>${booking.name}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Email</td><td style="padding:7px 0;font-size:.9rem"><strong>${booking.email}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Data</td><td style="padding:7px 0;font-size:.9rem"><strong>${formatDateDisplay(booking.booking_date)}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Orario</td><td style="padding:7px 0;font-size:.9rem"><strong>${booking.booking_time.substring(0,5)}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Partecipanti</td><td style="padding:7px 0;font-size:.9rem"><strong>${booking.guests}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Importo</td><td style="padding:7px 0;font-size:.9rem"><strong>€${parseFloat(booking.amount_paid).toFixed(2)}</strong></td></tr>
+          <tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Rimborso</td><td style="padding:7px 0;font-size:.9rem"><strong>${refunded ? '✅ Rimborsato' : '❌ Non rimborsato'}</strong></td></tr>
+        </table>
+      `),
+    });
+  }
 }
 
 // ── PUBLIC: GET experience types + availability ─────────────────
