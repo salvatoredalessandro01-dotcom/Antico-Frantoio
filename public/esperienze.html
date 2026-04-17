@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Esperienze — Antico Frantoio, Sorrento</title>
+<meta name="description" content="Cooking Class e Pizza School all'Antico Frantoio di Sorrento. Prenota la tua esperienza autentica con vista sul Golfo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --olive:#5C7A2E;--olive-lt:#8FAF54;--olive-dk:#3B5218;
+  --cream:#FDFAF6;--cream2:#F5EFE6;--cream3:#EDE3D5;
+  --dark:#1C1410;--gray:#5A5040;--gray-lt:#D8CCBC;--gray-xlt:#EDE8E0;
+  --white:#FFFFFF;--red:#B03030;
+  --radius:6px;--radius-lg:12px;--radius-xl:20px;
+  --transition:.25s cubic-bezier(.4,0,.2,1);
+  font-family:'Lato',sans-serif;font-size:17px;
+}
+@media(prefers-color-scheme:dark){
+  body{background:#1E2318!important;color:#EDE8E0!important}
+  .site-header{background:rgba(18,22,14,.97)!important;border-bottom-color:rgba(143,175,84,.2)!important}
+  .header-logo{color:#8FAF54!important}
+  .header-nav a{color:rgba(255,255,255,.6)!important}
+  .header-nav a:hover,.header-nav a.active{color:#8FAF54!important}
+  .mobile-menu-btn{color:#EDE8E0!important}
+  .mobile-drawer-panel{background:#161C10!important;border-left-color:rgba(143,175,84,.3)!important}
+  .mobile-drawer-panel a{color:rgba(255,255,255,.8)!important;border-bottom-color:rgba(255,255,255,.08)!important}
+  .mobile-drawer-panel a:hover,.drawer-cta{color:#8FAF54!important}
+  .exp-section{background:#1E2318!important}
+  .exp-section.alt{background:#161C10!important}
+  .booking-card{background:#161C10!important;border-color:rgba(255,255,255,.08)!important}
+  .form-section-title{color:#EDE8E0!important;border-bottom-color:rgba(255,255,255,.08)!important}
+  .slot-btn{background:#1E2318!important;color:#EDE8E0!important;border-color:rgba(255,255,255,.12)!important}
+  .slot-btn:hover:not(:disabled){border-color:#8FAF54!important;color:#8FAF54!important}
+  .slot-btn.selected{background:var(--olive)!important;color:#fff!important}
+  input,select,textarea{background:#1E2318!important;color:#EDE8E0!important;border-color:rgba(255,255,255,.15)!important}
+  input:focus,select:focus,textarea:focus{border-color:#8FAF54!important}
+  .summary-box{background:#1E2318!important;border-color:rgba(255,255,255,.08)!important}
+  .policy-box{background:rgba(92,122,46,.12)!important;border-color:rgba(143,175,84,.3)!important;color:#8FAF54!important}
+  .faq-item{border-bottom-color:rgba(255,255,255,.08)!important}
+  .faq-q{color:#EDE8E0!important}
+  .faq-a{color:rgba(237,232,224,.7)!important}
+  .reviews-band{background:#161C10!important}
+  .review-card{background:#1E2318!important;border-color:rgba(255,255,255,.06)!important}
+  .review-text{color:rgba(237,232,224,.8)!important}
+  .review-author{color:#EDE8E0!important}
+  footer{background:#0E1209!important}
+  .footer-links a{color:rgba(255,255,255,.65)!important}
+}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--dark);min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;font-family:'Lato',sans-serif}
+input,select,textarea{font-family:'Lato',sans-serif}
+
+/* HEADER */
+.site-header{position:sticky;top:0;z-index:100;background:rgba(30,35,24,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(143,175,84,.2);padding:.75rem 0}
+.header-inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.header-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:400;color:#8FAF54;letter-spacing:.05em}
+.header-logo em{font-style:italic}
+.header-nav{display:flex;gap:1.5rem;align-items:center}
+.header-nav a{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.6);transition:color var(--transition)}
+.header-nav a:hover,.header-nav a.active{color:#8FAF54}
+@media(max-width:768px){.header-nav{display:none}}
+.lang-link{font-size:.7rem;letter-spacing:.1em;padding:.3rem .85rem;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:4px;color:#EDE8E0;font-weight:700;transition:all var(--transition)}
+.lang-link:hover{background:rgba(143,175,84,.25);border-color:rgba(143,175,84,.5);color:#8FAF54}
+.mobile-menu-btn{display:none;background:none;color:#EDE8E0;font-size:1.6rem;cursor:pointer;border:none;padding:.2rem .4rem;line-height:1}
+@media(max-width:768px){.mobile-menu-btn{display:block}}
+.mobile-drawer{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6)}
+.mobile-drawer.open{display:block}
+.mobile-drawer-panel{position:absolute;top:0;right:0;bottom:0;width:min(75vw,280px);background:#161C10;border-left:1px solid rgba(143,175,84,.3);display:flex;flex-direction:column;padding:1.5rem;animation:drawerIn .22s ease}
+@keyframes drawerIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.drawer-close{align-self:flex-end;background:none;border:none;color:rgba(255,255,255,.65);font-size:1.4rem;cursor:pointer;margin-bottom:1.5rem;padding:.25rem}
+.mobile-drawer-panel a{display:block;padding:.9rem 0;font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.75);border-bottom:1px solid rgba(255,255,255,.1);transition:color .2s}
+.mobile-drawer-panel a:hover{color:#8FAF54}
+.drawer-cta{color:#8FAF54!important}
+
+/* HERO */
+.exp-hero{background:linear-gradient(160deg,#1E2318 0%,#2C3520 100%);padding:5rem 1.5rem 4rem;text-align:center;position:relative;overflow:hidden}
+.exp-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(143,175,84,.2),transparent 70%);pointer-events:none}
+.hero-eyebrow{font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;color:#8FAF54;font-weight:700;display:block;margin-bottom:1.1rem}
+.exp-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.4rem,6vw,4rem);font-weight:400;color:#FDFAF6;letter-spacing:.02em;line-height:1.05;margin-bottom:.75rem}
+.exp-hero h1 em{font-style:italic;color:#8FAF54}
+.exp-hero-sub{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(1rem,2vw,1.2rem);color:rgba(253,250,246,.65);margin-bottom:2rem}
+.hero-badges{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+.hero-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem 1rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;font-size:.75rem;color:rgba(255,255,255,.75)}
+.hero-divider{width:40px;height:2px;background:linear-gradient(90deg,transparent,#8FAF54,transparent);margin:2rem auto 0;border-radius:2px}
+
+/* LAYOUT */
+.container{max-width:1100px;margin:0 auto;padding:0 1.5rem}
+.section-tag{font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--olive);font-weight:700;margin-bottom:.5rem;display:block}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,2.8rem);font-weight:400;color:var(--dark);line-height:1.1;margin-bottom:.6rem}
+.section-rule{width:2rem;height:2px;background:var(--olive);border-radius:2px;margin-bottom:2rem}
+.section-rule.center{margin-left:auto;margin-right:auto}
+
+/* EXPERIENCE SECTIONS */
+.exp-section{padding:clamp(3.5rem,7vw,6rem) 0;background:var(--white)}
+.exp-section.alt{background:#FAFAF8}
+.exp-split{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+@media(max-width:768px){.exp-split{grid-template-columns:1fr;gap:2.5rem}}
+.exp-split.reverse{direction:rtl}
+.exp-split.reverse>*{direction:ltr}
+
+/* PHOTO GRID */
+.exp-photo-main{border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.12);margin-bottom:1rem}
+.exp-photo-main img{width:100%;height:320px;object-fit:cover;display:block}
+.exp-photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.exp-photo-grid img{width:100%;height:140px;object-fit:cover;border-radius:var(--radius);display:block}
+
+/* EXP INFO */
+.exp-info{padding-top:.5rem}
+.exp-meta{display:grid;grid-template-columns:1fr 1fr;gap:.75rem 1.5rem;margin:1.5rem 0;padding:1.25rem;background:var(--cream2);border-radius:var(--radius)}
+.exp-meta-label{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--olive);font-weight:700;display:block;margin-bottom:.2rem}
+.exp-meta-value{font-size:.9rem;color:var(--dark);font-weight:400;line-height:1.4}
+.exp-includes{margin-bottom:1.5rem}
+.exp-includes-title{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--dark);margin-bottom:.65rem}
+.exp-includes ul{list-style:none;display:flex;flex-direction:column;gap:.35rem}
+.exp-includes li{font-size:.9rem;color:var(--gray);display:flex;align-items:flex-start;gap:.6rem;line-height:1.5;font-weight:300}
+.exp-includes li::before{content:'✓';color:var(--olive);font-weight:700;flex-shrink:0}
+.enquiry-note{font-size:.82rem;color:var(--gray);font-style:italic;margin-top:1rem;padding:.75rem 1rem;border-left:3px solid var(--olive);background:rgba(92,122,46,.05);border-radius:0 var(--radius) var(--radius) 0;line-height:1.6}
+.enquiry-note a{color:var(--olive);text-decoration:underline}
+
+/* BOOKING CARD */
+.booking-card{background:var(--white);border:1px solid var(--gray-xlt);border-radius:var(--radius-xl);padding:2.5rem;box-shadow:0 8px 32px rgba(0,0,0,.08)}
+.booking-card-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:400;color:var(--dark);margin-bottom:.3rem}
+.booking-card-sub{font-size:.85rem;color:var(--gray);margin-bottom:1.75rem;font-weight:300}
+.form-section-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:400;color:var(--dark);margin:1.5rem 0 .85rem;padding-bottom:.5rem;border-bottom:1px solid var(--gray-xlt);display:flex;align-items:center;gap:.5rem}
+.form-section-title::before{content:'';width:3px;height:1em;background:var(--olive);border-radius:2px;display:inline-block}
+.form-section-title:first-of-type{margin-top:0}
+.form-group{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+@media(max-width:500px){.form-row{grid-template-columns:1fr}}
+label{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gray);font-weight:700}
+label .req,.req{color:var(--olive)}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=number],select,textarea{width:100%;padding:.8rem 1rem;border:1.5px solid var(--gray-xlt);border-radius:var(--radius);background:var(--white);color:var(--dark);font-size:1rem;font-weight:300;transition:border-color var(--transition),box-shadow var(--transition);appearance:none;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--olive);box-shadow:0 0 0 3px rgba(92,122,46,.12)}
+input.error,select.error{border-color:var(--red)}
+.field-error{font-size:.72rem;color:var(--red);margin-top:.2rem}
+textarea{resize:vertical;min-height:80px}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A6A5A' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
+.phone-row{display:grid;grid-template-columns:6.5rem 1fr;gap:.5rem}
+
+/* SLOTS */
+.slots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(6rem,1fr));gap:.5rem;margin-top:.5rem}
+.slot-btn{padding:.65rem .5rem;border:1.5px solid var(--gray-xlt);border-radius:var(--radius);background:var(--white);color:var(--dark);font-size:.88rem;font-weight:400;transition:all var(--transition);text-align:center;cursor:pointer}
+.slot-btn:hover:not(:disabled){border-color:var(--olive);color:var(--olive);background:rgba(92,122,46,.05)}
+.slot-btn.selected{background:var(--olive);color:#fff;border-color:var(--olive);box-shadow:0 4px 12px rgba(92,122,46,.3)}
+.slot-btn:disabled{opacity:.3;cursor:not-allowed}
+.spots-badge{display:inline-block;font-size:.68rem;font-weight:700;padding:.15rem .45rem;border-radius:10px;margin-left:.3rem}
+.spots-badge.ok{background:#e8f3ec;color:#2A5C40}
+.spots-badge.low{background:rgba(176,48,48,.1);color:var(--red)}
+
+/* SUMMARY + POLICY */
+.summary-box{background:var(--cream2);border-radius:var(--radius);padding:1.1rem 1.25rem;margin:1.1rem 0;border:1px solid var(--gray-xlt)}
+.summary-row{display:flex;justify-content:space-between;align-items:baseline;padding:.4rem 0;border-bottom:1px solid var(--gray-xlt);font-size:.88rem}
+.summary-row:last-child{border-bottom:none;font-weight:700;font-size:1rem;padding-top:.6rem}
+.summary-label{color:var(--gray);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.policy-box{background:rgba(92,122,46,.07);border:1px solid rgba(92,122,46,.25);border-radius:var(--radius);padding:.9rem 1rem;font-size:.82rem;color:var(--olive-dk);line-height:1.6;margin:1rem 0;font-weight:400}
+.policy-box strong{font-weight:700}
+.gdpr-row{background:rgba(92,122,46,.05);border:1px solid rgba(92,122,46,.2);border-radius:var(--radius);padding:.85rem 1rem;font-size:.82rem;color:var(--dark);line-height:1.6;margin:1rem 0}
+.gdpr-row a{color:var(--olive);text-decoration:underline}
+.check-row{display:flex;align-items:flex-start;gap:.75rem;cursor:pointer}
+.check-row input[type=checkbox]{width:1.1rem;height:1.1rem;accent-color:var(--olive);flex-shrink:0;margin-top:.1rem}
+.btn-primary{width:100%;padding:1.1rem;background:var(--olive);color:#fff;font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;font-weight:700;border-radius:var(--radius);transition:all var(--transition);display:flex;align-items:center;justify-content:center;gap:.75rem;box-shadow:0 4px 16px rgba(92,122,46,.3);border:none;cursor:pointer}
+.btn-primary:hover{background:var(--olive-dk);transform:translateY(-1px);box-shadow:0 8px 24px rgba(92,122,46,.4)}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.loading-spinner{width:1rem;height:1rem;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* CONFIRMATION / CANCELLATION */
+.confirm-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:1rem}
+.confirm-overlay.open{display:flex}
+.confirm-modal{background:var(--white);border-radius:var(--radius-xl);padding:3rem;max-width:520px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.confirm-icon{width:4rem;height:4rem;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:1.75rem}
+.confirm-icon.success{background:rgba(42,92,64,.1)}
+.confirm-icon.error{background:rgba(176,48,48,.1)}
+.confirm-modal h2{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:400;margin-bottom:.5rem}
+.confirm-modal p{color:var(--gray);font-size:.92rem;line-height:1.7;margin-bottom:1.5rem;font-weight:300}
+.btn-secondary{padding:.75rem 2rem;background:transparent;color:var(--dark);border:1.5px solid var(--gray-lt);font-size:.78rem;letter-spacing:.1em;border-radius:var(--radius);transition:all var(--transition);cursor:pointer;font-family:'Lato',sans-serif}
+.btn-secondary:hover{border-color:var(--olive);color:var(--olive)}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:999;background:#1C1410;color:#fff;padding:.75rem 1.25rem;border-radius:var(--radius-lg);font-size:.82rem;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateY(4rem);opacity:0;transition:all .3s ease;pointer-events:none;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-left:3px solid var(--olive)}
+.toast.error{border-left:3px solid var(--red)}
+
+/* WHAT YOU LEARN */
+.learn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:2.5rem}
+@media(max-width:768px){.learn-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.learn-grid{grid-template-columns:1fr}}
+.learn-item{padding:1.4rem;background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--gray-xlt)}
+.learn-step{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--olive);margin-bottom:.4rem;display:block}
+.learn-item h4{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:400;color:var(--dark);margin-bottom:.4rem}
+.learn-item p{font-size:.85rem;color:var(--gray);line-height:1.7;font-weight:300}
+
+/* REVIEWS */
+.reviews-band{background:#FAFAF8;border-top:1px solid var(--gray-xlt);border-bottom:1px solid var(--gray-xlt);padding:clamp(3rem,6vw,5rem) 0}
+.reviews-header{text-align:center;margin-bottom:2.5rem}
+.rating-big{font-family:'Playfair Display',serif;font-size:3.5rem;font-weight:400;color:var(--olive);line-height:1}
+.rating-stars{color:#F5A623;font-size:1.2rem;margin:.25rem 0}
+.rating-sub{font-size:.82rem;color:var(--gray);font-weight:300}
+.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+@media(max-width:768px){.reviews-grid{grid-template-columns:1fr}}
+.review-card{padding:1.5rem;border:1px solid var(--gray-xlt);border-radius:var(--radius-lg);background:var(--white)}
+.review-stars{color:#F5A623;font-size:.9rem;margin-bottom:.7rem}
+.review-text{font-size:.9rem;color:var(--gray);line-height:1.75;font-weight:300;margin-bottom:.85rem;font-style:italic}
+.review-author{font-size:.78rem;font-weight:700;color:var(--dark)}
+.review-source{font-size:.7rem;color:var(--gray);margin-top:.1rem}
+
+/* FAQ */
+.faq-list{margin-top:2rem;max-width:720px;margin-left:auto;margin-right:auto}
+.faq-item{border-bottom:1px solid var(--gray-xlt);cursor:pointer}
+.faq-q{font-size:1rem;font-weight:700;color:var(--dark);display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1.25rem 0;user-select:none}
+.faq-arrow{color:var(--olive);font-size:1.2rem;transition:transform var(--transition);flex-shrink:0}
+.faq-item.open .faq-arrow{transform:rotate(180deg)}
+.faq-a{font-size:.92rem;color:var(--gray);line-height:1.8;font-weight:300;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s ease}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:1.1rem}
+
+/* CTA BAND */
+.cta-band{background:linear-gradient(160deg,#1E2318 0%,#2C3520 100%);padding:clamp(3.5rem,7vw,6rem) 0;text-align:center}
+.cta-band h2{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:400;color:#FDFAF6;margin-bottom:.75rem}
+.cta-band p{font-size:1rem;color:rgba(253,250,246,.6);margin-bottom:0;font-weight:300;max-width:500px;margin-left:auto;margin-right:auto}
+
+/* FOOTER */
+footer{background:#0E1209;color:rgba(255,255,255,.5);padding:3rem 0;text-align:center;font-size:.82rem;line-height:2.2}
+.footer-links{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:.75rem}
+.footer-links a{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.55);transition:color var(--transition)}
+.footer-links a:hover{color:#8FAF54}
+footer p{font-size:.7rem;color:rgba(255,255,255,.3)}
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="header-logo">Antico <em>Frantoio</em></a>
+    <nav class="header-nav">
+      <a href="/">Home</a>
+      <a href="/menu.html">Menu</a>
+      <a href="/#reservation">Prenota Ora</a>
+      <a href="/esperienze.html" class="active">Esperienze</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <a href="/experiences.html" class="lang-link">&#127468;&#127463; EN</a>
+      <button class="mobile-menu-btn" onclick="openDrawer()">&#9776;</button>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE DRAWER -->
+<div class="mobile-drawer" id="mobile-drawer" onclick="if(event.target===this)closeDrawer()">
+  <div class="mobile-drawer-panel">
+    <button class="drawer-close" onclick="closeDrawer()">&#x2715;</button>
+    <a href="/">Home</a>
+    <a href="/#reservation" class="drawer-cta">Prenota Ora</a>
+    <a href="/menu.html">Menu</a>
+    <a href="/gallery.html">Galleria</a>
+    <a href="/esperienze.html">Esperienze</a>
+    <a href="/experiences.html">&#127468;&#127463; English</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="exp-hero">
+  <span class="hero-eyebrow">Via Casarlano 5 &middot; Sorrento</span>
+  <h1>Cooking Class &amp;<br><em>Pizza School</em></h1>
+  <p class="exp-hero-sub">Un'esperienza autentica tra i sapori della tradizione campana</p>
+  <div class="hero-badges">
+    <span class="hero-badge">&#11088; 4.9 su Tripadvisor</span>
+    <span class="hero-badge">&#127941; Badge of Excellence</span>
+    <span class="hero-badge">&#128104;&#8205;&#127859; 100% consigliato</span>
+    <span class="hero-badge">&#127754; Vista sul Golfo</span>
+  </div>
+  <div class="hero-divider"></div>
+</div>
+
+<!-- ═══════════════ COOKING CLASS ═══════════════ -->
+<section class="exp-section" id="cooking-class">
+  <div class="container">
+    <div class="exp-split">
+
+      <!-- LEFT: photos -->
+      <div>
+        <div class="exp-photo-main">
+          <img src="/public/img/gallery/cookingclass-hero.jpg" alt="Cooking Class Antico Frantoio" loading="lazy" onerror="this.style.height='280px';this.style.background='#EDE8E0'">
+        </div>
+        <div class="exp-photo-grid">
+          <img src="/public/img/gallery/cookingclass-1.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+          <img src="/public/img/gallery/cookingclass-2.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+          <img src="/public/img/gallery/cookingclass-3.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+          <img src="/public/img/gallery/cookingclass-4.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+        </div>
+      </div>
+
+      <!-- RIGHT: info + booking form -->
+      <div class="exp-info">
+        <span class="section-tag">Esperienza culinaria</span>
+        <h2 class="section-title">Cooking <em style="font-family:'Playfair Display',serif;font-style:italic">Class</em></h2>
+        <div class="section-rule"></div>
+
+        <div class="exp-meta">
+          <div><span class="exp-meta-label">Durata</span><span class="exp-meta-value">4–4,5 ore</span></div>
+          <div><span class="exp-meta-label">Max partecipanti</span><span class="exp-meta-value" id="cc-max-guests">20 persone</span></div>
+          <div><span class="exp-meta-label">Orario</span><span class="exp-meta-value" id="cc-times">18:30 (giornaliero)</span></div>
+          <div><span class="exp-meta-label">Prezzo</span><span class="exp-meta-value" id="cc-price">€75 / persona</span></div>
+        </div>
+
+        <div class="exp-includes">
+          <div class="exp-includes-title">Incluso</div>
+          <ul>
+            <li>Benvenuto con drink e degustazione olio EVO</li>
+            <li>Lezione pratica 100% hands-on</li>
+            <li>Pizza, gnocchi, ravioli, parmigiana, tiramisù</li>
+            <li>Limoncello &amp; marmellata di limoni artigianali</li>
+            <li>Pranzo/cena con i piatti preparati &amp; vino</li>
+          </ul>
+        </div>
+
+        <div class="enquiry-note">
+          Orari diversi? Scrivi a <a href="mailto:prenotazioni@anticofrantoiosorrento.it">prenotazioni@anticofrantoiosorrento.it</a>
+        </div>
+
+        <!-- BOOKING FORM - COOKING CLASS -->
+        <div class="booking-card" style="margin-top:2rem">
+          <div class="booking-card-title">Prenota la tua Cooking Class</div>
+          <div class="booking-card-sub">Pagamento completo richiesto. Rimborso 100% se cancelli entro le 20:00 del giorno precedente.</div>
+
+          <form id="form-cc" novalidate>
+            <div class="form-section-title">I tuoi dati</div>
+            <div class="form-group">
+              <label>Nome Completo <span class="req">*</span></label>
+              <input type="text" id="cc-name" required placeholder="Mario Rossi">
+              <span class="field-error" id="cc-name-err"></span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Email <span class="req">*</span></label>
+                <input type="email" id="cc-email" required placeholder="mario@esempio.it">
+                <span class="field-error" id="cc-email-err"></span>
+              </div>
+              <div class="form-group">
+                <label>Telefono <span class="req">*</span></label>
+                <div class="phone-row">
+                  <select id="cc-prefix">
+                    <option value="+39">&#127470;&#127481; +39</option>
+                    <option value="+1">&#127482;&#127480; +1</option>
+                    <option value="+44">&#127468;&#127463; +44</option>
+                    <option value="+33">&#127467;&#127479; +33</option>
+                    <option value="+49">&#127465;&#127466; +49</option>
+                    <option value="+34">&#127466;&#127480; +34</option>
+                  </select>
+                  <input type="tel" id="cc-phone" required placeholder="081 807 2200">
+                </div>
+                <span class="field-error" id="cc-phone-err"></span>
+              </div>
+            </div>
+
+            <div class="form-section-title">Dettagli esperienza</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Data <span class="req">*</span></label>
+                <input type="date" id="cc-date" required onchange="loadCCSlots()">
+                <span class="field-error" id="cc-date-err"></span>
+              </div>
+              <div class="form-group">
+                <label>Partecipanti <span class="req">*</span></label>
+                <input type="number" id="cc-guests" min="1" max="20" value="2" onchange="updateCCSummary()">
+                <span class="field-error" id="cc-guests-err"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Orario <span class="req">*</span></label>
+              <div class="slots-grid" id="cc-slots">
+                <div style="font-size:.85rem;color:var(--gray)">Seleziona prima una data</div>
+              </div>
+              <span class="field-error" id="cc-time-err"></span>
+            </div>
+
+            <div class="form-group">
+              <label>Note (allergie, richieste speciali)</label>
+              <textarea id="cc-notes" rows="2" placeholder="Es: allergia ai latticini, celiaci nel gruppo..."></textarea>
+            </div>
+
+            <!-- SUMMARY -->
+            <div class="summary-box" id="cc-summary" style="display:none">
+              <div class="summary-row"><span class="summary-label">Esperienza</span><span>Cooking Class</span></div>
+              <div class="summary-row"><span class="summary-label">Data</span><span id="cc-sum-date">—</span></div>
+              <div class="summary-row"><span class="summary-label">Orario</span><span id="cc-sum-time">—</span></div>
+              <div class="summary-row"><span class="summary-label">Partecipanti</span><span id="cc-sum-guests">—</span></div>
+              <div class="summary-row"><span class="summary-label">Totale</span><span id="cc-sum-total">—</span></div>
+            </div>
+
+            <!-- CANCELLATION POLICY -->
+            <div class="policy-box">
+              <strong>&#9888;&#65039; Politica di cancellazione:</strong> Rimborso 100% se cancelli entro le ore 20:00 del giorno precedente all'esperienza. Dopo tale orario non è previsto rimborso.
+            </div>
+
+            <!-- GDPR -->
+            <div class="gdpr-row">
+              <label class="check-row">
+                <input type="checkbox" id="cc-gdpr" required>
+                <span>Acconsento al trattamento dei dati personali ai sensi del GDPR. <a href="#">Privacy Policy</a> <span class="req">*</span></span>
+              </label>
+            </div>
+            <span class="field-error" id="cc-gdpr-err"></span>
+
+            <button type="submit" class="btn-primary" id="cc-submit" style="margin-top:1rem">
+              <span id="cc-submit-label">Procedi al Pagamento</span>
+              <div class="loading-spinner" id="cc-spinner"></div>
+            </button>
+          </form>
+        </div><!-- /booking-card -->
+      </div><!-- /exp-info -->
+    </div><!-- /exp-split -->
+  </div>
+</section>
+
+<!-- ═══════════════ PIZZA SCHOOL ═══════════════ -->
+<section class="exp-section alt" id="pizza-school">
+  <div class="container">
+    <div class="exp-split reverse">
+
+      <!-- RIGHT: photos (reversed) -->
+      <div>
+        <div class="exp-photo-main">
+          <img src="/public/img/gallery/pizzaschool-hero.jpg" alt="Pizza School Antico Frantoio" loading="lazy" onerror="this.style.height='280px';this.style.background='#EDE8E0'">
+        </div>
+        <div class="exp-photo-grid">
+          <img src="/public/img/gallery/pizzaschool-1.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+          <img src="/public/img/gallery/pizzaschool-2.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+          <img src="/public/img/gallery/pizzaschool-3.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+          <img src="/public/img/gallery/pizzaschool-4.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+        </div>
+      </div>
+
+      <!-- LEFT: info + booking form -->
+      <div class="exp-info">
+        <span class="section-tag">Scuola di pizza napoletana</span>
+        <h2 class="section-title">Pizza <em style="font-family:'Playfair Display',serif;font-style:italic">School</em></h2>
+        <div class="section-rule"></div>
+
+        <div class="exp-meta">
+          <div><span class="exp-meta-label">Durata</span><span class="exp-meta-value">2–3 ore</span></div>
+          <div><span class="exp-meta-label">Max partecipanti</span><span class="exp-meta-value" id="ps-max-guests">20 persone</span></div>
+          <div><span class="exp-meta-label">Orario</span><span class="exp-meta-value" id="ps-times">11:30 (giornaliero)</span></div>
+          <div><span class="exp-meta-label">Prezzo</span><span class="exp-meta-value" id="ps-price">€45 / persona</span></div>
+        </div>
+
+        <div class="exp-includes">
+          <div class="exp-includes-title">Incluso</div>
+          <ul>
+            <li>Drink di benvenuto</li>
+            <li>Lezione con pizzaiolo certificato Claudio</li>
+            <li>Tecniche napoletane: impasto, stesura, farcitura</li>
+            <li>Cottura nel forno a legna</li>
+            <li>La tua pizza + vino locale &amp; dessert</li>
+          </ul>
+        </div>
+
+        <div class="enquiry-note">
+          Orari diversi? Scrivi a <a href="mailto:prenotazioni@anticofrantoiosorrento.it">prenotazioni@anticofrantoiosorrento.it</a>
+        </div>
+
+        <!-- BOOKING FORM - PIZZA SCHOOL -->
+        <div class="booking-card" style="margin-top:2rem">
+          <div class="booking-card-title">Prenota la tua Pizza School</div>
+          <div class="booking-card-sub">Pagamento completo richiesto. Rimborso 100% se cancelli entro le 20:00 del giorno precedente.</div>
+
+          <form id="form-ps" novalidate>
+            <div class="form-section-title">I tuoi dati</div>
+            <div class="form-group">
+              <label>Nome Completo <span class="req">*</span></label>
+              <input type="text" id="ps-name" required placeholder="Mario Rossi">
+              <span class="field-error" id="ps-name-err"></span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Email <span class="req">*</span></label>
+                <input type="email" id="ps-email" required placeholder="mario@esempio.it">
+                <span class="field-error" id="ps-email-err"></span>
+              </div>
+              <div class="form-group">
+                <label>Telefono <span class="req">*</span></label>
+                <div class="phone-row">
+                  <select id="ps-prefix">
+                    <option value="+39">&#127470;&#127481; +39</option>
+                    <option value="+1">&#127482;&#127480; +1</option>
+                    <option value="+44">&#127468;&#127463; +44</option>
+                    <option value="+33">&#127467;&#127479; +33</option>
+                    <option value="+49">&#127465;&#127466; +49</option>
+                    <option value="+34">&#127466;&#127480; +34</option>
+                  </select>
+                  <input type="tel" id="ps-phone" required placeholder="081 807 2200">
+                </div>
+                <span class="field-error" id="ps-phone-err"></span>
+              </div>
+            </div>
+
+            <div class="form-section-title">Dettagli esperienza</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Data <span class="req">*</span></label>
+                <input type="date" id="ps-date" required onchange="loadPSSlots()">
+                <span class="field-error" id="ps-date-err"></span>
+              </div>
+              <div class="form-group">
+                <label>Partecipanti <span class="req">*</span></label>
+                <input type="number" id="ps-guests" min="1" max="20" value="2" onchange="updatePSSummary()">
+                <span class="field-error" id="ps-guests-err"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Orario <span class="req">*</span></label>
+              <div class="slots-grid" id="ps-slots">
+                <div style="font-size:.85rem;color:var(--gray)">Seleziona prima una data</div>
+              </div>
+              <span class="field-error" id="ps-time-err"></span>
+            </div>
+
+            <div class="form-group">
+              <label>Note (allergie, richieste speciali)</label>
+              <textarea id="ps-notes" rows="2" placeholder="Es: allergia al glutine, sedie per bambini..."></textarea>
+            </div>
+
+            <div class="summary-box" id="ps-summary" style="display:none">
+              <div class="summary-row"><span class="summary-label">Esperienza</span><span>Pizza School</span></div>
+              <div class="summary-row"><span class="summary-label">Data</span><span id="ps-sum-date">—</span></div>
+              <div class="summary-row"><span class="summary-label">Orario</span><span id="ps-sum-time">—</span></div>
+              <div class="summary-row"><span class="summary-label">Partecipanti</span><span id="ps-sum-guests">—</span></div>
+              <div class="summary-row"><span class="summary-label">Totale</span><span id="ps-sum-total">—</span></div>
+            </div>
+
+            <div class="policy-box">
+              <strong>&#9888;&#65039; Politica di cancellazione:</strong> Rimborso 100% se cancelli entro le ore 20:00 del giorno precedente all'esperienza. Dopo tale orario non è previsto rimborso.
+            </div>
+
+            <div class="gdpr-row">
+              <label class="check-row">
+                <input type="checkbox" id="ps-gdpr" required>
+                <span>Acconsento al trattamento dei dati personali ai sensi del GDPR. <a href="#">Privacy Policy</a> <span class="req">*</span></span>
+              </label>
+            </div>
+            <span class="field-error" id="ps-gdpr-err"></span>
+
+            <button type="submit" class="btn-primary" id="ps-submit" style="margin-top:1rem">
+              <span id="ps-submit-label">Procedi al Pagamento</span>
+              <div class="loading-spinner" id="ps-spinner"></div>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT YOU LEARN -->
+<section style="padding:clamp(3.5rem,7vw,6rem) 0;background:var(--cream2)">
+  <div class="container">
+    <div style="text-align:center">
+      <span class="section-tag">Il Programma</span>
+      <h2 class="section-title">Cosa imparerai</h2>
+      <div class="section-rule center"></div>
+    </div>
+    <div class="learn-grid">
+      <div class="learn-item"><span class="learn-step">01</span><h4>Pizza Napoletana</h4><p>Dall'impasto alla cottura nel forno a legna. I segreti di Claudio per una pizza perfetta.</p></div>
+      <div class="learn-item"><span class="learn-step">02</span><h4>Pasta Fresca</h4><p>Gnocchi alla sorrentina e Ravioli Capresi fatti a mano, dalla sfoglia al ripieno.</p></div>
+      <div class="learn-item"><span class="learn-step">03</span><h4>Parmigiana</h4><p>Il grande classico campano: melanzane, pomodoro, mozzarella e basilico nel forno a legna.</p></div>
+      <div class="learn-item"><span class="learn-step">04</span><h4>Tiramisù</h4><p>La versione classica al caffè e quella al limoncello — specialità sorrentina.</p></div>
+      <div class="learn-item"><span class="learn-step">05</span><h4>Limoncello</h4><p>I limoni di Sorrento sono famosi nel mondo. Scopri come si produce il vero limoncello.</p></div>
+      <div class="learn-item"><span class="learn-step">06</span><h4>Vista &amp; Degustazione</h4><p>Gusta tutto ciò che hai preparato sulla terrazza con vista sul Golfo di Napoli. Vino incluso.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="reviews-band">
+  <div class="container">
+    <div class="reviews-header">
+      <span class="section-tag" style="display:block;text-align:center">Cosa dicono i nostri ospiti</span>
+      <div class="rating-big">4.9</div>
+      <div class="rating-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <div class="rating-sub">Oltre 73 recensioni verificate su Viator &amp; Tripadvisor</div>
+    </div>
+    <div class="reviews-grid">
+      <div class="review-card"><div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="review-text">"Mira e Claudio sono stati meravigliosi. Il cibo è incredibile, la vista mozzafiato. La migliore parte del nostro viaggio a Sorrento."</p><div class="review-author">Sarah M.</div><div class="review-source">Viator · Cooking Class</div></div>
+      <div class="review-card"><div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="review-text">"I ravioli erano la pasta più buona che abbia mai assaggiato. Ricette tutte 10/10. Tornerò sicuramente."</p><div class="review-author">Emma K.</div><div class="review-source">Tripadvisor · Cooking Class</div></div>
+      <div class="review-card"><div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="review-text">"Claudio è un insegnante coinvolgente e divertente. La nostra pizza nel forno a legna era perfetta. Vista incredibile sul golfo."</p><div class="review-author">James &amp; Laura T.</div><div class="review-source">Viator · Pizza School</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section style="padding:clamp(3.5rem,7vw,6rem) 0">
+  <div class="container">
+    <div style="text-align:center">
+      <span class="section-tag">Domande Frequenti</span>
+      <h2 class="section-title">Tutto quello che vuoi sapere</h2>
+      <div class="section-rule center"></div>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">È necessaria esperienza culinaria? <span class="faq-arrow">&#8964;</span></div><div class="faq-a">Assolutamente no. Le esperienze sono adatte a tutti i livelli. I nostri chef guidano ogni partecipante passo dopo passo.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Il pickup dall'hotel è disponibile? <span class="faq-arrow">&#8964;</span></div><div class="faq-a">Sì, su richiesta dagli hotel centrali di Sorrento. È possibile raggiungere autonomamente Via Casarlano 15, 80067 Sorrento (NA). Parcheggio disponibile.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">L'esperienza è adatta ai bambini? <span class="faq-arrow">&#8964;</span></div><div class="faq-a">Sì, le nostre esperienze sono a misura di famiglia. La venue è accessibile a sedie a rotelle e passeggini.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Come funziona la cancellazione e il rimborso? <span class="faq-arrow">&#8964;</span></div><div class="faq-a">Rimborso 100% se cancelli entro le ore 20:00 del giorno precedente all'esperienza. Riceverai il rimborso entro 5-10 giorni lavorativi. Dopo tale termine non è previsto rimborso.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Ho allergie alimentari — posso partecipare? <span class="faq-arrow">&#8964;</span></div><div class="faq-a">Comunica eventuali allergie o intolleranze nel campo note durante la prenotazione. Il nostro team farà di tutto per adattare l'esperienza.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Posso prenotare per un gruppo privato? <span class="faq-arrow">&#8964;</span></div><div class="faq-a">Sì! Per classi private o gruppi esclusivi scrivici a prenotazioni@anticofrantoiosorrento.it. Organizziamo sessioni su misura.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<div class="cta-band">
+  <div class="container">
+    <h2>Pronto a entrare in cucina?</h2>
+    <p>Prenota direttamente qui sopra. I posti sono limitati a 20 partecipanti per classe.</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div style="max-width:1100px;margin:0 auto;padding:0 1.5rem">
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/#reservation">Prenota Ora</a>
+      <a href="/menu.html">Menu</a>
+      <a href="/gallery.html">Galleria</a>
+      <a href="/esperienze.html">Esperienze</a>
+      <a href="tel:+390818072200">+39 081 807 22 00</a>
+    </div>
+    <p>&copy; 2025 Antico Frantoio &middot; Tree Legs and More S.r.l. &middot; P.IVA 10428621212 &middot; Via degli Aranci 33, 80067 Sorrento (NA)</p>
+  </div>
+</footer>
+
+<!-- CONFIRMATION MODAL -->
+<div class="confirm-overlay" id="confirm-modal">
+  <div class="confirm-modal">
+    <div class="confirm-icon success" id="confirm-icon">&#x2713;</div>
+    <h2 id="confirm-title">Prenotazione Confermata</h2>
+    <p id="confirm-body">La tua esperienza è confermata. Riceverai una email di conferma a breve.</p>
+    <button class="btn-secondary" onclick="closeConfirm()">Chiudi</button>
+  </div>
+</div>
+
+<script>
+const API = 'https://antico-frantoio-api.onrender.com';
+let ccData = { typeId: null, sessionId: null, time: null, price: 0, discountPct: 0 };
+let psData = { typeId: null, sessionId: null, time: null, price: 0, discountPct: 0 };
+
+// Set date min/max
+function initDateInputs() {
+  const today = new Date().toISOString().split('T')[0];
+  const max = new Date(); max.setMonth(max.getMonth()+6);
+  ['cc-date','ps-date'].forEach(id => {
+    const el = document.getElementById(id);
+    el.min = today;
+    el.max = max.toISOString().split('T')[0];
+  });
+}
+initDateInputs();
+
+// Load experience types from backend
+async function loadExpTypes() {
+  try {
+    const r = await fetch(`${API}/api/experiences`);
+    const d = await r.json();
+    d.experiences.forEach(exp => {
+      const price = exp.discount_pct > 0
+        ? (exp.price * (1 - exp.discount_pct/100)).toFixed(2)
+        : parseFloat(exp.price).toFixed(2);
+      if (exp.slug === 'cooking-class') {
+        ccData.typeId = exp.id;
+        ccData.price = parseFloat(exp.price);
+        ccData.discountPct = parseFloat(exp.discount_pct) || 0;
+        document.getElementById('cc-price').textContent = `€${price} / persona${exp.discount_label ? ' (' + exp.discount_label + ')' : ''}`;
+        document.getElementById('cc-max-guests').textContent = `${exp.max_guests} persone`;
+        document.getElementById('cc-guests').max = exp.max_guests;
+      }
+      if (exp.slug === 'pizza-school') {
+        psData.typeId = exp.id;
+        psData.price = parseFloat(exp.price);
+        psData.discountPct = parseFloat(exp.discount_pct) || 0;
+        document.getElementById('ps-price').textContent = `€${price} / persona${exp.discount_label ? ' (' + exp.discount_label + ')' : ''}`;
+        document.getElementById('ps-max-guests').textContent = `${exp.max_guests} persone`;
+        document.getElementById('ps-guests').max = exp.max_guests;
+      }
+    });
+  } catch(e) { console.log('Could not load exp types', e); }
+}
+loadExpTypes();
+
+async function loadSlots(date, typeId, gridId, dataObj, updateSummaryFn) {
+  const grid = document.getElementById(gridId);
+  if (!date || !typeId) { grid.innerHTML = '<div style="font-size:.85rem;color:var(--gray)">Seleziona prima una data</div>'; return; }
+  grid.innerHTML = '<div style="font-size:.85rem;color:var(--gray)">&#8987; Verifica disponibilità...</div>';
+  dataObj.time = null; dataObj.sessionId = null;
+  try {
+    const r = await fetch(`${API}/api/experiences/availability?date=${date}`);
+    const d = await r.json();
+    const slug = typeId === ccData.typeId ? 'cooking-class' : 'pizza-school';
+    const expAvail = d.availability?.[slug];
+    if (!expAvail || !expAvail.sessions?.length) {
+      grid.innerHTML = '<div style="font-size:.85rem;color:var(--red)">Nessuna sessione disponibile per questa data</div>';
+      return;
+    }
+    // Update times label
+    const timesEl = document.getElementById(slug === 'cooking-class' ? 'cc-times' : 'ps-times');
+    if (timesEl) timesEl.textContent = expAvail.sessions.map(s => s.time).join(', ');
+
+    grid.innerHTML = '';
+    expAvail.sessions.forEach(s => {
+      const guests = parseInt(document.getElementById(slug === 'cooking-class' ? 'cc-guests' : 'ps-guests').value) || 1;
+      const full = s.spots_left < guests;
+      const low = s.spots_left > 0 && s.spots_left <= 4;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'slot-btn' + (full ? '' : '');
+      btn.disabled = full;
+      btn.innerHTML = s.time + (full
+        ? ' <span class="spots-badge low">Esaurito</span>'
+        : (low ? ` <span class="spots-badge low">${s.spots_left} posti</span>` : ` <span class="spots-badge ok">${s.spots_left} posti</span>`));
+      btn.onclick = () => {
+        grid.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        dataObj.time = s.time;
+        dataObj.sessionId = s.session_id;
+        updateSummaryFn();
+      };
+      grid.appendChild(btn);
+    });
+  } catch(e) {
+    grid.innerHTML = '<div style="font-size:.85rem;color:var(--red)">Errore. Riprova.</div>';
+  }
+}
+
+function loadCCSlots() { loadSlots(document.getElementById('cc-date').value, ccData.typeId, 'cc-slots', ccData, updateCCSummary); }
+function loadPSSlots() { loadSlots(document.getElementById('ps-date').value, psData.typeId, 'ps-slots', psData, updatePSSummary); }
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'long', year:'numeric' });
+}
+function effectivePrice(data) {
+  return data.price * (1 - (data.discountPct||0)/100);
+}
+
+function updateSummary(prefix, dataObj, label) {
+  const date = document.getElementById(prefix+'-date').value;
+  const guests = parseInt(document.getElementById(prefix+'-guests').value) || 0;
+  const sum = document.getElementById(prefix+'-summary');
+  if (!date || !dataObj.time || !guests) { sum.style.display='none'; return; }
+  sum.style.display='';
+  document.getElementById(prefix+'-sum-date').textContent = fmtDate(date);
+  document.getElementById(prefix+'-sum-time').textContent = dataObj.time;
+  document.getElementById(prefix+'-sum-guests').textContent = guests + ' partecipanti';
+  const total = (effectivePrice(dataObj) * guests).toFixed(2);
+  document.getElementById(prefix+'-sum-total').textContent = `€${total}`;
+}
+function updateCCSummary() { updateSummary('cc', ccData, 'Cooking Class'); }
+function updatePSSummary() { updateSummary('ps', psData, 'Pizza School'); }
+
+function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+function validateForm(prefix, dataObj) {
+  let ok = true;
+  const set = (id, msg) => { document.getElementById(id).textContent = msg; if (msg) ok = false; };
+  const clr = (id) => { document.getElementById(id).textContent = ''; document.getElementById(id.replace('-err','')).classList.remove('error'); };
+  ['name','email','phone','date','guests'].forEach(f => clr(`${prefix}-${f}-err`));
+  document.getElementById(`${prefix}-time-err`).textContent = '';
+  document.getElementById(`${prefix}-gdpr-err`).textContent = '';
+
+  const name = document.getElementById(`${prefix}-name`).value.trim();
+  const email = document.getElementById(`${prefix}-email`).value.trim();
+  const phone = document.getElementById(`${prefix}-phone`).value.trim();
+  const date = document.getElementById(`${prefix}-date`).value;
+  const guests = parseInt(document.getElementById(`${prefix}-guests`).value);
+  const gdpr = document.getElementById(`${prefix}-gdpr`).checked;
+
+  if (!name || name.length < 2) { set(`${prefix}-name-err`, 'Inserisci il tuo nome'); document.getElementById(`${prefix}-name`).classList.add('error'); }
+  if (!validateEmail(email)) { set(`${prefix}-email-err`, 'Email non valida'); document.getElementById(`${prefix}-email`).classList.add('error'); }
+  if (!phone || phone.length < 5) { set(`${prefix}-phone-err`, 'Numero non valido'); document.getElementById(`${prefix}-phone`).classList.add('error'); }
+  if (!date) { set(`${prefix}-date-err`, 'Seleziona una data'); document.getElementById(`${prefix}-date`).classList.add('error'); }
+  if (!guests || guests < 1) { set(`${prefix}-guests-err`, 'Almeno 1 partecipante'); }
+  if (!dataObj.time) { document.getElementById(`${prefix}-time-err`).textContent = 'Seleziona un orario'; ok = false; }
+  if (!gdpr) { document.getElementById(`${prefix}-gdpr-err`).textContent = 'Il consenso è obbligatorio'; ok = false; }
+  return ok;
+}
+
+async function submitForm(prefix, dataObj, slug) {
+  if (!validateForm(prefix, dataObj)) return;
+  const btn = document.getElementById(`${prefix}-submit`);
+  const lbl = document.getElementById(`${prefix}-submit-label`);
+  const spinner = document.getElementById(`${prefix}-spinner`);
+  btn.disabled = true; spinner.style.display = 'block'; lbl.textContent = 'Elaborazione...';
+
+  const payload = {
+    experience_type_id: dataObj.typeId,
+    session_id: dataObj.sessionId,
+    name: document.getElementById(`${prefix}-name`).value.trim(),
+    email: document.getElementById(`${prefix}-email`).value.trim(),
+    phone: document.getElementById(`${prefix}-prefix`).value + ' ' + document.getElementById(`${prefix}-phone`).value.trim(),
+    date: document.getElementById(`${prefix}-date`).value,
+    time: dataObj.time,
+    guests: parseInt(document.getElementById(`${prefix}-guests`).value),
+    notes: document.getElementById(`${prefix}-notes`).value.trim(),
+    language: 'it',
+  };
+
+  try {
+    const r = await fetch(`${API}/api/experiences/create-payment`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Errore');
+    // Redirect to Stripe
+    window.location.href = d.checkoutUrl;
+  } catch(err) {
+    showToast('Errore: ' + err.message, 'error');
+    btn.disabled = false; spinner.style.display = 'none';
+    lbl.textContent = 'Procedi al Pagamento';
+  }
+}
+
+document.getElementById('form-cc').addEventListener('submit', e => { e.preventDefault(); submitForm('cc', ccData, 'cooking-class'); });
+document.getElementById('form-ps').addEventListener('submit', e => { e.preventDefault(); submitForm('ps', psData, 'pizza-school'); });
+
+// Handle Stripe success/cancel redirect
+async function handleStripeReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('exp_success');
+  const cancelled = params.get('exp_cancelled');
+
+  if (sessionId) {
+    try {
+      const r = await fetch(`${API}/api/experiences/confirm`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stripe_session_id: sessionId })
+      });
+      const d = await r.json();
+      if (d.success) {
+        document.getElementById('confirm-icon').className = 'confirm-icon success';
+        document.getElementById('confirm-icon').innerHTML = '&#x2713;';
+        document.getElementById('confirm-title').textContent = 'Esperienza Confermata!';
+        document.getElementById('confirm-body').textContent = 'Pagamento ricevuto. Riceverai una email di conferma con tutti i dettagli. Ti aspettiamo!';
+        document.getElementById('confirm-modal').classList.add('open');
+      }
+    } catch(e) { console.error(e); }
+    history.replaceState({}, '', window.location.pathname);
+  }
+
+  if (cancelled) {
+    showToast('Pagamento annullato. Puoi riprovare quando vuoi.', 'error');
+    history.replaceState({}, '', window.location.pathname);
+  }
+}
+handleStripeReturn();
+
+// Handle cancellation URL: /esperienze.html?cancel=ID
+async function handleCancelUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const cancelId = params.get('cancel');
+  if (!cancelId) return;
+
+  const r = await fetch(`${API}/api/experiences/booking/${cancelId}`);
+  const d = await r.json();
+  if (!r.ok || !d.booking) {
+    document.getElementById('confirm-icon').className = 'confirm-icon error';
+    document.getElementById('confirm-icon').innerHTML = '&#x2717;';
+    document.getElementById('confirm-title').textContent = 'Prenotazione non trovata';
+    document.getElementById('confirm-body').textContent = 'Non siamo riusciti a trovare questa prenotazione.';
+    document.getElementById('confirm-modal').classList.add('open');
+    return;
+  }
+  const b = d.booking;
+  if (b.status === 'cancelled') {
+    document.getElementById('confirm-icon').className = 'confirm-icon error';
+    document.getElementById('confirm-icon').innerHTML = '&#x2717;';
+    document.getElementById('confirm-title').textContent = 'Già cancellata';
+    document.getElementById('confirm-body').textContent = 'Questa prenotazione è già stata cancellata.';
+    document.getElementById('confirm-modal').classList.add('open');
+    return;
+  }
+  const typeName = b.name_it;
+  const dateStr = new Date(b.booking_date).toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' });
+  if (confirm(`Vuoi cancellare: ${typeName} del ${dateStr} alle ${b.booking_time.substring(0,5)} per ${b.guests} partecipanti?\n\nRimborso: €${b.amount_paid}`)) {
+    const cr = await fetch(`${API}/api/experiences/cancel/${cancelId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const cd = await cr.json();
+    document.getElementById('confirm-icon').className = cd.refunded ? 'confirm-icon success' : 'confirm-icon error';
+    document.getElementById('confirm-icon').innerHTML = cd.refunded ? '&#x2713;' : '&#9888;';
+    document.getElementById('confirm-title').textContent = 'Prenotazione cancellata';
+    document.getElementById('confirm-body').textContent = cd.refunded
+      ? `Rimborso di €${parseFloat(b.amount_paid).toFixed(2)} elaborato. Riceverai il rimborso entro 5-10 giorni lavorativi.`
+      : 'Prenotazione cancellata. Il termine per il rimborso gratuito era già passato.';
+    document.getElementById('confirm-modal').classList.add('open');
+  }
+  history.replaceState({}, '', window.location.pathname);
+}
+handleCancelUrl();
+
+function closeConfirm() { document.getElementById('confirm-modal').classList.remove('open'); }
+function toggleFaq(el) { const o = el.classList.contains('open'); document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open')); if(!o) el.classList.add('open'); }
+function openDrawer() { document.getElementById('mobile-drawer').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeDrawer() { document.getElementById('mobile-drawer').classList.remove('open'); document.body.style.overflow=''; }
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast'); t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+</script>
+</body>
+</html>
