@@ -1328,10 +1328,14 @@ async function renderExpBookingsTab(container) {
   const today = todayStr();
   const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
   const weekAgoStr = weekAgo.toISOString().split('T')[0];
+  const sixMonths = new Date(); sixMonths.setMonth(sixMonths.getMonth()+6);
+  const sixMonthsStr = sixMonths.toISOString().split('T')[0];
   container.innerHTML = `
     <div class="admin-filter-bar">
+      <label style="font-size:.78rem;color:var(--gray)">Data esperienza dal</label>
       <input type="date" id="exp-from" value="${weekAgoStr}" onchange="loadExpBookings()">
-      <input type="date" id="exp-to" value="${today}" onchange="loadExpBookings()">
+      <label style="font-size:.78rem;color:var(--gray)">al</label>
+      <input type="date" id="exp-to" value="${sixMonthsStr}" onchange="loadExpBookings()">
       <select id="exp-type-filter" onchange="loadExpBookings()" style="padding:.5rem .75rem;font-size:.8rem;width:auto">
         <option value="">Tutte le esperienze</option>
         <option value="cooking-class">Cooking Class</option>
