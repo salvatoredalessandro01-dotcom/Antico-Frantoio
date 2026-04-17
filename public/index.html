@@ -56,11 +56,11 @@ h2{font-size:clamp(2.4rem,4.5vw,3.6rem)}
 .logo{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:400;letter-spacing:.06em;color:var(--white);text-transform:uppercase;transition:color var(--transition)}
 .logo span{font-style:italic;font-weight:500}
 #site-header.scrolled .logo{color:var(--dark)}
-.nav-links{display:flex;gap:2rem;list-style:none}
-.nav-links a{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.8);transition:color var(--transition)}
-.nav-links a:hover{color:var(--terra-lt)}
-#site-header.scrolled .nav-links a{color:#1C1410}
-#site-header.scrolled .nav-links a:hover{color:var(--terra)}
+.nav-links{display:flex;gap:1.25rem;list-style:none;white-space:nowrap}
+.nav-links a{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--terra-lt);transition:color var(--transition);white-space:nowrap}
+.nav-links a:hover{color:#fff}
+#site-header.scrolled .nav-links a{color:var(--terra-dk)}
+#site-header.scrolled .nav-links a:hover{color:var(--terra-lt)}
 .lang-switcher{display:flex;gap:2px;background:rgba(255,255,255,.15);border-radius:20px;padding:2px;transition:background var(--transition)}
 #site-header.scrolled .lang-switcher{background:var(--cream2)}
 .lang-btn{padding:.25rem .7rem;border-radius:18px;font-size:.72rem;letter-spacing:.1em;font-weight:700;color:rgba(255,255,255,.65);background:transparent;transition:all var(--transition)}
@@ -706,11 +706,11 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
 <!-- HEADER -->
 <header id="site-header">
   <div class="header-inner">
-    <div class="logo">Antico <span>Frantoio</span></div>
     <nav aria-label="Main navigation">
       <ul class="nav-links">
         <li><a href="/" data-i18n="nav.home">Home</a></li>
         <li><a href="/menu.html" data-i18n="nav.menu">Menu</a></li>
+        <li><a href="/gallery.html" data-i18n="nav.gallery">Galleria</a></li>
         <li><a href="#reservation" data-i18n="nav.reserve">Prenota Ora</a></li>
         <li><a href="/esperienze.html" data-i18n="nav.experiences">Esperienze</a></li>
         <li><a href="#" data-i18n="nav.events">Eventi</a></li>
@@ -735,6 +735,7 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
     <a href="/" onclick="closeMobileDrawer()" data-i18n="nav.home">Home</a>
     <a href="#reservation" onclick="closeMobileDrawer()" class="drawer-prenota" data-i18n="nav.reserve">Prenota Ora</a>
     <a href="/menu.html" onclick="closeMobileDrawer()" data-i18n="nav.menu">Menu</a>
+    <a href="/gallery.html" onclick="closeMobileDrawer()" data-i18n="nav.gallery">Galleria</a>
     <a href="/esperienze.html" onclick="closeMobileDrawer()" data-i18n="nav.experiences">Esperienze</a>
     <a href="#" onclick="closeMobileDrawer()">Eventi</a>
     <a href="#" onclick="closeMobileDrawer();openContactSidebar();return false;">Contatti</a>
@@ -1195,7 +1196,7 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
 // ═══════════════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════════════
-const API_BASE = 'https://antico-frantoio-api.onrender.com';
+const API_BASE = 'https://antico-frantoio-api-2.onrender.com';
 let adminToken = null;
 let currentUser = { username:'', role:'' };
 
