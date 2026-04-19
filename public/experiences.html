@@ -681,7 +681,7 @@ async function loadExpTypes() {
         ccData.typeId = exp.id;
         ccData.price = parseFloat(exp.price);
         ccData.discountPct = parseFloat(exp.discount_pct) || 0;
-        document.getElementById('cc-price').textContent = `€${unitPrice} / persona${discLabel}`;
+        document.getElementById('cc-price').textContent = `€${unitPrice} / person${discLabel}`;
         document.getElementById('cc-max-guests').textContent = `${exp.max_guests} people`;
         document.getElementById('cc-guests').max = exp.max_guests;
       }
@@ -689,7 +689,7 @@ async function loadExpTypes() {
         psData.typeId = exp.id;
         psData.price = parseFloat(exp.price);
         psData.discountPct = parseFloat(exp.discount_pct) || 0;
-        document.getElementById('ps-price').textContent = `€${unitPrice} / persona${discLabel}`;
+        document.getElementById('ps-price').textContent = `€${unitPrice} / person${discLabel}`;
         document.getElementById('ps-max-guests').textContent = `${exp.max_guests} people`;
         document.getElementById('ps-guests').max = exp.max_guests;
       }
