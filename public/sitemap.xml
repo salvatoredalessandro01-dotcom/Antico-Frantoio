@@ -1,74 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
-
   <!-- HOME -->
   <url>
-    <loc>https://anticofrantoiosorrento.it/</loc>
+    <loc>https://www.anticofrantoiosorrento.it/</loc>
     <lastmod>2026-04-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="it" href="https://anticofrantoiosorrento.it/"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.anticofrantoiosorrento.it/"/>
   </url>
-
   <!-- MENU IT -->
   <url>
-    <loc>https://anticofrantoiosorrento.it/menu.html</loc>
+    <loc>https://www.anticofrantoiosorrento.it/menu</loc>
     <lastmod>2026-04-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="it" href="https://anticofrantoiosorrento.it/menu"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://anticofrantoiosorrento.it/menu-en"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.anticofrantoiosorrento.it/menu"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.anticofrantoiosorrento.it/menu-en"/>
   </url>
-
   <!-- MENU EN -->
   <url>
-    <loc>https://anticofrantoiosorrento.it/menu-en.html</loc>
+    <loc>https://www.anticofrantoiosorrento.it/menu-en</loc>
     <lastmod>2026-04-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="it" href="https://anticofrantoiosorrento.it/menu"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://anticofrantoiosorrento.it/menu-en"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.anticofrantoiosorrento.it/menu"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.anticofrantoiosorrento.it/menu-en"/>
   </url>
-
   <!-- ESPERIENZE IT -->
   <url>
-    <loc>https://anticofrantoiosorrento.it/esperienze.html</loc>
+    <loc>https://www.anticofrantoiosorrento.it/esperienze</loc>
     <lastmod>2026-04-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="it" href="https://anticofrantoiosorrento.it/esperienze"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://anticofrantoiosorrento.it/experiences"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.anticofrantoiosorrento.it/esperienze"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.anticofrantoiosorrento.it/experiences"/>
   </url>
-
   <!-- ESPERIENZE EN -->
   <url>
-    <loc>https://anticofrantoiosorrento.it/experiences.html</loc>
+    <loc>https://www.anticofrantoiosorrento.it/experiences</loc>
     <lastmod>2026-04-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="it" href="https://anticofrantoiosorrento.it/esperienze"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://anticofrantoiosorrento.it/experiences"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.anticofrantoiosorrento.it/esperienze"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.anticofrantoiosorrento.it/experiences"/>
   </url>
-
   <!-- GALLERY IT -->
   <url>
-    <loc>https://anticofrantoiosorrento.it/gallery.html</loc>
+    <loc>https://www.anticofrantoiosorrento.it/gallery</loc>
     <lastmod>2026-04-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="it" href="https://anticofrantoiosorrento.it/gallery"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://anticofrantoiosorrento.it/gallery-en"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.anticofrantoiosorrento.it/gallery"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.anticofrantoiosorrento.it/gallery-en"/>
   </url>
-
   <!-- GALLERY EN -->
   <url>
-    <loc>https://anticofrantoiosorrento.it/gallery-en.html</loc>
+    <loc>https://www.anticofrantoiosorrento.it/gallery-en</loc>
     <lastmod>2026-04-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="it" href="https://anticofrantoiosorrento.it/gallery"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://anticofrantoiosorrento.it/gallery-en"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.anticofrantoiosorrento.it/gallery"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.anticofrantoiosorrento.it/gallery-en"/>
   </url>
-
 </urlset>
