@@ -1,4 +1,12 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/menu.html",       "destination": "/menu",       "permanent": true },
+    { "source": "/menu-en.html",    "destination": "/menu-en",    "permanent": true },
+    { "source": "/gallery.html",    "destination": "/gallery",    "permanent": true },
+    { "source": "/gallery-en.html", "destination": "/gallery-en", "permanent": true },
+    { "source": "/esperienze.html", "destination": "/esperienze", "permanent": true },
+    { "source": "/experiences.html","destination": "/experiences","permanent": true }
+  ]
 }
