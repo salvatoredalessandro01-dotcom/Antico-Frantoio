@@ -1026,13 +1026,19 @@ async function handleStripeReturn() {
         body: JSON.stringify({ stripe_session_id: sessionId })
       });
       const d = await r.json();
-      if (d.success) {
-        document.getElementById('confirm-icon').className = 'confirm-icon success';
-        document.getElementById('confirm-icon').innerHTML = '&#x2713;';
-        document.getElementById('confirm-title').textContent = 'Experience Confirmed!';
-        document.getElementById('confirm-body').textContent = 'Payment received. You will receive a confirmation email with all the details. We look forward to seeing you!';
-        document.getElementById('confirm-modal').classList.add('open');
-      }
+     if (d.success) {
+  document.getElementById('confirm-icon').className = 'confirm-icon success';
+  document.getElementById('confirm-icon').innerHTML = '&#x2713;';
+  document.getElementById('confirm-title').textContent = 'Experience Confirmed!';
+  document.getElementById('confirm-body').textContent = 'Payment received. You will receive a confirmation email with all the details. We look forward to seeing you!';
+  document.getElementById('confirm-modal').classList.add('open');
+  gtag('event', 'conversion', {
+    'send_to': 'AW-1003758316/BdQxCJyi7QQQ7MXQ3gM',
+    'value': 1.0,
+    'currency': 'EUR',
+    'transaction_id': sessionId
+  });
+}
     } catch(e) { console.error(e); }
     history.replaceState({}, '', window.location.pathname);
   }
