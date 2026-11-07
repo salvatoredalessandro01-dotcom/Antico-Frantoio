@@ -208,11 +208,6 @@ async function initDB() {
   console.log('✅ Database initialized');
 }
 
-// ── EXPERIENCE DB INIT ────────────────────────────────────────────
-async function initExperiencesDB() {
-  // Tables created via SQL in initDB above
-}
-
 // ── HELPERS ─────────────────────────────────────────────────────
 async function getSetting(key) {
   const res = await pool.query('SELECT value FROM settings WHERE key=$1', [key]);
@@ -1378,23 +1373,47 @@ async function initExperiencesDB() {
        45.00, 20, true)
     ON CONFLICT (slug) DO NOTHING;
 
-    INSERT INTO experience_sessions (experience_type_id, day_of_week, session_time, active)
-    SELECT id, dow, '18:30', true
-    FROM experience_types, generate_series(0,6) AS dow
-    WHERE slug = 'cooking-class'
-      AND NOT EXISTS (SELECT 1 FROM experience_sessions es WHERE es.experience_type_id = experience_types.id AND es.day_of_week = dow)
-    ON CONFLICT DO NOTHING;
+    CREATE TABLE IF NOT EXISTS experience_meta (
+      key VARCHAR(100) PRIMARY KEY,
+      value TEXT
+    );
 
-    INSERT INTO experience_sessions (experience_type_id, day_of_week, session_time, active)
-    SELECT id, dow, '11:30', true
-    FROM experience_types, generate_series(0,6) AS dow
-    WHERE slug = 'pizza-school'
-      AND NOT EXISTS (SELECT 1 FROM experience_sessions es WHERE es.experience_type_id = experience_types.id AND es.day_of_week = dow)
-    ON CONFLICT DO NOTHING;
+    -- Closures: experience_type_id NULL = all experiences; block_from/until NULL = whole day.
+    -- Partial closure blocks sessions whose START time is >= block_from and < block_until
+    -- (same rule as the restaurant's partial closures).
+    CREATE TABLE IF NOT EXISTS experience_closures (
+      id SERIAL PRIMARY KEY,
+      experience_type_id INTEGER REFERENCES experience_types(id) ON DELETE CASCADE,
+      date_from DATE NOT NULL,
+      date_to DATE NOT NULL,
+      block_from TIME,
+      block_until TIME,
+      reason VARCHAR(200),
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      CHECK (date_to >= date_from),
+      CHECK ((block_from IS NULL AND block_until IS NULL)
+          OR (block_from IS NOT NULL AND block_until IS NOT NULL AND block_until > block_from))
+    );
 
     ALTER TABLE experience_types ADD COLUMN IF NOT EXISTS discount_pct NUMERIC(5,2) DEFAULT 0;
     ALTER TABLE experience_types ADD COLUMN IF NOT EXISTS discount_label VARCHAR(100);
   `);
+
+  // Seed the default weekly sessions only the first time. This used to run at EVERY boot and
+  // silently re-created any weekday session an admin had deleted (Monday came back after each deploy).
+  const seeded = await pool.query(`SELECT 1 FROM experience_meta WHERE key='default_sessions_seeded'`);
+  if (!seeded.rows.length) {
+    for (const [slug, time] of [['cooking-class', '18:30'], ['pizza-school', '11:30']]) {
+      await pool.query(
+        `INSERT INTO experience_sessions (experience_type_id, day_of_week, session_time, active)
+         SELECT et.id, dow, $2::time, true
+         FROM experience_types et, generate_series(0,6) AS dow
+         WHERE et.slug = $1
+           AND NOT EXISTS (SELECT 1 FROM experience_sessions es WHERE es.experience_type_id = et.id)`,
+        [slug, time]);
+    }
+    await pool.query(`INSERT INTO experience_meta (key, value) VALUES ('default_sessions_seeded','1') ON CONFLICT (key) DO NOTHING`);
+  }
   console.log('✅ Experience tables initialized');
 }
 
@@ -1412,14 +1431,45 @@ async function getExpBookedGuests(expTypeId, date, time) {
   return parseInt(r.rows[0].total) || 0;
 }
 
+// Closures that apply on a given date (rows: experience_type_id, block_from, block_until, reason)
+async function getExpClosures(date) {
+  const r = await pool.query(
+    `SELECT experience_type_id, block_from, block_until, reason
+     FROM experience_closures WHERE $1::date BETWEEN date_from AND date_to`, [date]);
+  return r.rows;
+}
+// First closure blocking this experience type at this start time (or undefined). Single source of truth.
+function findBlockingClosure(closures, typeId, time) {
+  const t = String(time).substring(0, 5);
+  return closures.find(c =>
+    (c.experience_type_id === null || c.experience_type_id === typeId) &&
+    (c.block_from === null || (t >= String(c.block_from).substring(0, 5) && t < String(c.block_until).substring(0, 5))));
+}
+async function isExpSlotClosed(typeId, date, time) {
+  const c = findBlockingClosure(await getExpClosures(date), typeId, time);
+  return c ? { closed: true, reason: c.reason || null } : { closed: false };
+}
+
 // Is cancellation eligible? Before 20:00 of the day before
+// pg returns DATE columns as JS Date objects: normalise to 'YYYY-MM-DD'
+function toDateStr(d) {
+  if (typeof d === 'string') return d.substring(0, 10);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// 20:00 Italian time (Europe/Rome, DST-aware) on the day before the experience
+function romeCutoff(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const guess = Date.UTC(y, m - 1, d - 1, 20, 0, 0);
+  const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Rome', hourCycle: 'h23',
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const p = Object.fromEntries(fmt.formatToParts(new Date(guess)).map(x => [x.type, x.value]));
+  const asUTC = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second);
+  return new Date(guess - (asUTC - guess));
+}
+
 function canCancelExperience(bookingDate, bookedAt) {
-  const now = new Date();
-  const bDate = new Date(bookingDate + 'T00:00:00');
-  const cutoff = new Date(bDate);
-  cutoff.setDate(cutoff.getDate() - 1);
-  cutoff.setHours(20, 0, 0, 0);
-  return now < cutoff;
+  return new Date() < romeCutoff(toDateStr(bookingDate));
 }
 
 // Email for experience confirmations
@@ -1481,6 +1531,50 @@ async function sendExpConfirmationEmail(booking, expType, lang) {
       `),
     });
   }
+}
+
+async function sendExpModificationEmail(booking, expType, lang, oldDate, oldTime) {
+  const isIT = lang === 'it';
+  const base = process.env.FRONTEND_URL || 'https://anticofrantoiosorrento.it';
+  const cancelUrl = `${base}/${isIT ? 'esperienze' : 'experiences'}.html?cancel=${booking.id}`;
+  const typeName = isIT ? expType.name_it : expType.name_en;
+  const newDateDisp = formatDateLong(booking.booking_date, lang);
+  const oldDateDisp = formatDateLong(oldDate, lang);
+  const newTime = formatTime(booking.booking_time);
+  const row = (label, value) => `<tr><td style="padding:7px 0;color:#6B6460;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;width:130px">${label}</td><td style="padding:7px 0;font-size:.9rem">${value}</td></tr>`;
+
+  return await sendEmail({
+    to: booking.email, toName: booking.name,
+    subject: isIT
+      ? `Prenotazione modificata — ${typeName} — ${newDateDisp} ${newTime}`
+      : `Booking updated — ${typeName} — ${newDateDisp} ${newTime}`,
+    html: emailWrapper(`
+      <h2 style="font-weight:300;font-size:1.4rem;margin-bottom:8px">${isIT ? 'La tua prenotazione è stata modificata' : 'Your booking has been updated'}</h2>
+      <p style="color:#6B6460;font-size:.9rem;margin:0 0 16px">${isIT
+        ? 'Abbiamo aggiornato data e orario della tua esperienza. Questa email sostituisce la precedente conferma.'
+        : 'We have updated the date and time of your experience. This email replaces your previous confirmation.'}</p>
+      <div style="background:#f5efe6;border-radius:6px;padding:12px 14px;font-size:.85rem;color:#6B6460;margin-bottom:8px">
+        ${isIT ? 'Prima' : 'Before'}: <span style="text-decoration:line-through">${oldDateDisp} · ${oldTime}</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin:16px 0">
+        ${row(isIT ? 'Esperienza' : 'Experience', `<strong>${typeName}</strong>`)}
+        ${row(isIT ? 'Nome' : 'Name', `<strong>${booking.name}</strong>`)}
+        ${row(isIT ? 'Nuova data' : 'New date', `<strong>${newDateDisp}</strong>`)}
+        ${row(isIT ? 'Nuovo orario' : 'New time', `<strong>${newTime}</strong>`)}
+        ${row(isIT ? 'Partecipanti' : 'Guests', `<strong>${booking.guests}</strong>`)}
+        ${row(isIT ? 'Pagato' : 'Paid', `<strong>€${parseFloat(booking.amount_paid).toFixed(2)} ✓</strong>`)}
+      </table>
+      <div style="background:#f0f4eb;border:1px solid #8FAF54;border-radius:6px;padding:14px;margin:16px 0;font-size:.82rem;color:#3B5218;text-align:center">
+        <strong>${isIT ? 'Politica di rimborso' : 'Refund policy'}</strong><br>
+        ${isIT
+          ? 'Rimborso 100% se cancelli entro le ore 20:00 del giorno precedente la nuova data.'
+          : '100% refund if cancelled by 8:00 PM (Italy time) the day before the new date.'}
+      </div>
+      <div style="text-align:center;margin-top:16px">
+        <a href="${cancelUrl}" style="color:#B03030;font-size:.82rem">${isIT ? 'Cancella la prenotazione' : 'Cancel your booking'}</a>
+      </div>
+    `),
+  });
 }
 
 async function sendExpCancellationEmail(booking, expType, lang, refunded) {
@@ -1564,8 +1658,10 @@ app.get('/api/experiences/availability', async (req, res) => {
       [date, dow]
     );
 
+    const closures = await getExpClosures(date);
     const result = {};
     for (const row of types.rows) {
+      if (findBlockingClosure(closures, row.id, row.session_time)) continue;   // closed: not offered
       if (!result[row.slug]) {
         result[row.slug] = {
           id: row.id, slug: row.slug,
@@ -1608,6 +1704,15 @@ app.post('/api/experiences/create-payment', reservationLimiter, async (req, res)
     const expRes = await pool.query('SELECT * FROM experience_types WHERE id=$1 AND active=true', [experience_type_id]);
     if (!expRes.rows.length) return res.status(404).json({ error: 'Experience not found' });
     const exp = expRes.rows[0];
+
+    // Closed? (UI hides closed slots, but never trust the client)
+    const closure = await isExpSlotClosed(parseInt(experience_type_id), date, time);
+    if (closure.closed) {
+      return res.status(409).json({
+        code: 'closed',
+        error: language === 'en' ? 'This session is no longer available for the selected date' : 'Questa sessione non è più disponibile per la data scelta',
+      });
+    }
 
     // Check availability
     const booked = await getExpBookedGuests(experience_type_id, date, time);
@@ -1873,10 +1978,25 @@ app.patch('/api/admin/experiences/sessions/:id', authMiddleware, async (req, res
 
 app.delete('/api/admin/experiences/sessions/:id', authMiddleware, async (req, res) => {
   if (!['superadmin','admin'].includes(req.user.role)) return res.status(403).json({ error: 'Forbidden' });
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid_id' });
+  const client = await pool.connect();
   try {
-    await pool.query('DELETE FROM experience_sessions WHERE id=$1', [req.params.id]);
-    res.json({ success: true });
-  } catch(err) { res.status(500).json({ error: 'Server error' }); }
+    await client.query('BEGIN');
+    // Existing bookings keep their own date/time, so they stay valid; we only detach the link to the session.
+    const future = await client.query(
+      `SELECT COUNT(*)::int AS n FROM experience_bookings
+       WHERE session_id=$1 AND status='confirmed' AND booking_date >= $2::date`,
+      [id, new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' })]);
+    await client.query('UPDATE experience_bookings SET session_id=NULL WHERE session_id=$1', [id]);
+    const del = await client.query('DELETE FROM experience_sessions WHERE id=$1', [id]);
+    await client.query('COMMIT');
+    res.json({ success: true, deleted: del.rowCount, future_bookings: future.rows[0].n });
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Delete experience session error:', err.message);
+    res.status(500).json({ error: 'Server error', detail: err.message });
+  } finally { client.release(); }
 });
 
 // Admin cancel experience booking
@@ -1900,6 +2020,168 @@ app.post('/api/admin/experiences/bookings/:id/cancel', authMiddleware, async (re
   } catch(err) { res.status(500).json({ error: 'Server error' }); }
 });
 
+
+// Admin: amend date/time of an experience booking (+ optional new confirmation email)
+app.patch('/api/admin/experiences/bookings/:id', authMiddleware, async (req, res) => {
+  if (!['superadmin','admin'].includes(req.user.role)) return res.status(403).json({ error: 'Forbidden' });
+  try {
+    const { date, time, send_email = true, force = false } = req.body || {};
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '') || !/^\d{2}:\d{2}$/.test(time || '')) {
+      return res.status(400).json({ error: 'invalid_datetime' });
+    }
+
+    const r = await pool.query(
+      `SELECT eb.*, et.name_it, et.name_en, et.max_guests AS type_max_guests
+       FROM experience_bookings eb
+       JOIN experience_types et ON et.id = eb.experience_type_id
+       WHERE eb.id=$1`, [req.params.id]);
+    if (!r.rows.length) return res.status(404).json({ error: 'Not found' });
+    const booking = r.rows[0];
+    if (booking.status !== 'confirmed') return res.status(409).json({ error: 'not_confirmed' });
+
+    const oldDate = toDateStr(booking.booking_date);
+    const oldTime = formatTime(booking.booking_time);
+    if (oldDate === date && oldTime === time) return res.status(400).json({ error: 'no_change' });
+
+    const todayRome = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
+    if (date < todayRome && !force) return res.status(400).json({ error: 'past_date' });
+
+    if (!force) {
+      const closure = await isExpSlotClosed(booking.experience_type_id, date, time);
+      if (closure.closed) return res.status(409).json({ error: 'closed', reason: closure.reason });
+    }
+
+    // Matching standard session (if any) decides the capacity; otherwise the type default applies
+    const dow = new Date(date + 'T00:00:00').getDay();
+    const sess = await pool.query(
+      `SELECT id, max_guests FROM experience_sessions
+       WHERE experience_type_id=$1 AND active=true AND session_time=$2
+         AND (specific_date=$3 OR (specific_date IS NULL AND day_of_week=$4))
+       ORDER BY (specific_date IS NOT NULL) DESC LIMIT 1`,
+      [booking.experience_type_id, time, date, dow]);
+    const capacity = sess.rows[0]?.max_guests || booking.type_max_guests;
+
+    const others = await pool.query(
+      `SELECT COALESCE(SUM(guests),0) AS total FROM experience_bookings
+       WHERE experience_type_id=$1 AND booking_date=$2 AND booking_time::text LIKE $3
+         AND status='confirmed' AND id <> $4`,
+      [booking.experience_type_id, date, time + '%', booking.id]);
+    const booked = parseInt(others.rows[0].total) || 0;
+    if (booked + booking.guests > capacity && !force) {
+      return res.status(409).json({ error: 'not_enough_spots', spotsLeft: Math.max(0, capacity - booked) });
+    }
+
+    const up = await pool.query(
+      `UPDATE experience_bookings
+       SET booking_date=$1, booking_time=$2, session_id=$3, updated_at=NOW()
+       WHERE id=$4 RETURNING *`,
+      [date, time, sess.rows[0]?.id || null, booking.id]);
+    console.log(`Experience booking ${booking.id} amended ${oldDate} ${oldTime} -> ${date} ${time} by ${req.user.username || req.user.id || req.user.role}${force ? ' (FORCED)' : ''}`);
+
+    let emailSent = null;
+    if (send_email) {
+      try {
+        emailSent = await sendExpModificationEmail(
+          up.rows[0], { name_it: booking.name_it, name_en: booking.name_en },
+          booking.language || 'it', oldDate, oldTime);
+      } catch (e) { console.error('Exp modification email error:', e); emailSent = false; }
+    }
+
+    res.json({ success: true, email_sent: emailSent, custom_slot: !sess.rows.length, booking: up.rows[0] });
+  } catch (err) {
+    console.error('Amend experience booking error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ── ADMIN: experience closures (whole day or time window; one experience or all) ──
+const EXP_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const EXP_TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+const romeToday = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
+
+// Confirmed bookings that a closure would collide with (they are NOT touched automatically)
+async function countAffectedExpBookings({ typeId, from, to, blockFrom, blockUntil }) {
+  const r = await pool.query(
+    `SELECT COUNT(*)::int AS bookings, COALESCE(SUM(guests),0)::int AS guests
+     FROM experience_bookings
+     WHERE status='confirmed' AND booking_date BETWEEN $1::date AND $2::date
+       AND ($3::int IS NULL OR experience_type_id = $3::int)
+       AND ($4::time IS NULL OR (booking_time >= $4::time AND booking_time < $5::time))`,
+    [from, to, typeId, blockFrom, blockUntil]);
+  return r.rows[0];
+}
+
+app.get('/api/admin/experiences/closures', authMiddleware, async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT c.id, c.experience_type_id, et.name_it,
+              to_char(c.date_from,'YYYY-MM-DD') AS date_from, to_char(c.date_to,'YYYY-MM-DD') AS date_to,
+              to_char(c.block_from,'HH24:MI') AS block_from, to_char(c.block_until,'HH24:MI') AS block_until,
+              c.reason
+       FROM experience_closures c
+       LEFT JOIN experience_types et ON et.id = c.experience_type_id
+       WHERE c.date_to >= $1::date
+       ORDER BY c.date_from, c.block_from NULLS FIRST, c.id`, [romeToday()]);
+    const closures = [];
+    for (const c of r.rows) {
+      const a = await countAffectedExpBookings({ typeId: c.experience_type_id, from: c.date_from, to: c.date_to, blockFrom: c.block_from, blockUntil: c.block_until });
+      closures.push({ ...c, affected_bookings: a.bookings, affected_guests: a.guests });
+    }
+    res.json({ closures });
+  } catch (err) {
+    console.error('List experience closures error:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.post('/api/admin/experiences/closures', authMiddleware, async (req, res) => {
+  if (!['superadmin','admin'].includes(req.user.role)) return res.status(403).json({ error: 'Forbidden' });
+  try {
+    const b = req.body || {};
+    const typeId = (b.experience_type_id === null || b.experience_type_id === undefined || b.experience_type_id === '') ? null : parseInt(b.experience_type_id, 10);
+    const dateFrom = b.date_from, dateTo = b.date_to || b.date_from;
+    const blockFrom = b.block_from || null, blockUntil = b.block_until || null;
+    const reason = b.reason ? String(b.reason).trim().slice(0, 200) : null;
+
+    if (typeId !== null && !Number.isInteger(typeId)) return res.status(400).json({ error: 'invalid_experience' });
+    if (!EXP_DATE_RE.test(dateFrom || '') || !EXP_DATE_RE.test(dateTo || '')) return res.status(400).json({ error: 'invalid_dates' });
+    if (dateTo < dateFrom) return res.status(400).json({ error: 'date_order' });
+    if (dateTo < romeToday()) return res.status(400).json({ error: 'past_closure' });
+    if ((new Date(dateTo) - new Date(dateFrom)) / 86400000 > 366) return res.status(400).json({ error: 'range_too_long' });
+    if ((blockFrom === null) !== (blockUntil === null)) return res.status(400).json({ error: 'time_window_incomplete' });
+    if (blockFrom !== null && (!EXP_TIME_RE.test(blockFrom) || !EXP_TIME_RE.test(blockUntil) || blockUntil <= blockFrom)) {
+      return res.status(400).json({ error: 'invalid_time_window' });
+    }
+    if (typeId !== null) {
+      const t = await pool.query('SELECT 1 FROM experience_types WHERE id=$1', [typeId]);
+      if (!t.rows.length) return res.status(400).json({ error: 'invalid_experience' });
+    }
+
+    const ins = await pool.query(
+      `INSERT INTO experience_closures (experience_type_id, date_from, date_to, block_from, block_until, reason)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
+      [typeId, dateFrom, dateTo, blockFrom, blockUntil, reason]);
+    const affected = await countAffectedExpBookings({ typeId, from: dateFrom, to: dateTo, blockFrom, blockUntil });
+    console.log(`Experience closure ${ins.rows[0].id} created (${dateFrom}..${dateTo}, type ${typeId ?? 'ALL'}, ${blockFrom ? blockFrom + '-' + blockUntil : 'whole day'}) by ${req.user.username || req.user.id || req.user.role}; affected bookings: ${affected.bookings}`);
+    res.status(201).json({ success: true, id: ins.rows[0].id, affected_bookings: affected.bookings, affected_guests: affected.guests });
+  } catch (err) {
+    console.error('Create experience closure error:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.delete('/api/admin/experiences/closures/:id', authMiddleware, async (req, res) => {
+  if (!['superadmin','admin'].includes(req.user.role)) return res.status(403).json({ error: 'Forbidden' });
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid_id' });
+  try {
+    const del = await pool.query('DELETE FROM experience_closures WHERE id=$1', [id]);
+    res.json({ success: true, deleted: del.rowCount });
+  } catch (err) {
+    console.error('Delete experience closure error:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 // Health — also pings DB to prevent Supabase free tier pausing
 app.get('/health', async (req, res) => {
