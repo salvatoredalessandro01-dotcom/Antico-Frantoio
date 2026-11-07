@@ -1115,6 +1115,35 @@ footer p{color:rgba(255,255,255,.35);font-size:.72rem}
   </div>
 </div>
 
+<!-- AMEND EXPERIENCE BOOKING MODAL -->
+<div id="exp-amend-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center">
+  <div style="background:var(--white);border-radius:var(--radius-lg);padding:2rem;width:min(90vw,480px);max-height:90vh;overflow-y:auto;box-shadow:var(--shadow)">
+    <h3 class="serif" style="margin-bottom:.75rem">Modifica Esperienza</h3>
+    <p class="text-gray text-sm" style="margin-bottom:1.25rem" id="exp-amend-info"></p>
+    <input type="hidden" id="exp-amend-id">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nuova data</label>
+        <input type="date" id="exp-amend-date" onchange="refreshExpAmendAvail()">
+      </div>
+      <div class="form-group">
+        <label>Nuovo orario</label>
+        <input type="time" id="exp-amend-time" onchange="refreshExpAmendAvail()">
+      </div>
+    </div>
+    <p class="text-sm" id="exp-amend-avail" style="min-height:1.2rem;margin:-.25rem 0 1rem"></p>
+    <p class="text-gray text-sm" style="margin-bottom:1rem">Partecipanti e importo pagato non cambiano. Il rimborso 100% varrà fino alle 20:00 del giorno prima della <strong>nuova</strong> data.</p>
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem 0;margin-bottom:1rem">
+      <input type="checkbox" id="exp-amend-email" checked style="width:1rem;height:1rem;accent-color:var(--terra)">
+      <label style="text-transform:none;letter-spacing:0;font-size:.85rem;cursor:pointer" for="exp-amend-email">Invia nuova conferma al cliente</label>
+    </div>
+    <div style="display:flex;gap:.75rem">
+      <button class="btn-primary" style="flex:1" id="exp-amend-save" onclick="saveExpAmend()">Salva Modifiche</button>
+      <button class="btn-secondary" onclick="closeExpAmend()">Annulla</button>
+    </div>
+  </div>
+</div>
+
 <!-- AMEND BOOKING MODAL -->
 <div id="amend-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center">
   <div style="background:var(--white);border-radius:var(--radius-lg);padding:2rem;width:min(90vw,540px);max-height:90vh;overflow-y:auto;box-shadow:var(--shadow)">
@@ -1369,6 +1398,8 @@ async function loadExpBookings() {
     if (status) url += `&status=${status}`;
     const r = await adminFetch(url);
     const d = await r.json();
+    window.expBookingsCache = {};
+    (d.bookings || []).forEach(b => { window.expBookingsCache[b.id] = b; });
     if (!d.bookings?.length) {
       tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--gray)">Nessuna prenotazione</td></tr>';
       return;
@@ -1383,11 +1414,85 @@ async function loadExpBookings() {
         <td style="text-align:center"><strong>${b.guests}</strong></td>
         <td>€${parseFloat(b.amount_paid).toFixed(2)}</td>
         <td>${b.status==='confirmed'?'<span class="status-badge status-confirmed">Confermato</span>':'<span class="status-badge status-cancelled">Cancellato</span>'}</td>
-        <td>${b.status==='confirmed'&&['superadmin','admin'].includes(currentUser.role)?`<button class="btn-sm btn-secondary btn-danger" onclick="adminCancelExp('${b.id}')">Cancella</button>`:'—'}</td>
+        <td>${b.status==='confirmed'&&['superadmin','admin'].includes(currentUser.role)?`<div style="display:flex;gap:.4rem;flex-wrap:wrap"><button class="btn-sm btn-secondary" onclick="openExpAmend('${b.id}')">Modifica</button><button class="btn-sm btn-secondary btn-danger" onclick="adminCancelExp('${b.id}')">Cancella</button></div>`:'—'}</td>
       </tr>`).join('');
   } catch(e) {
     tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--red)">Errore caricamento</td></tr>';
   }
+}
+
+function openExpAmend(id) {
+  const b = (window.expBookingsCache || {})[id];
+  if (!b) return;
+  document.getElementById('exp-amend-id').value = id;
+  document.getElementById('exp-amend-info').textContent =
+    `${b.name} · ${b.name_it} · ${b.guests} partecipanti — attuale: ${fmtDate(b.booking_date)} alle ${fmtTime(b.booking_time)}`;
+  document.getElementById('exp-amend-date').value = String(b.booking_date).substring(0, 10);
+  document.getElementById('exp-amend-time').value = fmtTime(b.booking_time);
+  document.getElementById('exp-amend-email').checked = true;
+  document.getElementById('exp-amend-modal').style.display = 'flex';
+  refreshExpAmendAvail();
+}
+function closeExpAmend() { document.getElementById('exp-amend-modal').style.display = 'none'; }
+
+async function refreshExpAmendAvail() {
+  const el = document.getElementById('exp-amend-avail');
+  const b = (window.expBookingsCache || {})[document.getElementById('exp-amend-id').value];
+  const date = document.getElementById('exp-amend-date').value;
+  const time = document.getElementById('exp-amend-time').value;
+  el.textContent = ''; if (!b || !date || !time) return;
+  try {
+    const r = await fetch(`${API_BASE}/api/experiences/availability?date=${date}`);
+    const d = await r.json();
+    const exp = d.availability?.[b.slug];
+    const s = exp?.sessions?.find(x => x.time === time);
+    if (!s) {
+      el.style.color = 'var(--gray)';
+      el.textContent = `Nessuna sessione standard alle ${time} (non prevista, oppure chiusa): se confermi verrà usato un orario personalizzato (capienza max ${exp?.max_guests ?? '—'}).`;
+      return;
+    }
+    const same = String(b.booking_date).substring(0, 10) === date && fmtTime(b.booking_time) === time;
+    const left = s.spots_left + (same ? b.guests : 0);
+    el.style.color = left >= b.guests ? 'var(--terra-dk)' : 'var(--red)';
+    el.textContent = `Posti liberi: ${left} (servono ${b.guests})`;
+  } catch(e) { /* hint only — ignore */ }
+}
+
+async function saveExpAmend(force = false) {
+  const id = document.getElementById('exp-amend-id').value;
+  const date = document.getElementById('exp-amend-date').value;
+  const time = document.getElementById('exp-amend-time').value;
+  const send_email = document.getElementById('exp-amend-email').checked;
+  if (!date || !time) { showToast('Inserisci data e orario', 'error'); return; }
+  const btn = document.getElementById('exp-amend-save');
+  btn.disabled = true;
+  try {
+    const r = await adminFetch(`/api/admin/experiences/bookings/${id}`, {
+      method: 'PATCH', body: JSON.stringify({ date, time, send_email, force })
+    });
+    const d = await r.json();
+    if (r.status === 409 && d.error === 'not_enough_spots') {
+      if (confirm(`Posti disponibili: ${d.spotsLeft}. La prenotazione non ci sta.\n\nForzare comunque (overbooking)?`)) {
+        btn.disabled = false; return saveExpAmend(true);
+      }
+    } else if (r.status === 409 && d.error === 'closed') {
+      if (confirm(`Quella data/orario è CHIUSO${d.reason ? ' (' + d.reason + ')' : ''}.\n\nSpostare comunque la prenotazione?`)) { btn.disabled = false; return saveExpAmend(true); }
+    } else if (r.status === 400 && d.error === 'past_date') {
+      if (confirm('La nuova data è nel passato. Confermi?')) { btn.disabled = false; return saveExpAmend(true); }
+    } else if (r.status === 400 && d.error === 'no_change') {
+      showToast('Nessuna modifica: data e orario sono uguali', 'error');
+    } else if (r.status === 409 && d.error === 'not_confirmed') {
+      showToast('Solo le prenotazioni confermate si possono modificare', 'error');
+    } else if (!r.ok) {
+      showToast('Errore nel salvataggio', 'error');
+    } else {
+      closeExpAmend();
+      if (send_email && d.email_sent === false) showToast('Prenotazione aggiornata, MA l\'email NON è partita — avvisa il cliente', 'error');
+      else showToast(send_email ? 'Prenotazione aggiornata, email inviata ✓' : 'Prenotazione aggiornata ✓');
+      loadExpBookings();
+    }
+  } catch(e) { showToast('Errore di rete', 'error'); }
+  btn.disabled = false;
 }
 
 async function adminCancelExp(id) {
@@ -1405,15 +1510,116 @@ async function adminCancelExp(id) {
 // ═══════════════════════════════════════════════════════════════
 // ADMIN: EXPERIENCE SETTINGS TAB
 // ═══════════════════════════════════════════════════════════════
+// ═══ Experience closures (whole day or time window; one experience or all) ═══
+function expClosuresSection(types, closures) {
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const rows = (closures || []).map(c => {
+    const period = c.date_from === c.date_to ? fmtDate(c.date_from) : `${fmtDate(c.date_from)} → ${fmtDate(c.date_to)}`;
+    const scope = c.block_from ? `Fascia ${esc(c.block_from)}–${esc(c.block_until)}` : 'Tutto il giorno';
+    const hit = c.affected_bookings > 0
+      ? `<span class="status-badge status-cancelled" title="Prenotazioni confermate già presenti: non sono state toccate">⚠️ ${c.affected_bookings} prenot. (${c.affected_guests} ospiti)</span>`
+      : '<span style="color:var(--gray)">—</span>';
+    return `<tr>
+      <td><strong>${period}</strong></td>
+      <td>${c.name_it ? esc(c.name_it) : 'Tutte le esperienze'}</td>
+      <td>${scope}</td>
+      <td>${esc(c.reason) || '—'}</td>
+      <td>${hit}</td>
+      <td><button class="btn-sm btn-secondary btn-danger" onclick="deleteExpClosure(${c.id})">Elimina</button></td>
+    </tr>`;
+  }).join('');
+  const inp = 'padding:.4rem .6rem;font-size:.82rem;border:1px solid var(--gray-lt);border-radius:3px';
+  return `
+    <div class="admin-section" id="exp-closures-section">
+      <div class="admin-section-title">Chiusure</div>
+      <div class="admin-card">
+        <p class="desc">Chiudi un giorno, un periodo o solo una fascia oraria. Le sessioni chiuse non sono prenotabili dal sito. Le prenotazioni <strong>già confermate non vengono toccate</strong>: se ce ne sono, comparirà un avviso rosso &mdash; spostale con <em>Modifica</em> o cancellale con rimborso da <em>Prenotazioni Esperienze</em>.</p>
+        <div class="bookings-table-wrap">
+          <table class="bookings-table">
+            <thead><tr><th>Periodo</th><th>Esperienza</th><th>Ambito</th><th>Motivo</th><th>Prenotazioni coinvolte</th><th></th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="6" style="text-align:center;padding:1.25rem;color:var(--gray)">Nessuna chiusura in programma</td></tr>'}</tbody>
+          </table>
+        </div>
+      </div>
+      <div class="admin-card" style="margin-top:1rem">
+        <h4>Aggiungi chiusura</h4>
+        <div class="inline-form">
+          <div class="form-group"><label>Esperienza</label>
+            <select id="cl-type" style="${inp}"><option value="">Tutte</option>${(types || []).map(t => `<option value="${t.id}">${esc(t.name_it)}</option>`).join('')}</select></div>
+          <div class="form-group"><label>Dal</label><input type="date" id="cl-from" style="${inp}"></div>
+          <div class="form-group"><label>Al (opz.)</label><input type="date" id="cl-to" style="${inp}"></div>
+          <div class="form-group"><label>Ambito</label>
+            <select id="cl-scope" onchange="toggleClosureScope()" style="${inp}"><option value="full">Tutto il giorno</option><option value="partial">Fascia oraria</option></select></div>
+          <div class="form-group cl-partial" style="display:none"><label>Dalle</label><input type="time" id="cl-bfrom" value="11:00" style="${inp}"></div>
+          <div class="form-group cl-partial" style="display:none"><label>Alle</label><input type="time" id="cl-buntil" value="12:00" style="${inp}"></div>
+          <div class="form-group"><label>Motivo (opz.)</label><input type="text" id="cl-reason" maxlength="200" placeholder="Es: ferie, evento privato" style="${inp};width:200px"></div>
+          <div class="form-group" style="align-self:flex-end"><button class="btn-sm btn-primary" style="white-space:nowrap" onclick="addExpClosure()">+ Aggiungi</button></div>
+        </div>
+        <p class="text-sm text-gray">Fascia oraria: chiude le sessioni che <strong>iniziano</strong> dalle ore indicate (incluse) fino alle ore finali (escluse). Es. 11:00–12:00 chiude la sessione delle 11:30. Per una chiusura settimanale fissa (es. ogni lunedì) elimina o disattiva la sessione di quel giorno in &laquo;Sessioni &amp; Orari&raquo;.</p>
+      </div>
+    </div>`;
+}
+
+function toggleClosureScope() {
+  const partial = document.getElementById('cl-scope').value === 'partial';
+  document.querySelectorAll('#exp-closures-section .cl-partial').forEach(el => { el.style.display = partial ? '' : 'none'; });
+}
+
+async function addExpClosure() {
+  const experience_type_id = document.getElementById('cl-type').value || null;
+  const date_from = document.getElementById('cl-from').value;
+  const date_to = document.getElementById('cl-to').value || date_from;
+  const partial = document.getElementById('cl-scope').value === 'partial';
+  const block_from = partial ? document.getElementById('cl-bfrom').value : null;
+  const block_until = partial ? document.getElementById('cl-buntil').value : null;
+  const reason = document.getElementById('cl-reason').value.trim();
+  if (!date_from) { showToast('Seleziona la data di inizio', 'error'); return; }
+  if (partial && (!block_from || !block_until)) { showToast('Inserisci orario di inizio e di fine', 'error'); return; }
+  const errs = {
+    date_order: 'La data finale è prima di quella iniziale',
+    time_window_incomplete: 'Inserisci sia l\'orario di inizio che quello di fine',
+    invalid_time_window: 'Fascia oraria non valida: la fine deve essere dopo l\'inizio',
+    past_closure: 'La chiusura è interamente nel passato',
+    range_too_long: 'Periodo troppo lungo (massimo 366 giorni)',
+    invalid_experience: 'Esperienza non valida',
+    invalid_dates: 'Date non valide',
+  };
+  try {
+    const r = await adminFetch(`/api/admin/experiences/closures`, {
+      method: 'POST', body: JSON.stringify({ experience_type_id, date_from, date_to, block_from, block_until, reason })
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast(errs[d.error] || 'Errore nel salvataggio', 'error'); return; }
+    if (d.affected_bookings > 0) {
+      const nb = d.affected_bookings, ng = d.affected_guests;
+      alert(`Chiusura salvata.\n\n⚠️ ATTENZIONE: in questo periodo ${nb === 1 ? 'c\'è 1 prenotazione confermata' : 'ci sono ' + nb + ' prenotazioni confermate'} (${ng} ospit${ng === 1 ? 'e' : 'i'}).\n\n${nb === 1 ? 'Non è stata toccata' : 'Non sono state toccate'}. Vai su "Prenotazioni Esperienze" e usa Modifica (per spostarle) o Cancella (con rimborso).`);
+    } else {
+      showToast('Chiusura salvata ✓');
+    }
+    renderExpSettingsTab(document.getElementById('admin-content-area'));
+  } catch(e) { showToast('Errore di rete', 'error'); }
+}
+
+async function deleteExpClosure(id) {
+  if (!confirm('Eliminare questa chiusura? Le sessioni torneranno prenotabili dal sito.')) return;
+  try {
+    const r = await adminFetch(`/api/admin/experiences/closures/${id}`, { method: 'DELETE' });
+    if (r.ok) { showToast('Chiusura eliminata'); renderExpSettingsTab(document.getElementById('admin-content-area')); }
+    else showToast('Errore', 'error');
+  } catch(e) { showToast('Errore di rete', 'error'); }
+}
+
 async function renderExpSettingsTab(container) {
   container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray)">Caricamento...</div>';
   try {
-    const [typesRes, sessRes] = await Promise.all([
+    const [typesRes, sessRes, closuresRes] = await Promise.all([
       adminFetch(`/api/admin/experiences/types`),
-      adminFetch(`/api/admin/experiences/sessions`)
+      adminFetch(`/api/admin/experiences/sessions`),
+      adminFetch(`/api/admin/experiences/closures`)
     ]);
     const { types } = await typesRes.json();
     const { sessions } = await sessRes.json();
+    const closures = await closuresRes.json().then(j => j.closures || []).catch(() => []);
     const days = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
 
     container.innerHTML = `
@@ -1505,7 +1711,9 @@ async function renderExpSettingsTab(container) {
             </div>
           </div>
         </div>
-      </div>`;
+      </div>
+
+      ${expClosuresSection(types, closures)}`;
   } catch(e) {
     container.innerHTML = '<div style="color:var(--red);padding:1rem">Errore caricamento impostazioni</div>';
   }
@@ -1545,12 +1753,16 @@ async function toggleSession(id, active) {
 }
 
 async function deleteSession(id) {
-  if (!confirm('Eliminare questa sessione?')) return;
+  if (!confirm('Eliminare questa sessione?\n\nIl sito non la offrirà più. Le prenotazioni già fatte restano valide.\nPer sospenderla temporaneamente è meglio disattivarla (interruttore "Attivo") o usare una Chiusura.')) return;
   try {
     const r = await adminFetch(`/api/admin/experiences/sessions/${id}`, { method:'DELETE' });
-    if (r.ok) { document.getElementById(`sess-row-${id}`)?.remove(); showToast('Sessione eliminata'); }
-    else showToast('Errore', 'error');
-  } catch(e) { showToast('Errore', 'error'); }
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) {
+      document.getElementById(`sess-row-${id}`)?.remove();
+      if (d.future_bookings > 0) alert(`Sessione eliminata.\n\nAttenzione: ${d.future_bookings} prenotazion${d.future_bookings === 1 ? 'e confermata futura resta valida' : 'i confermate future restano valide'}. Se vanno spostate o cancellate, usa "Prenotazioni Esperienze".`);
+      else showToast('Sessione eliminata');
+    } else showToast('Errore: ' + (d.detail || d.error || r.status), 'error');
+  } catch(e) { showToast('Errore di rete', 'error'); }
 }
 
 async function addSession() {
